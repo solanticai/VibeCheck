@@ -63,4 +63,13 @@ program
     await doctorCommand();
   });
 
+program
+  .command('lint')
+  .description('Run rules in static analysis mode (CI-friendly)')
+  .option('--format <format>', 'Output format: text, json, github-actions', 'text')
+  .action(async (options: { format?: string }) => {
+    const { lintCommand } = await import('./commands/lint.js');
+    await lintCommand(options);
+  });
+
 program.parse();
