@@ -5,6 +5,7 @@ import { secretDetection } from './secret-detection.js';
 import { promptInjection } from './prompt-injection.js';
 import { dependencyAudit } from './dependency-audit.js';
 import { envExposure } from './env-exposure.js';
+import { rlsRequired } from './rls-required.js';
 
 export const securityRules: Rule[] = [
   branchProtection,
@@ -13,6 +14,7 @@ export const securityRules: Rule[] = [
   promptInjection,
   dependencyAudit,
   envExposure,
+  rlsRequired,
 ];
 
 export {
@@ -22,4 +24,5 @@ export {
   promptInjection,
   dependencyAudit,
   envExposure,
+  rlsRequired,
 };

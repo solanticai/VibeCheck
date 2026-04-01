@@ -9,6 +9,7 @@ import { hallucinationGuard } from './hallucination-guard.js';
 import { testCoverage } from './test-coverage.js';
 import { maxFileLength } from './max-file-length.js';
 import { noConsoleLog } from './no-console-log.js';
+import { deadExports } from './dead-exports.js';
 
 export const qualityRules: Rule[] = [
   importAliases,
@@ -21,6 +22,7 @@ export const qualityRules: Rule[] = [
   testCoverage,
   maxFileLength,
   noConsoleLog,
+  deadExports,
 ];
 
 export {
@@ -34,4 +36,5 @@ export {
   testCoverage,
   maxFileLength,
   noConsoleLog,
+  deadExports,
 };

@@ -105,6 +105,15 @@ program
     await upgradeCommand(options);
   });
 
+program
+  .command('fix')
+  .description('Auto-fix issues that have machine-applicable fixes')
+  .option('--dry-run', 'Show fixes without applying them')
+  .action(async (options: { dryRun?: boolean }) => {
+    const { fixCommand } = await import('./commands/fix.js');
+    await fixCommand(options);
+  });
+
 // Cloud subcommands
 const cloud = program
   .command('cloud')

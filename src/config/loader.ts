@@ -12,6 +12,7 @@ import { getProfileSeverity, type ProfileName } from './profiles.js';
 
 /**
  * Load and resolve the vibecheck config from a project root.
+ * Applies global config inheritance: global → project.
  * Returns null if no config file is found.
  */
 export async function loadConfig(projectRoot: string): Promise<ResolvedConfig | null> {
@@ -19,7 +20,51 @@ export async function loadConfig(projectRoot: string): Promise<ResolvedConfig | 
   if (!discovered) return null;
 
   const raw = await readRawConfig(discovered);
-  return resolveConfig(raw as VibeCheckConfig);
+  const projectConfig = raw as VibeCheckConfig;
+
+  // Load global config (~/.vibecheck/config.ts) if it exists
+  const globalConfig = await loadGlobalConfig();
+
+  // Merge: global → project (project wins)
+  const merged = globalConfig ? mergeConfigs(globalConfig, projectConfig) : projectConfig;
+
+  return resolveConfig(merged);
+}
+
+/**
+ * Load the global user config from ~/.vibecheck/config.ts.
+ * Returns null if no global config exists.
+ */
+async function loadGlobalConfig(): Promise<VibeCheckConfig | null> {
+  const { homedir } = await import('node:os');
+  const { join } = await import('node:path');
+  const globalRoot = join(homedir(), '.vibecheck');
+  const discovered = discoverConfigFile(globalRoot);
+  if (!discovered) return null;
+
+  try {
+    const raw = await readRawConfig(discovered);
+    return raw as VibeCheckConfig;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Merge two configs: base → override.
+ * Override values take precedence. Rules are merged per-key.
+ */
+function mergeConfigs(base: VibeCheckConfig, override: VibeCheckConfig): VibeCheckConfig {
+  return {
+    profile: override.profile ?? base.profile,
+    presets: override.presets ?? base.presets,
+    agents: override.agents ?? base.agents,
+    rules: { ...base.rules, ...override.rules },
+    plugins: override.plugins ?? base.plugins,
+    learn: override.learn ?? base.learn,
+    cloud: override.cloud ?? base.cloud,
+    monorepo: override.monorepo ?? base.monorepo,
+  };
 }
 
 /**

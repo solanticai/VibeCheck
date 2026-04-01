@@ -59,6 +59,14 @@ export interface HookContext {
 
 // ─── Rule Result ────────────────────────────────────────────────────────────
 
+/** Machine-applicable autofix for a rule violation */
+export interface Autofix {
+  /** Replacement file content */
+  newContent: string;
+  /** Human-readable description of what the autofix does */
+  description: string;
+}
+
 /** Result of a rule check */
 export interface RuleResult {
   /** Whether the rule passed, wants to block, or wants to warn */
@@ -67,6 +75,8 @@ export interface RuleResult {
   message?: string;
   /** Suggested fix for the user */
   fix?: string;
+  /** Machine-applicable autofix (optional, opt-in per rule) */
+  autofix?: Autofix;
   /** Rule that produced this result */
   ruleId: string;
   /** Additional data for analytics/reporting */
@@ -136,6 +146,16 @@ export interface VibeCheckConfig {
   learn?: LearnConfig;
   /** Cloud sync settings */
   cloud?: CloudConfig;
+  /** Monorepo support */
+  monorepo?: MonorepoConfig;
+}
+
+/** Monorepo configuration */
+export interface MonorepoConfig {
+  /** Glob patterns for workspace packages (e.g., ["apps/*", "packages/*"]) */
+  packages: string[];
+  /** Per-workspace config overrides keyed by relative path */
+  overrides?: Record<string, Partial<Pick<VibeCheckConfig, 'presets' | 'rules'>>>;
 }
 
 /** Cloud sync settings */

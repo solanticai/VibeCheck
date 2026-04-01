@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0-beta.0] - 2026-04-01
+
+### Added
+
+- **New rule**: `security/rls-required` — warns when SQL migrations create tables without RLS
+- **New rule**: `quality/dead-exports` — flags exported symbols not imported anywhere nearby
+- **New rule**: `workflow/changelog-reminder` — reminds to update CHANGELOG.md after significant changes
+- **New rule**: `workflow/format-on-save` — detects formatter (Prettier, Biome, Black, gofmt, rustfmt) and suggests running it
+- **Autofix API**: `RuleResult.autofix` field for machine-applicable fixes, `vibecheck fix` command
+- **Monorepo support**: `monorepo.packages` and `monorepo.overrides` config for per-workspace rules
+- **Config inheritance**: Global config at `~/.vibecheck/config.ts` merges with project config
+- **4 new presets**: `astro`, `sveltekit`, `python-strict`, `go` (14 total)
+
+### Changed
+
+- Rule count increased from 17 to 21 (7 security, 11 quality, 7 workflow)
+- Preset count increased from 10 to 14
+
 ## [0.3.0-beta.0] - 2026-04-01
 
 ### Added

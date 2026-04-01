@@ -9,6 +9,10 @@ import { fastapi } from './fastapi.js';
 import { laravel } from './laravel.js';
 import { wordpress } from './wordpress.js';
 import { reactNative } from './react-native.js';
+import { astro } from './astro.js';
+import { sveltekit } from './sveltekit.js';
+import { pythonStrict } from './python-strict.js';
+import { go } from './go.js';
 
 /** All built-in presets */
 export const allBuiltinPresets = [
@@ -22,6 +26,10 @@ export const allBuiltinPresets = [
   laravel,
   wordpress,
   reactNative,
+  astro,
+  sveltekit,
+  pythonStrict,
+  go,
 ];
 
 /** Register all built-in presets */
@@ -45,4 +53,8 @@ export {
   laravel,
   wordpress,
   reactNative,
+  astro,
+  sveltekit,
+  pythonStrict,
+  go,
 };
