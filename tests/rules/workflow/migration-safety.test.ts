@@ -8,7 +8,13 @@ function ctx(content: string, filePath = '/p/supabase/migrations/001_init.sql'):
     tool: 'Write',
     toolInput: { content, file_path: filePath },
     projectConfig: { presets: [], agents: ['claude-code'], rules: new Map() },
-    gitContext: { branch: 'feat/test', isDirty: false, repoRoot: '/p', unpushedCount: 0, hasRemote: false },
+    gitContext: {
+      branch: 'feat/test',
+      isDirty: false,
+      repoRoot: '/p',
+      unpushedCount: 0,
+      hasRemote: false,
+    },
   };
 }
 
@@ -37,7 +43,9 @@ describe('workflow/migration-safety', () => {
   });
 
   it('should warn on hardcoded UUIDs', () => {
-    const r = migrationSafety.check(ctx('-- migration\nINSERT INTO roles (id) VALUES (\'550e8400-e29b-41d4-a716-446655440000\');'));
+    const r = migrationSafety.check(
+      ctx("-- migration\nINSERT INTO roles (id) VALUES ('550e8400-e29b-41d4-a716-446655440000');"),
+    );
     expect(r.status).toBe('warn');
     expect(r.message).toContain('UUID');
   });
@@ -49,7 +57,9 @@ describe('workflow/migration-safety', () => {
   });
 
   it('should pass on safe SQL with header', () => {
-    const r = migrationSafety.check(ctx('-- Add users table\nCREATE TABLE IF NOT EXISTS users (\n  id uuid PRIMARY KEY\n);'));
+    const r = migrationSafety.check(
+      ctx('-- Add users table\nCREATE TABLE IF NOT EXISTS users (\n  id uuid PRIMARY KEY\n);'),
+    );
     expect(r.status).toBe('pass');
   });
 

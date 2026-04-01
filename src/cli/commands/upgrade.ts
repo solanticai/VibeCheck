@@ -57,7 +57,9 @@ export async function upgradeCommand(options: { check?: boolean }): Promise<void
         stdio: ['pipe', 'pipe', 'pipe'],
       });
     } catch (error) {
-      console.error(`    Failed to update ${update.name}: ${error instanceof Error ? error.message : 'unknown error'}`);
+      console.error(
+        `    Failed to update ${update.name}: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
     }
   }
 

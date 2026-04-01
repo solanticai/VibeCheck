@@ -20,8 +20,10 @@ export async function initCommand(): Promise<void> {
   console.log('\n  VibeCheck — AI Coding Guardrails\n');
 
   // Check if already initialized
-  if (existsSync(join(projectRoot, 'vibecheck.config.ts')) ||
-      existsSync(join(projectRoot, '.vibecheckrc.json'))) {
+  if (
+    existsSync(join(projectRoot, 'vibecheck.config.ts')) ||
+    existsSync(join(projectRoot, '.vibecheckrc.json'))
+  ) {
     console.log('  VibeCheck is already configured in this project.');
     console.log('  Run `vibecheck generate` to regenerate hooks.\n');
     return;

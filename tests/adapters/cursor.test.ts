@@ -11,8 +11,14 @@ function makeConfig(): ResolvedConfig {
     agents: ['cursor'],
     rules: new Map([
       ['security/branch-protection', { enabled: true, severity: 'block' as const, options: {} }],
-      ['quality/import-aliases', { enabled: true, severity: 'block' as const, options: { aliases: ['@/'] } }],
-      ['quality/no-use-client-in-pages', { enabled: true, severity: 'block' as const, options: {} }],
+      [
+        'quality/import-aliases',
+        { enabled: true, severity: 'block' as const, options: { aliases: ['@/'] } },
+      ],
+      [
+        'quality/no-use-client-in-pages',
+        { enabled: true, severity: 'block' as const, options: {} },
+      ],
     ]),
   };
 }
@@ -45,7 +51,11 @@ describe('Cursor adapter', () => {
 
   it('should skip disabled rules', async () => {
     const config = makeConfig();
-    config.rules.set('security/branch-protection', { enabled: false, severity: 'block', options: {} });
+    config.rules.set('security/branch-protection', {
+      enabled: false,
+      severity: 'block',
+      options: {},
+    });
     const files = await cursorAdapter.generate(config, '/project');
     const branchMdc = files.find((f) => f.path.includes('branch-protection'));
     expect(branchMdc).toBeUndefined();

@@ -25,7 +25,10 @@ function createContext(content: string, filePath: string): HookContext {
 describe('quality/no-use-client-in-pages', () => {
   it('should block "use client" in page.tsx', () => {
     const result = noUseClientInPages.check(
-      createContext('"use client";\n\nexport default function Page() {}', '/project/src/app/dashboard/page.tsx'),
+      createContext(
+        '"use client";\n\nexport default function Page() {}',
+        '/project/src/app/dashboard/page.tsx',
+      ),
     );
     expect(result.status).toBe('block');
     expect(result.message).toContain('page');
@@ -33,7 +36,10 @@ describe('quality/no-use-client-in-pages', () => {
 
   it('should block "use client" in layout.tsx', () => {
     const result = noUseClientInPages.check(
-      createContext("'use client';\n\nexport default function Layout() {}", '/project/src/app/layout.tsx'),
+      createContext(
+        "'use client';\n\nexport default function Layout() {}",
+        '/project/src/app/layout.tsx',
+      ),
     );
     expect(result.status).toBe('block');
     expect(result.message).toContain('layout');
@@ -41,7 +47,10 @@ describe('quality/no-use-client-in-pages', () => {
 
   it('should allow "use client" in regular components', () => {
     const result = noUseClientInPages.check(
-      createContext('"use client";\n\nexport function Button() {}', '/project/src/app/components/Button.tsx'),
+      createContext(
+        '"use client";\n\nexport function Button() {}',
+        '/project/src/app/components/Button.tsx',
+      ),
     );
     expect(result.status).toBe('pass');
   });
@@ -55,22 +64,26 @@ describe('quality/no-use-client-in-pages', () => {
 
   it('should skip files not in app directory', () => {
     const result = noUseClientInPages.check(
-      createContext('"use client";\n\nexport default function Page() {}', '/project/pages/index.tsx'),
+      createContext(
+        '"use client";\n\nexport default function Page() {}',
+        '/project/pages/index.tsx',
+      ),
     );
     expect(result.status).toBe('pass');
   });
 
   it('should only check first 5 lines for directive', () => {
     const content = '\n\n\n\n\n\n"use client";\n\nexport default function Page() {}';
-    const result = noUseClientInPages.check(
-      createContext(content, '/project/src/app/page.tsx'),
-    );
+    const result = noUseClientInPages.check(createContext(content, '/project/src/app/page.tsx'));
     expect(result.status).toBe('pass'); // "use client" is on line 7, past first 5
   });
 
   it('should include fix suggestion', () => {
     const result = noUseClientInPages.check(
-      createContext('"use client";\nexport default function Page() {}', '/project/src/app/page.tsx'),
+      createContext(
+        '"use client";\nexport default function Page() {}',
+        '/project/src/app/page.tsx',
+      ),
     );
     expect(result.fix).toContain('Remove');
   });

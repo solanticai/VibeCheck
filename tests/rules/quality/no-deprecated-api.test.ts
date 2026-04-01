@@ -8,7 +8,13 @@ function ctx(content: string, filePath = '/p/src/App.tsx'): HookContext {
     tool: 'Write',
     toolInput: { content, file_path: filePath },
     projectConfig: { presets: [], agents: ['claude-code'], rules: new Map() },
-    gitContext: { branch: 'feat/test', isDirty: false, repoRoot: '/p', unpushedCount: 0, hasRemote: false },
+    gitContext: {
+      branch: 'feat/test',
+      isDirty: false,
+      repoRoot: '/p',
+      unpushedCount: 0,
+      hasRemote: false,
+    },
   };
 }
 
@@ -38,7 +44,9 @@ describe('quality/no-deprecated-api', () => {
   });
 
   it('should pass for modern patterns', () => {
-    const r = noDeprecatedApi.check(ctx('export default async function Page() { return <div />; }'));
+    const r = noDeprecatedApi.check(
+      ctx('export default async function Page() { return <div />; }'),
+    );
     expect(r.status).toBe('pass');
   });
 

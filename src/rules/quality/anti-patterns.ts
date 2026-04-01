@@ -21,7 +21,8 @@ const configSchema = z.object({
 export const antiPatterns: Rule = {
   id: 'quality/anti-patterns',
   name: 'Anti-Patterns',
-  description: 'Catches common AI coding mistakes: CSS in Tailwind projects, inline styles, console.log.',
+  description:
+    'Catches common AI coding mistakes: CSS in Tailwind projects, inline styles, console.log.',
   severity: 'warn',
   events: ['PreToolUse'],
   match: { tools: ['Write'] },

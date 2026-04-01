@@ -39,7 +39,11 @@ describe('Codex adapter', () => {
 
   it('should skip disabled rules', async () => {
     const config = makeConfig();
-    config.rules.set('security/branch-protection', { enabled: false, severity: 'block', options: {} });
+    config.rules.set('security/branch-protection', {
+      enabled: false,
+      severity: 'block',
+      options: {},
+    });
     const files = await codexAdapter.generate(config, '/p');
     expect(files[0].content).not.toContain('Branch Protection');
   });

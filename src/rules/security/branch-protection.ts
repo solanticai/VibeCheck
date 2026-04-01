@@ -41,9 +41,7 @@ export const branchProtection: Rule = {
       (ruleConfig?.options?.protectedBranches as string[]) ?? DEFAULT_PROTECTED_BRANCHES;
 
     // Check if current branch is protected
-    const isProtected = protectedBranches.some(
-      (pb) => branch.toLowerCase() === pb.toLowerCase(),
-    );
+    const isProtected = protectedBranches.some((pb) => branch.toLowerCase() === pb.toLowerCase());
 
     if (isProtected) {
       return {

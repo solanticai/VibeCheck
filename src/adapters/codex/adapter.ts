@@ -30,7 +30,10 @@ export const codexAdapter: Adapter = {
     ];
 
     // Group rules by category
-    const categories = new Map<string, Array<{ id: string; name: string; desc: string; severity: string }>>();
+    const categories = new Map<
+      string,
+      Array<{ id: string; name: string; desc: string; severity: string }>
+    >();
 
     for (const [ruleId, ruleConfig] of config.rules) {
       if (!ruleConfig.enabled) continue;

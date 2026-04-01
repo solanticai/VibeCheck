@@ -29,9 +29,7 @@ describe('security/secret-detection', () => {
   });
 
   it('should detect AWS access keys', () => {
-    const result = secretDetection.check(
-      createContext('const key = "AKIAIOSFODNN7EXAMPLE";'),
-    );
+    const result = secretDetection.check(createContext('const key = "AKIAIOSFODNN7EXAMPLE";'));
     expect(result.status).toBe('block');
     expect(result.message).toContain('AWS');
   });
@@ -102,9 +100,7 @@ describe('security/secret-detection', () => {
   });
 
   it('should include fix suggestion', () => {
-    const result = secretDetection.check(
-      createContext('const key = "AKIAIOSFODNN7EXAMPLE";'),
-    );
+    const result = secretDetection.check(createContext('const key = "AKIAIOSFODNN7EXAMPLE";'));
     expect(result.fix).toContain('environment variable');
   });
 });

@@ -38,11 +38,15 @@ export async function executeHook(event: HookEvent): Promise<void> {
     const { toolName } = extractToolInput(rawInput);
 
     // 4. Build context
-    const context = buildHookContext(event, {
-      tool_name: toolName,
-      tool_input: rawInput.tool_input as Record<string, unknown>,
-      ...rawInput,
-    }, config);
+    const context = buildHookContext(
+      event,
+      {
+        tool_name: toolName,
+        tool_input: rawInput.tool_input as Record<string, unknown>,
+        ...rawInput,
+      },
+      config,
+    );
 
     // 5. Resolve which rules apply
     const resolvedRules = resolveRules(event, toolName, config);

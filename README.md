@@ -43,28 +43,28 @@ Create a feature branch first: git checkout -b feat/your-change
 
 For agents without hook support, VibeCheck generates configuration files that guide AI behavior.
 
-| Agent | Enforcement | Mechanism |
-|-------|------------|-----------|
+| Agent           | Enforcement          | Mechanism                    |
+| --------------- | -------------------- | ---------------------------- |
 | **Claude Code** | **Runtime (blocks)** | Hook scripts with exit codes |
-| Cursor | Advisory | `.cursorrules` |
-| Codex | Advisory | `AGENTS.md` |
-| OpenCode | Advisory | Config file |
+| Cursor          | Advisory             | `.cursorrules`               |
+| Codex           | Advisory             | `AGENTS.md`                  |
+| OpenCode        | Advisory             | Config file                  |
 
 ## Built-in Rules
 
 ### Security (enabled by default)
 
-| Rule | What it prevents |
-|------|-----------------|
-| `security/branch-protection` | Writing to `main`, `master`, or other protected branches |
-| `security/destructive-commands` | `rm -rf ~/`, `git push --force`, `git reset --hard` |
-| `security/secret-detection` | API keys, tokens, and passwords in committed code |
+| Rule                            | What it prevents                                         |
+| ------------------------------- | -------------------------------------------------------- |
+| `security/branch-protection`    | Writing to `main`, `master`, or other protected branches |
+| `security/destructive-commands` | `rm -rf ~/`, `git push --force`, `git reset --hard`      |
+| `security/secret-detection`     | API keys, tokens, and passwords in committed code        |
 
 ### Quality (via presets)
 
-| Rule | What it enforces |
-|------|-----------------|
-| `quality/import-aliases` | Use `@/` instead of deep relative imports |
+| Rule                             | What it enforces                           |
+| -------------------------------- | ------------------------------------------ |
+| `quality/import-aliases`         | Use `@/` instead of deep relative imports  |
 | `quality/no-use-client-in-pages` | No `"use client"` in Next.js pages/layouts |
 
 ## Presets
@@ -80,10 +80,10 @@ export default defineConfig({
 });
 ```
 
-| Preset | What it enforces |
-|--------|-----------------|
-| `nextjs-15` | App Router conventions, Server Components, path aliases |
-| `typescript-strict` | Import aliases, no deep relative imports |
+| Preset              | What it enforces                                        |
+| ------------------- | ------------------------------------------------------- |
+| `nextjs-15`         | App Router conventions, Server Components, path aliases |
+| `typescript-strict` | Import aliases, no deep relative imports                |
 
 ## Configuration
 
@@ -104,13 +104,13 @@ export default defineConfig({
 
 ## CLI
 
-| Command | Description |
-|---------|-------------|
-| `vibecheck init` | Interactive setup wizard |
-| `vibecheck add <rule\|preset>` | Add a rule or preset |
-| `vibecheck remove <rule\|preset>` | Remove a rule or preset |
-| `vibecheck generate` | Regenerate hook scripts |
-| `vibecheck doctor` | Validate config and hook health |
+| Command                           | Description                     |
+| --------------------------------- | ------------------------------- |
+| `vibecheck init`                  | Interactive setup wizard        |
+| `vibecheck add <rule\|preset>`    | Add a rule or preset            |
+| `vibecheck remove <rule\|preset>` | Remove a rule or preset         |
+| `vibecheck generate`              | Regenerate hook scripts         |
+| `vibecheck doctor`                | Validate config and hook health |
 
 ## How It Works
 

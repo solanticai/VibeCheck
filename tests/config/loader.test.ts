@@ -26,10 +26,7 @@ describe('resolveConfig', () => {
   });
 
   it('should apply preset rules', () => {
-    const config = resolveConfig(
-      { presets: ['test-preset'] },
-      makePresetMap(testPreset),
-    );
+    const config = resolveConfig({ presets: ['test-preset'] }, makePresetMap(testPreset));
 
     expect(config.rules.has('quality/import-aliases')).toBe(true);
     expect(config.rules.get('quality/import-aliases')?.enabled).toBe(true);
@@ -89,15 +86,15 @@ describe('resolveConfig', () => {
   });
 
   it('should throw on invalid config', () => {
-    expect(() =>
-      resolveConfig({ agents: ['invalid-agent' as 'claude-code'] }),
-    ).toThrow('Invalid vibecheck config');
+    expect(() => resolveConfig({ agents: ['invalid-agent' as 'claude-code'] })).toThrow(
+      'Invalid vibecheck config',
+    );
   });
 
   it('should throw on unknown presets', () => {
-    expect(() =>
-      resolveConfig({ presets: ['nonexistent'] }, makePresetMap(testPreset)),
-    ).toThrow('Unknown preset');
+    expect(() => resolveConfig({ presets: ['nonexistent'] }, makePresetMap(testPreset))).toThrow(
+      'Unknown preset',
+    );
   });
 
   it('should support user-only rules (no preset)', () => {

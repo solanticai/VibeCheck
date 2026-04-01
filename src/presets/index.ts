@@ -10,7 +10,14 @@ import { laravel } from './laravel.js';
 
 /** All built-in presets */
 export const allBuiltinPresets = [
-  nextjs15, typescriptStrict, react19, supabase, tailwind, django, fastapi, laravel,
+  nextjs15,
+  typescriptStrict,
+  react19,
+  supabase,
+  tailwind,
+  django,
+  fastapi,
+  laravel,
 ];
 
 /** Register all built-in presets */

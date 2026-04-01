@@ -48,7 +48,9 @@ export function validatePlugin(plugin: VibeCheckPlugin, packageName: string): Va
 
       // Check for conflicts with built-in rules
       if (hasRule(rule.id)) {
-        errors.push(`Rule "${rule.id}" conflicts with a built-in rule. Use a unique prefix (e.g., "plugin-name/${rule.id.split('/').pop()}")`);
+        errors.push(
+          `Rule "${rule.id}" conflicts with a built-in rule. Use a unique prefix (e.g., "plugin-name/${rule.id.split('/').pop()}")`,
+        );
       }
 
       // Check required fields

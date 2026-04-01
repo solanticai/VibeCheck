@@ -15,8 +15,14 @@ function makeFile(path: string, content: string): WalkedFile {
 describe('import analyzer', () => {
   it('should detect path alias usage', () => {
     const files = [
-      makeFile('/p/src/components/Button.tsx', 'import { cn } from "@/lib/utils";\nexport const Button = () => null;'),
-      makeFile('/p/src/components/Card.tsx', 'import { theme } from "@/styles/theme";\nexport const Card = () => null;'),
+      makeFile(
+        '/p/src/components/Button.tsx',
+        'import { cn } from "@/lib/utils";\nexport const Button = () => null;',
+      ),
+      makeFile(
+        '/p/src/components/Card.tsx',
+        'import { theme } from "@/styles/theme";\nexport const Card = () => null;',
+      ),
       makeFile('/p/src/lib/utils.ts', 'export const cn = (...args: string[]) => args.join(" ");'),
     ];
     const result = analyzeImports(files);
@@ -41,7 +47,10 @@ describe('import analyzer', () => {
 
   it('should report top import sources', () => {
     const files = [
-      makeFile('/p/src/App.tsx', 'import React from "react";\nimport { Button } from "@/components";'),
+      makeFile(
+        '/p/src/App.tsx',
+        'import React from "react";\nimport { Button } from "@/components";',
+      ),
       makeFile('/p/src/Page.tsx', 'import React from "react";\nimport { cn } from "@/lib/utils";'),
     ];
     const result = analyzeImports(files);

@@ -73,15 +73,15 @@ export async function doctorCommand(): Promise<void> {
   }
 
   // 4. Check active rules
-  const enabledRules = Array.from(resolvedConfig.rules.entries())
-    .filter(([, c]) => c.enabled);
+  const enabledRules = Array.from(resolvedConfig.rules.entries()).filter(([, c]) => c.enabled);
   const securityRules = enabledRules.filter(([id]) => id.startsWith('security/'));
 
   if (securityRules.length === 0) {
     results.push({
       name: 'Security rules',
       status: 'warn',
-      message: 'No security rules enabled. Consider enabling branch-protection and destructive-commands.',
+      message:
+        'No security rules enabled. Consider enabling branch-protection and destructive-commands.',
     });
   } else {
     results.push({

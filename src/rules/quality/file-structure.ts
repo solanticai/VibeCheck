@@ -45,8 +45,9 @@ export const fileStructure: Rule = {
         : false;
 
     // Detect React hook (function starting with "use")
-    const isHook = /export\s+(default\s+)?function\s+use[A-Z]/.test(content) ||
-                   /export\s+const\s+use[A-Z]\w+\s*=/.test(content);
+    const isHook =
+      /export\s+(default\s+)?function\s+use[A-Z]/.test(content) ||
+      /export\s+const\s+use[A-Z]\w+\s*=/.test(content);
 
     // Warn if a component is placed outside common component directories
     if (isComponent && !isHook) {
@@ -68,9 +69,7 @@ export const fileStructure: Rule = {
 
     // Warn if a hook is placed outside hook directories
     if (isHook) {
-      const isInHookDir =
-        normalized.includes('/hooks/') ||
-        normalized.includes('/_hooks/');
+      const isInHookDir = normalized.includes('/hooks/') || normalized.includes('/_hooks/');
 
       if (!isInHookDir) {
         return {

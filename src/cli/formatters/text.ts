@@ -32,7 +32,9 @@ export function formatText(result: ScanResult): string {
 
   const blocks = result.issues.filter((i) => i.severity === 'block').length;
   const warns = result.issues.filter((i) => i.severity === 'warn').length;
-  lines.push(`  ${result.issues.length} issue${result.issues.length !== 1 ? 's' : ''} (${blocks} blocking, ${warns} warnings)\n`);
+  lines.push(
+    `  ${result.issues.length} issue${result.issues.length !== 1 ? 's' : ''} (${blocks} blocking, ${warns} warnings)\n`,
+  );
 
   return lines.join('\n');
 }

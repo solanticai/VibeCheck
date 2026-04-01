@@ -9,7 +9,11 @@ const DEFAULT_TIMEOUT_MS = 5000;
  * Run a git command and return the trimmed output.
  * Returns null on any error (not a git repo, command fails, timeout).
  */
-export function gitCommand(args: string[], cwd: string, timeoutMs = DEFAULT_TIMEOUT_MS): string | null {
+export function gitCommand(
+  args: string[],
+  cwd: string,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): string | null {
   try {
     const result = execSync(`git ${args.join(' ')}`, {
       cwd,
@@ -49,7 +53,10 @@ export function getUnpushedCount(cwd: string): number {
 
 /** Check if the current branch tracks a remote */
 export function hasRemoteTracking(cwd: string): boolean {
-  const upstream = gitCommand(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'], cwd);
+  const upstream = gitCommand(
+    ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'],
+    cwd,
+  );
   return upstream !== null && upstream.length > 0;
 }
 

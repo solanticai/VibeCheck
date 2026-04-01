@@ -10,7 +10,8 @@ import type { Preset } from '../types.js';
 export const nextjs15: Preset = {
   id: 'nextjs-15',
   name: 'Next.js 15',
-  description: 'Next.js 15 App Router conventions: Server Components, path aliases, file structure.',
+  description:
+    'Next.js 15 App Router conventions: Server Components, path aliases, file structure.',
   version: '1.0.0',
   rules: {
     'quality/no-use-client-in-pages': true,

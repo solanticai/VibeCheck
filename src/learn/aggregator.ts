@@ -47,7 +47,10 @@ export function aggregateConventions(files: WalkedFile[], projectRoot: string): 
 /**
  * Save conventions report to .vibecheck/learned/conventions.json
  */
-export async function saveConventions(report: ConventionsReport, projectRoot: string): Promise<string> {
+export async function saveConventions(
+  report: ConventionsReport,
+  projectRoot: string,
+): Promise<string> {
   const outputPath = join(projectRoot, '.vibecheck', 'learned', 'conventions.json');
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, JSON.stringify(report, null, 2), 'utf-8');

@@ -1,7 +1,19 @@
 import type { Rule, RuleResult } from '../../types.js';
 import { gitCommand } from '../../utils/git.js';
 
-const DEFAULT_TYPES = ['feat', 'fix', 'docs', 'style', 'refactor', 'perf', 'test', 'build', 'ci', 'chore', 'revert'];
+const DEFAULT_TYPES = [
+  'feat',
+  'fix',
+  'docs',
+  'style',
+  'refactor',
+  'perf',
+  'test',
+  'build',
+  'ci',
+  'chore',
+  'revert',
+];
 
 /**
  * workflow/commit-conventions

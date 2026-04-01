@@ -2,7 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { importAliases } from '../../../src/rules/quality/import-aliases.js';
 import type { HookContext } from '../../../src/types.js';
 
-function createContext(content: string, filePath = '/project/src/components/Button.tsx'): HookContext {
+function createContext(
+  content: string,
+  filePath = '/project/src/components/Button.tsx',
+): HookContext {
   return {
     event: 'PreToolUse',
     tool: 'Write',
@@ -24,7 +27,9 @@ function createContext(content: string, filePath = '/project/src/components/Butt
 
 describe('quality/import-aliases', () => {
   it('should pass for imports using @/ alias', () => {
-    const result = importAliases.check(createContext('import { Button } from "@/components/ui/button";'));
+    const result = importAliases.check(
+      createContext('import { Button } from "@/components/ui/button";'),
+    );
     expect(result.status).toBe('pass');
   });
 
@@ -46,9 +51,7 @@ describe('quality/import-aliases', () => {
   });
 
   it('should skip non-TypeScript files', () => {
-    const result = importAliases.check(
-      createContext('from "src/something"', '/project/README.md'),
-    );
+    const result = importAliases.check(createContext('from "src/something"', '/project/README.md'));
     expect(result.status).toBe('pass');
   });
 

@@ -48,10 +48,7 @@ describe('preset resolution', () => {
   });
 
   it('multiple presets compose correctly', () => {
-    const config = resolveConfig(
-      { presets: ['nextjs-15', 'tailwind', 'supabase'] },
-      presetMap,
-    );
+    const config = resolveConfig({ presets: ['nextjs-15', 'tailwind', 'supabase'] }, presetMap);
     // All three presets' rules should be present
     expect(config.rules.has('quality/no-use-client-in-pages')).toBe(true);
     expect(config.rules.has('quality/anti-patterns')).toBe(true);

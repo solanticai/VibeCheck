@@ -23,10 +23,7 @@ const testRule: Rule = {
   },
 };
 
-function createEditContext(
-  oldString: string,
-  newString: string,
-): HookContext {
+function createEditContext(oldString: string, newString: string): HookContext {
   return {
     event: 'PreToolUse',
     tool: 'Edit',

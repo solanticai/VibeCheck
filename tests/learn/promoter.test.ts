@@ -21,7 +21,10 @@ const patterns: DiscoveredPattern[] = [
     totalFiles: 25,
     examples: [],
     promotable: true,
-    suggestedRule: { ruleId: 'quality/naming-conventions', config: { componentDirs: ['/components/'] } },
+    suggestedRule: {
+      ruleId: 'quality/naming-conventions',
+      config: { componentDirs: ['/components/'] },
+    },
   },
   {
     type: 'structure',

@@ -47,9 +47,10 @@ export function analyzeNaming(files: WalkedFile[]): AnalyzerResult {
         totalFiles: dirFiles.length,
         examples: dirFiles.slice(0, 3).map((f) => f.filename),
         promotable: dominant === 'PascalCase',
-        suggestedRule: dominant === 'PascalCase'
-          ? { ruleId: 'quality/naming-conventions', config: { componentDirs: [`/${dirName}/`] } }
-          : undefined,
+        suggestedRule:
+          dominant === 'PascalCase'
+            ? { ruleId: 'quality/naming-conventions', config: { componentDirs: [`/${dirName}/`] } }
+            : undefined,
       });
     }
   }
@@ -60,7 +61,9 @@ export function analyzeNaming(files: WalkedFile[]): AnalyzerResult {
     const dirFiles = dirGroups.get(dirName);
     if (!dirFiles || dirFiles.length < 2) continue;
 
-    const usePrefix = dirFiles.filter((f) => f.filename.startsWith('use') || f.filename.startsWith('Use'));
+    const usePrefix = dirFiles.filter(
+      (f) => f.filename.startsWith('use') || f.filename.startsWith('Use'),
+    );
     const ratio = usePrefix.length / dirFiles.length;
 
     if (ratio >= 0.7) {

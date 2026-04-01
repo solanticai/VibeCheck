@@ -8,7 +8,13 @@ function ctx(filePath: string, content = ''): HookContext {
     tool: 'Write',
     toolInput: { file_path: filePath, content },
     projectConfig: { presets: [], agents: ['claude-code'], rules: new Map() },
-    gitContext: { branch: 'feat/test', isDirty: false, repoRoot: '/p', unpushedCount: 0, hasRemote: false },
+    gitContext: {
+      branch: 'feat/test',
+      isDirty: false,
+      repoRoot: '/p',
+      unpushedCount: 0,
+      hasRemote: false,
+    },
   };
 }
 

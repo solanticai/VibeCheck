@@ -48,7 +48,9 @@ describe('security/destructive-commands', () => {
   });
 
   it('should allow git push --force-with-lease', () => {
-    const result = destructiveCommands.check(createContext('git push --force-with-lease origin main'));
+    const result = destructiveCommands.check(
+      createContext('git push --force-with-lease origin main'),
+    );
     expect(result.status).toBe('pass');
   });
 

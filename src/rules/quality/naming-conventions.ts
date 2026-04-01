@@ -11,7 +11,14 @@ const configSchema = z.object({
 
 const DEFAULT_COMPONENT_DIRS = ['/components/', '/_components/'];
 const DEFAULT_HOOK_DIRS = ['/hooks/', '/_hooks/'];
-const DEFAULT_VAGUE_FILENAMES = ['utils.ts', 'helpers.ts', 'misc.ts', 'utils.tsx', 'helpers.tsx', 'misc.tsx'];
+const DEFAULT_VAGUE_FILENAMES = [
+  'utils.ts',
+  'helpers.ts',
+  'misc.ts',
+  'utils.tsx',
+  'helpers.tsx',
+  'misc.tsx',
+];
 
 /**
  * quality/naming-conventions
@@ -44,9 +51,11 @@ export const namingConventions: Rule = {
 
     // Get config
     const ruleConfig = context.projectConfig.rules.get(ruleId);
-    const componentDirs = (ruleConfig?.options?.componentDirs as string[]) ?? DEFAULT_COMPONENT_DIRS;
+    const componentDirs =
+      (ruleConfig?.options?.componentDirs as string[]) ?? DEFAULT_COMPONENT_DIRS;
     const hookDirs = (ruleConfig?.options?.hookDirs as string[]) ?? DEFAULT_HOOK_DIRS;
-    const vagueFilenames = (ruleConfig?.options?.vagueFilenames as string[]) ?? DEFAULT_VAGUE_FILENAMES;
+    const vagueFilenames =
+      (ruleConfig?.options?.vagueFilenames as string[]) ?? DEFAULT_VAGUE_FILENAMES;
     const allowedVagueFiles = (ruleConfig?.options?.allowedVagueFiles as string[]) ?? [];
 
     // Check: No vague filenames

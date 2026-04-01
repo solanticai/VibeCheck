@@ -41,7 +41,17 @@ const DEFAULT_EXCLUDE = [
 ];
 
 const SCANNABLE_EXTENSIONS = new Set([
-  'ts', 'tsx', 'js', 'jsx', 'mts', 'mjs', 'sql', 'css', 'scss', 'sass', 'less',
+  'ts',
+  'tsx',
+  'js',
+  'jsx',
+  'mts',
+  'mjs',
+  'sql',
+  'css',
+  'scss',
+  'sass',
+  'less',
 ]);
 
 /**
@@ -55,7 +65,10 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
   const gitContext = buildGitContext(rootDir);
 
   // Collect applicable rules (only Write-matching rules work in scan mode)
-  const scanRules: Array<{ rule: Rule; config: typeof config.rules extends Map<string, infer V> ? V : never }> = [];
+  const scanRules: Array<{
+    rule: Rule;
+    config: typeof config.rules extends Map<string, infer V> ? V : never;
+  }> = [];
 
   for (const [ruleId, ruleConfig] of config.rules) {
     if (!ruleConfig.enabled) continue;
@@ -108,7 +121,12 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
         if (result.status !== 'pass') {
           issues.push({
             ruleId: result.ruleId,
-            severity: ruleConfig.severity === 'info' ? 'info' : result.status === 'block' ? ruleConfig.severity : result.status,
+            severity:
+              ruleConfig.severity === 'info'
+                ? 'info'
+                : result.status === 'block'
+                  ? ruleConfig.severity
+                  : result.status,
             filePath: normalizePath(filePath),
             message: result.message ?? `Rule ${rule.id} violation`,
             fix: result.fix,

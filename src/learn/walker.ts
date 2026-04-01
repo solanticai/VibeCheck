@@ -3,12 +3,31 @@ import { join } from 'node:path';
 import { normalizePath } from '../utils/path.js';
 
 const DEFAULT_EXCLUDE = [
-  'node_modules', '.next', 'dist', 'build', '.git', 'coverage',
-  '.vibecheck', '__pycache__', '.venv', 'vendor', '.turbo',
+  'node_modules',
+  '.next',
+  'dist',
+  'build',
+  '.git',
+  'coverage',
+  '.vibecheck',
+  '__pycache__',
+  '.venv',
+  'vendor',
+  '.turbo',
 ];
 
 const ANALYZABLE_EXTENSIONS = new Set([
-  'ts', 'tsx', 'js', 'jsx', 'mts', 'mjs', 'py', 'rb', 'php', 'go', 'rs',
+  'ts',
+  'tsx',
+  'js',
+  'jsx',
+  'mts',
+  'mjs',
+  'py',
+  'rb',
+  'php',
+  'go',
+  'rs',
 ]);
 
 export interface WalkedFile {

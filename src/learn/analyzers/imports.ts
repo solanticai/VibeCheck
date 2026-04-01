@@ -37,7 +37,9 @@ export function analyzeImports(files: WalkedFile[]): AnalyzerResult {
 
       // Track import sources (top-level package name)
       if (!source.startsWith('.') && !source.startsWith('/')) {
-        const pkg = source.startsWith('@') ? source.split('/').slice(0, 2).join('/') : source.split('/')[0];
+        const pkg = source.startsWith('@')
+          ? source.split('/').slice(0, 2).join('/')
+          : source.split('/')[0];
         importSourceCounts.set(pkg, (importSourceCounts.get(pkg) ?? 0) + 1);
       }
 

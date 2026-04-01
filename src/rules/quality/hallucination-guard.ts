@@ -74,7 +74,17 @@ function checkFileExists(basePath: string): boolean {
   if (existsSync(basePath)) return true;
 
   // Try common extensions
-  const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs', '/index.ts', '/index.tsx', '/index.js'];
+  const extensions = [
+    '.ts',
+    '.tsx',
+    '.js',
+    '.jsx',
+    '.mts',
+    '.mjs',
+    '/index.ts',
+    '/index.tsx',
+    '/index.js',
+  ];
   for (const ext of extensions) {
     if (existsSync(basePath + ext)) return true;
   }

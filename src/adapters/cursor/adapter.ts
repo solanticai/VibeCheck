@@ -18,7 +18,8 @@ export const cursorAdapter: Adapter = {
   async generate(config: ResolvedConfig): Promise<GeneratedFile[]> {
     const files: GeneratedFile[] = [];
     const allRules = getAllRules();
-    const activeRules: Array<{ id: string; name: string; description: string; severity: string }> = [];
+    const activeRules: Array<{ id: string; name: string; description: string; severity: string }> =
+      [];
 
     for (const [ruleId, ruleConfig] of config.rules) {
       if (!ruleConfig.enabled) continue;
@@ -57,9 +58,7 @@ export const cursorAdapter: Adapter = {
 function generateCursorRules(
   rules: Array<{ id: string; name: string; description: string; severity: string }>,
 ): string {
-  const ruleLines = rules
-    .map((r) => `- **${r.id}** (${r.severity}): ${r.description}`)
-    .join('\n');
+  const ruleLines = rules.map((r) => `- **${r.id}** (${r.severity}): ${r.description}`).join('\n');
 
   return `# VibeCheck Rules for Cursor
 

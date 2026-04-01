@@ -40,14 +40,17 @@ export const migrationSafety: Rule = {
     }
 
     // Check for hardcoded UUIDs
-    const uuidPattern = /['"]\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b['"]/gi;
+    const uuidPattern =
+      /['"]\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b['"]/gi;
     if (uuidPattern.test(content)) {
       warnings.push('Hardcoded UUID detected — consider using variables or parameters');
     }
 
     // Check for missing migration header comment
     if (!content.trim().startsWith('--')) {
-      warnings.push('Missing migration header comment — add a description of what this migration does');
+      warnings.push(
+        'Missing migration header comment — add a description of what this migration does',
+      );
     }
 
     if (warnings.length > 0) {

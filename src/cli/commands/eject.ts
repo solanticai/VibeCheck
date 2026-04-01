@@ -34,7 +34,12 @@ export async function ejectCommand(): Promise<void> {
   // Generate bundled hook scripts
   for (const event of HOOK_EVENTS) {
     const script = bundleHookScript(event, resolvedConfig);
-    const scriptPath = join(projectRoot, '.vibecheck', 'ejected', `vibecheck-${event.toLowerCase()}.js`);
+    const scriptPath = join(
+      projectRoot,
+      '.vibecheck',
+      'ejected',
+      `vibecheck-${event.toLowerCase()}.js`,
+    );
     await mkdir(dirname(scriptPath), { recursive: true });
     await writeFile(scriptPath, script, 'utf-8');
     console.log(`  Created ${scriptPath}`);
