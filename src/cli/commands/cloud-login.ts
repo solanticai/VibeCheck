@@ -1,7 +1,7 @@
 import http from 'node:http';
 import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
-import { writeCredentials, getCredentialsPath } from '../../cloud/credentials.js';
+import { readCredentials, writeCredentials, getCredentialsPath } from '../../cloud/credentials.js';
 
 const DEFAULT_CLOUD_URL = process.env.VIBECHECK_CLOUD_URL ?? 'https://app.vibecheck.dev';
 const DEFAULT_SUPABASE_URL =
@@ -33,9 +33,10 @@ export async function cloudLoginCommand(
     return handleTokenLogin(options);
   }
 
-  // Interactive OAuth flow
-  const cloudUrl = options.url ?? DEFAULT_CLOUD_URL;
-  const supabaseUrl = options.supabaseUrl ?? DEFAULT_SUPABASE_URL;
+  // Interactive OAuth flow — read from existing credentials, options, or defaults
+  const existingCreds = readCredentials();
+  const cloudUrl = options.url ?? existingCreds?.apiUrl ?? DEFAULT_CLOUD_URL;
+  const supabaseUrl = options.supabaseUrl ?? existingCreds?.supabaseUrl ?? DEFAULT_SUPABASE_URL;
   const clientId = DEFAULT_OAUTH_CLIENT_ID;
 
   if (options.noInteractive) {
@@ -187,7 +188,7 @@ async function oauthPkceLogin(
             code,
             code_verifier: codeVerifier,
             client_id: clientId,
-            redirect_uri: `${cloudHost}/auth/callback/cli?cli_port=${CLI_CALLBACK_PORT}`,
+            redirect_uri: `${cloudHost}/auth/callback/cli`,
           }),
         });
 
@@ -225,16 +226,17 @@ async function oauthPkceLogin(
     });
 
     const CLI_CALLBACK_PORT = 3030;
-    // Supabase redirect_uri must match what's registered: the dashboard URL
-    // The dashboard /auth/callback/cli route will forward the code to the CLI's local server
-    const cloudHost = options?.cloudUrl ?? 'http://localhost:3000';
+    // redirect_uri must exactly match what's registered in Supabase (no query params)
+    // Pass cli_port via the OAuth state parameter instead
+    const cloudHost = options?.cloudUrl ?? DEFAULT_CLOUD_URL;
     server.listen(CLI_CALLBACK_PORT, () => {
-      const redirectUri = `${cloudHost}/auth/callback/cli?cli_port=${CLI_CALLBACK_PORT}`;
+      const redirectUri = `${cloudHost}/auth/callback/cli`;
 
       const authUrl = new URL(`${supabaseUrl}/auth/v1/oauth/authorize`);
       authUrl.searchParams.set('client_id', clientId);
       authUrl.searchParams.set('redirect_uri', redirectUri);
       authUrl.searchParams.set('response_type', 'code');
+      authUrl.searchParams.set('state', String(CLI_CALLBACK_PORT));
       authUrl.searchParams.set('code_challenge', codeChallenge);
       authUrl.searchParams.set('code_challenge_method', 'S256');
       authUrl.searchParams.set('scope', 'openid email');
