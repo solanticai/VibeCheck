@@ -79,6 +79,9 @@ function updateConfigFile(projectRoot: string, projectId: string): boolean {
       // Update existing projectId
       content = content.replace(/projectId\s*:\s*['"][^'"]*['"]/, `projectId: '${projectId}'`);
     } else {
+      // Ensure the last property before }); has a trailing comma
+      content = content.replace(/(\s*)(}|])\s*\n(\}\);?\s*)$/, '$1$2,\n$3');
+
       // Insert cloud config before the closing });
       const cloudBlock = [
         '  cloud: {',
