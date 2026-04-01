@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-04-02
+
 ### Security
 
 - **Fix command injection in upgrade checker**: Replace `execSync` template strings with `execFileSync` array arguments in `upgrade/checker.ts` — prevents shell metacharacter injection via plugin names
