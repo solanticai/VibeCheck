@@ -1,0 +1,32 @@
+---
+title: VibeCheck
+description: AI coding guardrails framework with runtime enforcement.
+template: splash
+hero:
+  tagline: Runtime-enforced quality controls for Claude Code, Cursor, Codex, and more.
+  actions:
+    - text: Get Started
+      link: /VibeCheck/getting-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/solanticai/VibeCheck
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="17 Built-in Rules" icon="approve-check">
+    Security, quality, and workflow rules that block bad code before it lands.
+  </Card>
+  <Card title="10 Presets" icon="setting">
+    Next.js, React, Supabase, Tailwind, Django, FastAPI, Laravel, and more.
+  </Card>
+  <Card title="5 Adapters" icon="laptop">
+    Claude Code (runtime), Cursor, Codex, OpenCode (advisory), GitHub Actions (CI).
+  </Card>
+  <Card title="Plugin System" icon="puzzle">
+    Extend with custom rules and presets via npm packages.
+  </Card>
+</CardGrid>
