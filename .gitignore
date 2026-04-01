@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.vibecheck/cache/
+.vibecheck/data/
+.vibecheck/reports/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+.claude
