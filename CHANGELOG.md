@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-04-02
+
+### Fixed
+
+- **Fix CLI binary on Node 24**: Remove duplicate shebang from ESM output that caused `SyntaxError: Invalid or unexpected token` on Node 24's strict ESM parser. CLI bin now points to CJS output with single shebang.
+
 ## [1.0.1] - 2026-04-02
 
 ### Security
