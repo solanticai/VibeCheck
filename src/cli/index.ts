@@ -96,4 +96,13 @@ program
     await ejectCommand();
   });
 
+program
+  .command('upgrade')
+  .description('Check for and apply updates to vibecheck and plugins')
+  .option('--check', 'Only check for updates, do not apply')
+  .action(async (options: { check?: boolean }) => {
+    const { upgradeCommand } = await import('./commands/upgrade.js');
+    await upgradeCommand(options);
+  });
+
 program.parse();

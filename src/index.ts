@@ -30,3 +30,7 @@ export { registerRule, registerRules, getRule, getAllRules } from './engine/regi
 
 // Presets
 export { registerPreset, getPreset, getAllPresets } from './config/presets.js';
+
+// Plugins
+export { loadPlugins } from './plugins/loader.js';
+export { validatePlugin } from './plugins/validator.js';

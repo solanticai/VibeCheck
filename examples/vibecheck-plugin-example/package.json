@@ -1,0 +1,9 @@
+{
+  "name": "vibecheck-plugin-example",
+  "version": "1.0.0",
+  "description": "Example VibeCheck plugin demonstrating the plugin API",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "license": "Apache-2.0"
+}
