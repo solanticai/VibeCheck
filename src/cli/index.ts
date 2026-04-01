@@ -122,12 +122,13 @@ const cloud = program
 
 cloud
   .command('login')
-  .description('Authenticate with VibeCheck Cloud')
-  .option('--token <token>', 'Supabase access token (JWT)')
-  .option('--refresh-token <token>', 'Supabase refresh token (for auto-renewal)')
+  .description('Authenticate with VibeCheck Cloud (opens browser by default)')
+  .option('--token <token>', 'Manual token login for CI/headless (skip browser)')
+  .option('--refresh-token <token>', 'Supabase refresh token (with --token)')
   .option('--url <url>', 'Cloud API URL (e.g. http://localhost:3000)')
-  .option('--supabase-url <url>', 'Supabase project URL (for token refresh)')
-  .option('--supabase-anon-key <key>', 'Supabase anon key (for token refresh)')
+  .option('--supabase-url <url>', 'Supabase project URL')
+  .option('--supabase-anon-key <key>', 'Supabase anon key')
+  .option('--no-interactive', 'Print manual login URL instead of opening browser')
   .action(
     async (options: {
       token?: string;
@@ -135,6 +136,7 @@ cloud
       url?: string;
       supabaseUrl?: string;
       supabaseAnonKey?: string;
+      noInteractive?: boolean;
     }) => {
       const { cloudLoginCommand } = await import('./commands/cloud-login.js');
       await cloudLoginCommand(options);
