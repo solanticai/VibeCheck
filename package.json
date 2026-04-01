@@ -7,7 +7,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "vibecheck": "./dist/cli.cjs"
+    "vibecheck": "dist/cli.cjs"
   },
   "exports": {
     ".": {
@@ -51,7 +51,7 @@
   "homepage": "https://github.com/SolanticAi/vibecheck",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SolanticAi/vibecheck.git"
+    "url": "git+https://github.com/SolanticAi/vibecheck.git"
   },
   "bugs": {
     "url": "https://github.com/SolanticAi/vibecheck/issues"
