@@ -46,7 +46,7 @@ export async function cloudLoginCommand(
   }
 
   try {
-    const tokens = await oauthPkceLogin(supabaseUrl, clientId);
+    const tokens = await oauthPkceLogin(supabaseUrl, clientId, { cloudUrl });
 
     // Decode JWT for email and expiry
     let expiresAt: string | undefined;
@@ -136,6 +136,7 @@ function handleTokenLogin(options: {
 async function oauthPkceLogin(
   supabaseUrl: string,
   clientId: string,
+  options?: { cloudUrl?: string },
 ): Promise<{ accessToken: string; refreshToken: string }> {
   // Generate PKCE pair
   const codeVerifier = crypto.randomBytes(32).toString('base64url');
@@ -186,7 +187,7 @@ async function oauthPkceLogin(
             code,
             code_verifier: codeVerifier,
             client_id: clientId,
-            redirect_uri: 'http://localhost:3030/callback',
+            redirect_uri: `${cloudHost}/auth/callback/cli?cli_port=${CLI_CALLBACK_PORT}`,
           }),
         });
 
@@ -224,8 +225,11 @@ async function oauthPkceLogin(
     });
 
     const CLI_CALLBACK_PORT = 3030;
+    // Supabase redirect_uri must match what's registered: the dashboard URL
+    // The dashboard /auth/callback/cli route will forward the code to the CLI's local server
+    const cloudHost = options?.cloudUrl ?? 'http://localhost:3000';
     server.listen(CLI_CALLBACK_PORT, () => {
-      const redirectUri = `http://localhost:${CLI_CALLBACK_PORT}/callback`;
+      const redirectUri = `${cloudHost}/auth/callback/cli?cli_port=${CLI_CALLBACK_PORT}`;
 
       const authUrl = new URL(`${supabaseUrl}/auth/v1/oauth/authorize`);
       authUrl.searchParams.set('client_id', clientId);
