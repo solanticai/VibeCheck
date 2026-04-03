@@ -8,17 +8,16 @@ const TEST_DIR = join(process.cwd(), '.vguard-test-report');
 const LOG_DIR = join(TEST_DIR, '.vguard', 'data');
 const LOG_PATH = join(LOG_DIR, 'rule-hits.jsonl');
 
-beforeEach(() => {
-  mkdirSync(LOG_DIR, { recursive: true });
-});
-
-afterEach(() => {
-  if (existsSync(TEST_DIR)) {
-    rmSync(TEST_DIR, { recursive: true, force: true });
-  }
-});
-
 describe('aggregateReport', () => {
+  beforeEach(() => {
+    mkdirSync(LOG_DIR, { recursive: true });
+  });
+
+  afterEach(() => {
+    if (existsSync(TEST_DIR)) {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
+  });
   it('should return empty report when no data', () => {
     const data = aggregateReport(TEST_DIR);
     expect(data.totalHits).toBe(0);
