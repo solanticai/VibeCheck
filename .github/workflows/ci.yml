@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [master, dev]
   pull_request:
     branches: [master, dev]
 
@@ -13,23 +11,16 @@ concurrency:
 jobs:
   # ── Gate: PRs to master must bump version and update changelog ──
   release-checks:
+    if: github.base_ref == 'master'
     runs-on: ubuntu-latest
     steps:
-      - name: Skip — not a PR to master
-        if: ${{ !(github.event_name == 'pull_request' && github.base_ref == 'master') }}
-        run: echo "Not a PR to master — release checks not required."
-
       - uses: actions/checkout@v5
-        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         with:
           fetch-depth: 0
 
       - name: Check package.json version was bumped
-        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
-          # Get the version on master (base branch)
           MASTER_VERSION=$(git show origin/master:package.json | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
-          # Get the version in this PR
           PR_VERSION=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
 
           echo "Master version: $MASTER_VERSION"
@@ -43,9 +34,7 @@ jobs:
           echo "Version bumped: $MASTER_VERSION → $PR_VERSION"
 
       - name: Check CHANGELOG.md was updated
-        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
-          # Check if CHANGELOG.md has changes compared to master
           if git diff --quiet origin/master -- CHANGELOG.md; then
             echo "::error::CHANGELOG.md has not been updated. PRs to master must include changelog entries."
             exit 1
@@ -53,7 +42,8 @@ jobs:
 
           echo "CHANGELOG.md has been updated."
 
-  lint:
+  # ── Quality: lint, format, type-check in a single job ──
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -63,22 +53,14 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm run format:check
-
-  type-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-      - run: npm install
       - run: npm run type-check
 
+  # ── Tests: full matrix on PRs to master, slim on PRs to dev ──
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node: [20, 22]
+        os: ${{ github.base_ref == 'master' && fromJSON('["ubuntu-latest","macos-latest","windows-latest"]') || fromJSON('["ubuntu-latest"]') }}
+        node: ${{ github.base_ref == 'master' && fromJSON('[20, 22]') || fromJSON('[22]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -88,8 +70,9 @@ jobs:
       - run: npm install
       - run: npm test
 
+  # ── Build: verify the package compiles ──
   build:
-    needs: [type-check]
+    needs: [quality]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

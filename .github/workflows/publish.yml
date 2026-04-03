@@ -99,26 +99,9 @@ jobs:
             echo "should_publish=false" >> "$GITHUB_OUTPUT"
           fi
 
-  # ── Validate: full CI checks before publishing ──
-  validate:
-    needs: [preflight]
-    if: needs.preflight.outputs.should_publish == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-      - run: npm install
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run type-check
-      - run: npm test
-      - run: npm run build
-
   # ── Publish to npm with OIDC trusted publishing ──
   publish:
-    needs: [preflight, validate]
+    needs: [preflight]
     if: needs.preflight.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     environment: publishing

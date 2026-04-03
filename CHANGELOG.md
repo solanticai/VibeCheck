@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-04-03
+
+### Changed
+
+- CI workflow triggers on pull_request only (removed redundant push triggers)
+- Test matrix: full 3 OS x 2 Node for PRs to master, Ubuntu + Node 22 only for PRs to dev
+- Merged lint, format, and type-check into a single `quality` job
+- Removed redundant `validate` job from publish workflow (CI already gates the PR)
+
 ### Fixed
 
 - Prettier formatting applied to 25 files (tests, docs, fixtures)
