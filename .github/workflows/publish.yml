@@ -1,0 +1,155 @@
+name: Publish
+
+on:
+  push:
+    branches: [master]
+
+# Prevent concurrent publishes — never cancel an in-progress publish
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  # ── Gate: only proceed if this is a PR merge and the version is unpublished ──
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.decision.outputs.should_publish }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+      npm_tag: ${{ steps.version.outputs.npm_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if this push is a PR merge
+        id: merge
+        run: |
+          PARENT_COUNT=$(git rev-list --parents -n 1 HEAD | wc -w)
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          # Merge commit: 3+ words (sha + 2 parents)
+          # Squash merge from PR: message contains "(#<number>)"
+          if [[ "$PARENT_COUNT" -gt 2 ]] || [[ "$COMMIT_MSG" =~ \(#[0-9]+\) ]]; then
+            echo "is_merge=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_merge=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Push to master is not a PR merge. Skipping publish."
+          fi
+
+      - name: Extract version from package.json
+        id: version
+        if: steps.merge.outputs.is_merge == 'true'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+          if [[ "$VERSION" == *"alpha"* ]] || [[ "$VERSION" == *"beta"* ]] || [[ "$VERSION" == *"rc"* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ "$VERSION" == *"alpha"* ]]; then
+            echo "npm_tag=alpha" >> "$GITHUB_OUTPUT"
+          elif [[ "$VERSION" == *"beta"* ]]; then
+            echo "npm_tag=beta" >> "$GITHUB_OUTPUT"
+          elif [[ "$VERSION" == *"rc"* ]]; then
+            echo "npm_tag=rc" >> "$GITHUB_OUTPUT"
+          else
+            echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check if version already published on npm
+        id: npm
+        if: steps.merge.outputs.is_merge == 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if npm view "@solanticai/vguard@$VERSION" version 2>/dev/null; then
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Version $VERSION already published to npm. Skipping."
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check if git tag already exists
+        id: git_tag
+        if: steps.merge.outputs.is_merge == 'true'
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+            echo "tag_exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Tag $TAG already exists. Skipping."
+          else
+            echo "tag_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine whether to publish
+        id: decision
+        run: |
+          IS_MERGE="${{ steps.merge.outputs.is_merge }}"
+          ALREADY_PUBLISHED="${{ steps.npm.outputs.already_published }}"
+          TAG_EXISTS="${{ steps.git_tag.outputs.tag_exists }}"
+
+          if [[ "$IS_MERGE" == "true" && "$ALREADY_PUBLISHED" != "true" && "$TAG_EXISTS" != "true" ]]; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ── Validate: full CI checks before publishing ──
+  validate:
+    needs: [preflight]
+    if: needs.preflight.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run type-check
+      - run: npm test
+      - run: npm run build
+
+  # ── Publish to npm with OIDC trusted publishing ──
+  publish:
+    needs: [preflight, validate]
+    if: needs.preflight.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    environment: publishing
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - run: npm install
+      - run: npm run build
+
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --tag ${{ needs.preflight.outputs.npm_tag }}
+
+      - name: Create and push git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ needs.preflight.outputs.tag }}" -m "Release ${{ needs.preflight.outputs.tag }}"
+          git push origin "${{ needs.preflight.outputs.tag }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.preflight.outputs.tag }}
+          name: ${{ needs.preflight.outputs.tag }}
+          generate_release_notes: true
+          prerelease: ${{ needs.preflight.outputs.is_prerelease == 'true' }}
