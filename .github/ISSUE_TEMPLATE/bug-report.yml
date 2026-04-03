@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug in VibeCheck
+description: Report a bug in VGuard
 labels: [bug]
 body:
   - type: markdown
@@ -21,7 +21,7 @@ body:
       label: Steps to Reproduce
       description: Steps to reproduce the behavior
       value: |
-        1. Run `vibecheck ...`
+        1. Run `vguard ...`
         2. ...
         3. See error
     validations:
@@ -42,7 +42,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: VibeCheck Version
+      label: VGuard Version
       placeholder: "0.1.0"
     validations:
       required: true
@@ -82,8 +82,8 @@ body:
   - type: textarea
     id: config
     attributes:
-      label: VibeCheck Config
-      description: Paste your vibecheck.config.ts (remove any secrets)
+      label: VGuard Config
+      description: Paste your vguard.config.ts (remove any secrets)
       render: typescript
 
   - type: textarea

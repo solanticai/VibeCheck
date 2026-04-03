@@ -1,6 +1,8 @@
 import type { Adapter, GeneratedFile, ResolvedConfig, HookEvent } from '../../types.js';
 import { getAllRules } from '../../engine/registry.js';
 import { generateHookScript } from './hook-generator.js';
+import { generateCommands } from './command-generator.js';
+import { generateEnforcementRules } from './rules-generator.js';
 
 /** Hook event types that VGuard generates scripts for */
 const HOOK_EVENTS: HookEvent[] = ['PreToolUse', 'PostToolUse', 'Stop'];
@@ -11,6 +13,8 @@ const HOOK_EVENTS: HookEvent[] = ['PreToolUse', 'PostToolUse', 'Stop'];
  * Generates:
  * 1. Hook scripts (one per event type) in .vguard/hooks/
  * 2. settings.json entries in .claude/settings.json
+ * 3. Command files in .claude/commands/vguard-*.md
+ * 4. Enforcement rules in .claude/rules/vguard-enforcement.md
  */
 export const claudeCodeAdapter: Adapter = {
   id: 'claude-code',
@@ -62,6 +66,14 @@ export const claudeCodeAdapter: Adapter = {
       content: JSON.stringify(settingsHooks, null, 2),
       mergeStrategy: 'merge',
     });
+
+    // Generate Claude Code commands (.claude/commands/vguard-*.md)
+    const commandFiles = generateCommands(config);
+    files.push(...commandFiles);
+
+    // Generate enforcement rules (.claude/rules/vguard-enforcement.md)
+    const rulesFile = generateEnforcementRules(config);
+    files.push(rulesFile);
 
     return files;
   },

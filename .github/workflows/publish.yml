@@ -153,3 +153,122 @@ jobs:
           name: ${{ needs.preflight.outputs.tag }}
           generate_release_notes: true
           prerelease: ${{ needs.preflight.outputs.is_prerelease == 'true' }}
+
+  # ── Post changelog to GitHub Discussions ──
+  changelog:
+    needs: [preflight, publish]
+    if: needs.preflight.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      discussions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ needs.preflight.outputs.version }}"
+          TAG="${{ needs.preflight.outputs.tag }}"
+
+          # Extract the section for this version from CHANGELOG.md
+          # Matches from "## [<version>]" to the next "## [" heading
+          CHANGELOG=$(awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if (index($0, "[" ver "]")) found=1
+            }
+            found && !/^## \[/ { print }
+          ' CHANGELOG.md)
+
+          # Get commit list since previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            COMMITS=$(git log --oneline "$PREV_TAG"..HEAD)
+          else
+            COMMITS=$(git log --oneline -20)
+          fi
+
+          # Build the discussion body
+          BODY=$(cat <<HEREDOC
+          # VGuard $TAG
+
+          **Released:** $(date -u +%Y-%m-%d)
+          **Install:** \`npm install @solanticai/vguard@$VERSION\`
+
+          ## What's Changed
+
+          $CHANGELOG
+
+          ## Commits
+
+          \`\`\`
+          $COMMITS
+          \`\`\`
+
+          ---
+
+          **Full changelog:** https://github.com/solanticai/vibe-guard/blob/master/CHANGELOG.md
+          **npm:** https://www.npmjs.com/package/@solanticai/vguard/v/$VERSION
+          **Release:** https://github.com/solanticai/vibe-guard/releases/tag/$TAG
+          HEREDOC
+          )
+
+          # Write to file to avoid escaping issues
+          echo "$BODY" > /tmp/changelog-body.md
+          echo "title=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Get repository and category IDs
+        id: ids
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RESULT=$(gh api graphql -f query='
+            query {
+              repository(owner: "solanticai", name: "vibe-guard") {
+                id
+                discussionCategories(first: 20) {
+                  nodes { id name }
+                }
+              }
+            }
+          ')
+
+          REPO_ID=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['repository']['id'])")
+          CATEGORY_ID=$(echo "$RESULT" | python3 -c "
+          import sys, json
+          cats = json.load(sys.stdin)['data']['repository']['discussionCategories']['nodes']
+          print(next(c['id'] for c in cats if c['name'] == 'Changelog'))
+          ")
+
+          echo "repo_id=$REPO_ID" >> "$GITHUB_OUTPUT"
+          echo "category_id=$CATEGORY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Create changelog discussion
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BODY=$(cat /tmp/changelog-body.md)
+          TITLE="${{ steps.changelog.outputs.title }}"
+          REPO_ID="${{ steps.ids.outputs.repo_id }}"
+          CATEGORY_ID="${{ steps.ids.outputs.category_id }}"
+
+          # Escape for JSON
+          BODY_ESCAPED=$(echo "$BODY" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
+
+          gh api graphql -f query="
+            mutation {
+              createDiscussion(input: {
+                repositoryId: \"$REPO_ID\",
+                categoryId: \"$CATEGORY_ID\",
+                title: \"$TITLE\",
+                body: $BODY_ESCAPED
+              }) {
+                discussion { url }
+              }
+            }
+          "
+
+          echo "::notice::Changelog discussion created for $TITLE"

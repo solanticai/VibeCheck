@@ -1,1 +1,28 @@
 npm run lint && npm run type-check
+
+# ── Require CHANGELOG.md to be updated ──
+# Check if CHANGELOG.md is staged or was recently modified
+BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+
+if [ "$BRANCH" = "dev" ] || [ "$BRANCH" = "master" ] || [ "$BRANCH" = "main" ]; then
+  # On protected branches: block if CHANGELOG.md is not staged
+  if ! git diff --cached --name-only | grep -q "^CHANGELOG.md$"; then
+    echo ""
+    echo "  ERROR: CHANGELOG.md must be updated when committing to '$BRANCH'."
+    echo "  Add your changes to CHANGELOG.md under the [Unreleased] section,"
+    echo "  then stage it: git add CHANGELOG.md"
+    echo ""
+    exit 1
+  fi
+fi
+
+# ── On master: require version bump ──
+if [ "$BRANCH" = "master" ] || [ "$BRANCH" = "main" ]; then
+  if ! git diff --cached --name-only | grep -q "^package.json$"; then
+    echo ""
+    echo "  ERROR: package.json must be updated (version bump) when committing to '$BRANCH'."
+    echo "  Bump the version in package.json and stage it: git add package.json"
+    echo ""
+    exit 1
+  fi
+fi

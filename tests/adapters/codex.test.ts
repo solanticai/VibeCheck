@@ -47,6 +47,29 @@ describe('Codex adapter', () => {
     const files = await codexAdapter.generate(config, '/p');
     expect(files[0].content).not.toContain('Branch Protection');
   });
+
+  it('should generate .codex/instructions.md', async () => {
+    const files = await codexAdapter.generate(makeConfig(), '/p');
+    const instructions = files.find((f) => f.path === '.codex/instructions.md');
+    expect(instructions).toBeDefined();
+    expect(instructions!.content).toContain('VGuard Coding Guidelines');
+    expect(instructions!.mergeStrategy).toBe('create-only');
+  });
+
+  it('should include rule categories in .codex/instructions.md', async () => {
+    const files = await codexAdapter.generate(makeConfig(), '/p');
+    const instructions = files.find((f) => f.path === '.codex/instructions.md');
+    expect(instructions!.content).toContain('Security');
+    expect(instructions!.content).toContain('Quality');
+  });
+
+  it('should include commands reference in .codex/instructions.md', async () => {
+    const files = await codexAdapter.generate(makeConfig(), '/p');
+    const instructions = files.find((f) => f.path === '.codex/instructions.md');
+    expect(instructions!.content).toContain('npx vguard lint');
+    expect(instructions!.content).toContain('npx vguard fix');
+    expect(instructions!.content).toContain('npx vguard doctor');
+  });
 });
 
 describe('OpenCode adapter', () => {

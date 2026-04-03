@@ -1,0 +1,8 @@
+{
+  "name": "@mixed/ui",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "react": "19.0.0"
+  }
+}

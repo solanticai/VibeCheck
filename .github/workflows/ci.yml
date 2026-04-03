@@ -11,6 +11,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ── Gate: PRs to master must bump version and update changelog ──
+  release-checks:
+    if: github.event_name == 'pull_request' && github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check package.json version was bumped
+        run: |
+          # Get the version on master (base branch)
+          MASTER_VERSION=$(git show origin/master:package.json | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+          # Get the version in this PR
+          PR_VERSION=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
+
+          echo "Master version: $MASTER_VERSION"
+          echo "PR version:     $PR_VERSION"
+
+          if [ "$MASTER_VERSION" = "$PR_VERSION" ]; then
+            echo "::error::package.json version ($PR_VERSION) has not been bumped. PRs to master must include a version bump."
+            exit 1
+          fi
+
+          echo "Version bumped: $MASTER_VERSION → $PR_VERSION"
+
+      - name: Check CHANGELOG.md was updated
+        run: |
+          # Check if CHANGELOG.md has changes compared to master
+          if git diff --quiet origin/master -- CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has not been updated. PRs to master must include changelog entries."
+            exit 1
+          fi
+
+          echo "CHANGELOG.md has been updated."
+
   lint:
     runs-on: ubuntu-latest
     steps:

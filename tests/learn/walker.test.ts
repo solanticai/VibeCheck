@@ -1,0 +1,108 @@
+import { describe, it, expect, vi } from 'vitest';
+import { join } from 'node:path';
+
+// Build paths using native join so keys match on Windows and Linux
+const ROOT = join('/project');
+const SRC = join('/project', 'src');
+const INDEX_TS = join('/project', 'src', 'index.ts');
+const APP_TSX = join('/project', 'src', 'app.tsx');
+const UTILS_JS = join('/project', 'src', 'utils.js');
+const NODE_MODULES = join('/project', 'node_modules');
+const DIST = join('/project', 'dist');
+const README = join('/project', 'README.md');
+const IMAGE = join('/project', 'image.png');
+
+vi.mock('node:fs', () => {
+  const { join: pathJoin } = require('node:path');
+
+  const root = pathJoin('/project');
+  const src = pathJoin('/project', 'src');
+  const indexTs = pathJoin('/project', 'src', 'index.ts');
+  const appTsx = pathJoin('/project', 'src', 'app.tsx');
+  const utilsJs = pathJoin('/project', 'src', 'utils.js');
+  const nodeModules = pathJoin('/project', 'node_modules');
+  const dist = pathJoin('/project', 'dist');
+  const readme = pathJoin('/project', 'README.md');
+  const image = pathJoin('/project', 'image.png');
+
+  const files: Record<string, { content: string; isDir: boolean; size: number }> = {
+    [root]: { content: '', isDir: true, size: 0 },
+    [src]: { content: '', isDir: true, size: 0 },
+    [indexTs]: { content: 'export const x = 1;', isDir: false, size: 20 },
+    [appTsx]: { content: '<App />', isDir: false, size: 10 },
+    [utilsJs]: { content: 'module.exports = {};', isDir: false, size: 25 },
+    [nodeModules]: { content: '', isDir: true, size: 0 },
+    [dist]: { content: '', isDir: true, size: 0 },
+    [readme]: { content: '# README', isDir: false, size: 10 },
+    [image]: { content: '', isDir: false, size: 100 },
+  };
+
+  const dirEntries: Record<string, string[]> = {
+    [root]: ['src', 'node_modules', 'dist', 'README.md', 'image.png'],
+    [src]: ['index.ts', 'app.tsx', 'utils.js'],
+  };
+
+  return {
+    readdirSync: vi.fn((dir: string) => {
+      return dirEntries[dir] ?? [];
+    }),
+    statSync: vi.fn((path: string) => {
+      const entry = files[path];
+      if (!entry) throw new Error(`ENOENT: ${path}`);
+      return {
+        isDirectory: () => entry.isDir,
+        isFile: () => !entry.isDir,
+        size: entry.size,
+      };
+    }),
+    readFileSync: vi.fn((path: string) => {
+      const entry = files[path as string];
+      if (!entry || entry.isDir) throw new Error(`ENOENT: ${path}`);
+      return entry.content;
+    }),
+  };
+});
+
+import { walkProject } from '../../src/learn/walker.js';
+
+describe('File System Walker', () => {
+  it('walks project directory tree', () => {
+    const files = walkProject({ rootDir: ROOT });
+    expect(files.length).toBeGreaterThan(0);
+  });
+
+  it('skips node_modules and dist', () => {
+    const files = walkProject({ rootDir: ROOT });
+    const paths = files.map((f) => f.path);
+    expect(paths.every((p) => !p.includes('node_modules'))).toBe(true);
+    expect(paths.every((p) => !p.includes('dist'))).toBe(true);
+  });
+
+  it('returns only analyzable extensions', () => {
+    const files = walkProject({ rootDir: ROOT });
+    const extensions = files.map((f) => f.extension);
+    // Should include ts, tsx, js but not md, png
+    expect(extensions.every((e) => ['ts', 'tsx', 'js'].includes(e))).toBe(true);
+  });
+
+  it('includes file content', () => {
+    const files = walkProject({ rootDir: ROOT });
+    const tsFile = files.find((f) => f.filename === 'index.ts');
+    expect(tsFile).toBeDefined();
+    expect(tsFile!.content).toContain('export const x');
+  });
+
+  it('respects maxFiles limit', () => {
+    const files = walkProject({ rootDir: ROOT, maxFiles: 1 });
+    expect(files.length).toBeLessThanOrEqual(1);
+  });
+
+  it('includes directory and filename metadata', () => {
+    const files = walkProject({ rootDir: ROOT });
+    for (const file of files) {
+      expect(file.filename).toBeTruthy();
+      expect(file.directory).toBeTruthy();
+      expect(file.path).toBeTruthy();
+    }
+  });
+});
