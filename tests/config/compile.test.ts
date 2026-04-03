@@ -21,7 +21,10 @@ function makeConfig(): ResolvedConfig {
     agents: ['claude-code'],
     rules: new Map([
       ['security/branch-protection', { enabled: true, severity: 'block' as const, options: {} }],
-      ['quality/import-aliases', { enabled: true, severity: 'warn' as const, options: { alias: '@/' } }],
+      [
+        'quality/import-aliases',
+        { enabled: true, severity: 'warn' as const, options: { alias: '@/' } },
+      ],
     ]),
   };
 }
@@ -101,13 +104,15 @@ describe('loadCompiledConfig', () => {
   });
 
   it('reads and parses compiled config', async () => {
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-      presets: ['nextjs-15'],
-      agents: ['claude-code'],
-      rules: {
-        'security/branch-protection': { enabled: true, severity: 'block', options: {} },
-      },
-    }));
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        presets: ['nextjs-15'],
+        agents: ['claude-code'],
+        rules: {
+          'security/branch-protection': { enabled: true, severity: 'block', options: {} },
+        },
+      }),
+    );
 
     const config = await loadCompiledConfig('/project');
     expect(config).not.toBeNull();

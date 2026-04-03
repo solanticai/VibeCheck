@@ -24,7 +24,9 @@ describe('settingsMerger', () => {
 
     await mergeSettings('/project', {
       hooks: {
-        PreToolUse: [{ hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] }],
+        PreToolUse: [
+          { hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] },
+        ],
       },
     });
 
@@ -38,16 +40,20 @@ describe('settingsMerger', () => {
 
   it('merges hooks into existing settings.json', async () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-      someOtherSetting: true,
-      hooks: {
-        PreToolUse: [{ hooks: [{ type: 'command', command: 'echo existing' }] }],
-      },
-    }));
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        someOtherSetting: true,
+        hooks: {
+          PreToolUse: [{ hooks: [{ type: 'command', command: 'echo existing' }] }],
+        },
+      }),
+    );
 
     await mergeSettings('/project', {
       hooks: {
-        PreToolUse: [{ hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] }],
+        PreToolUse: [
+          { hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] },
+        ],
       },
     });
 
@@ -60,18 +66,22 @@ describe('settingsMerger', () => {
 
   it('preserves non-VGuard hooks', async () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-      hooks: {
-        PreToolUse: [
-          { hooks: [{ type: 'command', command: 'echo custom-hook' }] },
-          { hooks: [{ type: 'command', command: 'node .vguard/hooks/old-hook.js' }] },
-        ],
-      },
-    }));
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        hooks: {
+          PreToolUse: [
+            { hooks: [{ type: 'command', command: 'echo custom-hook' }] },
+            { hooks: [{ type: 'command', command: 'node .vguard/hooks/old-hook.js' }] },
+          ],
+        },
+      }),
+    );
 
     await mergeSettings('/project', {
       hooks: {
-        PreToolUse: [{ hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] }],
+        PreToolUse: [
+          { hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] },
+        ],
       },
     });
 
@@ -79,29 +89,31 @@ describe('settingsMerger', () => {
     const parsed = JSON.parse(written);
 
     // Custom hook preserved, old VGuard hook removed, new VGuard hook added
-    const hookCommands = parsed.hooks.PreToolUse.flatMap(
-      (g: Record<string, unknown>) => {
-        const h = g.hooks as Array<{ command: string }>;
-        return h.map((x) => x.command);
-      },
-    );
+    const hookCommands = parsed.hooks.PreToolUse.flatMap((g: Record<string, unknown>) => {
+      const h = g.hooks as Array<{ command: string }>;
+      return h.map((x) => x.command);
+    });
     expect(hookCommands).toContain('echo custom-hook');
     expect(hookCommands).toContain('node .vguard/hooks/vguard-pretooluse.js');
   });
 
   it('overwrites stale VGuard hook entries', async () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-      hooks: {
-        PreToolUse: [
-          { hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] },
-        ],
-      },
-    }));
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        hooks: {
+          PreToolUse: [
+            { hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse.js' }] },
+          ],
+        },
+      }),
+    );
 
     await mergeSettings('/project', {
       hooks: {
-        PreToolUse: [{ hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse-v2.js' }] }],
+        PreToolUse: [
+          { hooks: [{ type: 'command', command: 'node .vguard/hooks/vguard-pretooluse-v2.js' }] },
+        ],
       },
     });
 

@@ -13,9 +13,25 @@ const emptyResult: ScanResult = {
 const issueResult: ScanResult = {
   filesScanned: 25,
   issues: [
-    { ruleId: 'security/branch-protection', severity: 'block', filePath: '/src/app.ts', message: 'Writing to main branch' },
-    { ruleId: 'quality/anti-patterns', severity: 'warn', filePath: '/src/utils.ts', message: 'console.log detected', fix: 'Use a logger' },
-    { ruleId: 'quality/import-aliases', severity: 'warn', filePath: '/src/app.ts', message: 'Use @/ alias' },
+    {
+      ruleId: 'security/branch-protection',
+      severity: 'block',
+      filePath: '/src/app.ts',
+      message: 'Writing to main branch',
+    },
+    {
+      ruleId: 'quality/anti-patterns',
+      severity: 'warn',
+      filePath: '/src/utils.ts',
+      message: 'console.log detected',
+      fix: 'Use a logger',
+    },
+    {
+      ruleId: 'quality/import-aliases',
+      severity: 'warn',
+      filePath: '/src/app.ts',
+      message: 'Use @/ alias',
+    },
   ],
   hasBlockingIssues: true,
 };

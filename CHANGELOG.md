@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Prettier formatting applied to 25 files (tests, docs, fixtures)
+
 ## [1.1.0] - 2026-04-03
 
 ### Added

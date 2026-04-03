@@ -35,9 +35,15 @@ vi.mock('../../src/config/compile.js', () => ({
 
 vi.mock('../../src/adapters/claude-code/adapter.js', () => ({
   claudeCodeAdapter: {
-    generate: vi.fn(() => Promise.resolve([
-      { path: '.vguard/hooks/vguard-pretooluse.js', content: '// hook', mergeStrategy: 'overwrite' },
-    ])),
+    generate: vi.fn(() =>
+      Promise.resolve([
+        {
+          path: '.vguard/hooks/vguard-pretooluse.js',
+          content: '// hook',
+          mergeStrategy: 'overwrite',
+        },
+      ]),
+    ),
   },
 }));
 

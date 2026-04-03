@@ -7,15 +7,25 @@ import '../../src/rules/index.js';
 
 import { bundleHookScript } from '../../src/eject/bundler.js';
 
-function makeConfig(rulesOverrides?: Map<string, { enabled: boolean; severity: 'block' | 'warn' | 'info'; options: Record<string, unknown> }>): ResolvedConfig {
+function makeConfig(
+  rulesOverrides?: Map<
+    string,
+    { enabled: boolean; severity: 'block' | 'warn' | 'info'; options: Record<string, unknown> }
+  >,
+): ResolvedConfig {
   return {
     presets: ['nextjs-15'],
     agents: ['claude-code'],
-    rules: rulesOverrides ?? new Map([
-      ['security/branch-protection', { enabled: true, severity: 'block' as const, options: {} }],
-      ['security/destructive-commands', { enabled: true, severity: 'block' as const, options: {} }],
-      ['quality/import-aliases', { enabled: true, severity: 'warn' as const, options: {} }],
-    ]),
+    rules:
+      rulesOverrides ??
+      new Map([
+        ['security/branch-protection', { enabled: true, severity: 'block' as const, options: {} }],
+        [
+          'security/destructive-commands',
+          { enabled: true, severity: 'block' as const, options: {} },
+        ],
+        ['quality/import-aliases', { enabled: true, severity: 'warn' as const, options: {} }],
+      ]),
   };
 }
 
@@ -49,10 +59,12 @@ describe('bundleHookScript', () => {
   });
 
   it('skips disabled rules', () => {
-    const config = makeConfig(new Map([
-      ['security/branch-protection', { enabled: false, severity: 'block' as const, options: {} }],
-      ['quality/import-aliases', { enabled: true, severity: 'warn' as const, options: {} }],
-    ]));
+    const config = makeConfig(
+      new Map([
+        ['security/branch-protection', { enabled: false, severity: 'block' as const, options: {} }],
+        ['quality/import-aliases', { enabled: true, severity: 'warn' as const, options: {} }],
+      ]),
+    );
     const script = bundleHookScript('PreToolUse', config);
     // Disabled rules should not have inline template code
     // But the config JSON still contains them

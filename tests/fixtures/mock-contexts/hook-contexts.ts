@@ -1,4 +1,10 @@
-import type { HookContext, HookEvent, GitContext, ResolvedConfig, ResolvedRuleConfig } from '../../../src/types.js';
+import type {
+  HookContext,
+  HookEvent,
+  GitContext,
+  ResolvedConfig,
+  ResolvedRuleConfig,
+} from '../../../src/types.js';
 
 /** Create a default git context for tests */
 export function createGitContext(overrides: Partial<GitContext> = {}): GitContext {
@@ -14,7 +20,9 @@ export function createGitContext(overrides: Partial<GitContext> = {}): GitContex
 
 /** Create a resolved config for tests */
 export function createResolvedConfig(
-  overrides: Partial<Omit<ResolvedConfig, 'rules'>> & { rules?: Map<string, ResolvedRuleConfig> } = {},
+  overrides: Partial<Omit<ResolvedConfig, 'rules'>> & {
+    rules?: Map<string, ResolvedRuleConfig>;
+  } = {},
 ): ResolvedConfig {
   return {
     presets: [],
@@ -61,7 +69,10 @@ export function createStopContext(overrides: Partial<HookContext> = {}): HookCon
 }
 
 /** Create a hook context for any event */
-export function createHookContext(event: HookEvent, overrides: Partial<HookContext> = {}): HookContext {
+export function createHookContext(
+  event: HookEvent,
+  overrides: Partial<HookContext> = {},
+): HookContext {
   return {
     event,
     tool: 'Edit',

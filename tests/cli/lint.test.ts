@@ -126,7 +126,9 @@ describe('lintCommand', () => {
     vi.mocked(readRawConfig).mockResolvedValue({});
     vi.mocked(scanProject).mockResolvedValue({
       filesScanned: 10,
-      issues: [{ ruleId: 'security/test', severity: 'block', filePath: '/src/app.ts', message: 'Bad' }],
+      issues: [
+        { ruleId: 'security/test', severity: 'block', filePath: '/src/app.ts', message: 'Bad' },
+      ],
       hasBlockingIssues: true,
     });
 

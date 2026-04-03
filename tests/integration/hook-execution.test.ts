@@ -21,7 +21,13 @@ vi.mock('../../src/engine/context.js', () => ({
     tool: 'Edit',
     toolInput: { file_path: '/project/src/index.ts' },
     projectConfig: { presets: [], agents: ['claude-code'], rules: new Map() },
-    gitContext: { branch: 'main', isDirty: false, repoRoot: '/project', unpushedCount: 0, hasRemote: false },
+    gitContext: {
+      branch: 'main',
+      isDirty: false,
+      repoRoot: '/project',
+      unpushedCount: 0,
+      hasRemote: false,
+    },
   })),
 }));
 
@@ -123,17 +129,19 @@ describe('Hook Execution Integration', () => {
       agents: ['claude-code'],
       rules: new Map(),
     });
-    vi.mocked(resolveRules).mockReturnValue([{
-      rule: {
-        id: 'security/test',
-        name: 'Test',
-        description: 'Test',
-        severity: 'block',
-        events: ['PreToolUse'],
-        check: () => ({ status: 'block', ruleId: 'security/test', message: 'blocked' }),
+    vi.mocked(resolveRules).mockReturnValue([
+      {
+        rule: {
+          id: 'security/test',
+          name: 'Test',
+          description: 'Test',
+          severity: 'block',
+          events: ['PreToolUse'],
+          check: () => ({ status: 'block', ruleId: 'security/test', message: 'blocked' }),
+        },
+        config: { enabled: true, severity: 'block', options: {} },
       },
-      config: { enabled: true, severity: 'block', options: {} },
-    }]);
+    ]);
     vi.mocked(runRules).mockResolvedValue({
       blocked: true,
       blockingResult: { status: 'block', ruleId: 'security/test', message: 'blocked' },
@@ -159,17 +167,19 @@ describe('Hook Execution Integration', () => {
       agents: ['claude-code'],
       rules: new Map(),
     });
-    vi.mocked(resolveRules).mockReturnValue([{
-      rule: {
-        id: 'test/rule',
-        name: 'Test',
-        description: 'Test',
-        severity: 'block',
-        events: ['PreToolUse'],
-        check: () => ({ status: 'pass', ruleId: 'test/rule' }),
+    vi.mocked(resolveRules).mockReturnValue([
+      {
+        rule: {
+          id: 'test/rule',
+          name: 'Test',
+          description: 'Test',
+          severity: 'block',
+          events: ['PreToolUse'],
+          check: () => ({ status: 'pass', ruleId: 'test/rule' }),
+        },
+        config: { enabled: true, severity: 'block', options: {} },
       },
-      config: { enabled: true, severity: 'block', options: {} },
-    }]);
+    ]);
     vi.mocked(runRules).mockResolvedValue({
       blocked: false,
       blockingResult: null,

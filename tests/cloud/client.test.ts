@@ -29,9 +29,7 @@ describe('CloudClient', () => {
     });
 
     const client = new CloudClient();
-    const result = await client.ingest('test-api-key', [
-      { ruleId: 'test', status: 'block' },
-    ]);
+    const result = await client.ingest('test-api-key', [{ ruleId: 'test', status: 'block' }]);
 
     expect(fetchSpy).toHaveBeenCalledWith(
       expect.stringContaining('/api/v1/ingest'),

@@ -15,7 +15,7 @@ vi.mock('../../src/engine/registry.js', () => {
 import { resolveRules } from '../../src/engine/resolver.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { _setMockRules } = await import('../../src/engine/registry.js') as any;
+const { _setMockRules } = (await import('../../src/engine/registry.js')) as any;
 
 function makeRule(id: string, overrides: Partial<Rule> = {}): Rule {
   return {
@@ -29,9 +29,7 @@ function makeRule(id: string, overrides: Partial<Rule> = {}): Rule {
   };
 }
 
-function makeConfig(
-  rules: Record<string, Partial<ResolvedRuleConfig>> = {},
-): ResolvedConfig {
+function makeConfig(rules: Record<string, Partial<ResolvedRuleConfig>> = {}): ResolvedConfig {
   const rulesMap = new Map<string, ResolvedRuleConfig>();
   for (const [id, partial] of Object.entries(rules)) {
     rulesMap.set(id, {
@@ -51,10 +49,13 @@ describe('resolveRules', () => {
 
   it('returns enabled rules matching event and tool', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/test', makeRule('security/test', {
-      events: ['PreToolUse'],
-      match: { tools: ['Edit'] },
-    }));
+    rules.set(
+      'security/test',
+      makeRule('security/test', {
+        events: ['PreToolUse'],
+        match: { tools: ['Edit'] },
+      }),
+    );
     _setMockRules(rules);
 
     const config = makeConfig({ 'security/test': { enabled: true } });
@@ -75,9 +76,12 @@ describe('resolveRules', () => {
 
   it('enables security/* rules by default when no config entry', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/auto-enabled', makeRule('security/auto-enabled', {
-      events: ['PreToolUse'],
-    }));
+    rules.set(
+      'security/auto-enabled',
+      makeRule('security/auto-enabled', {
+        events: ['PreToolUse'],
+      }),
+    );
     _setMockRules(rules);
 
     // No config entry for this rule
@@ -89,9 +93,12 @@ describe('resolveRules', () => {
 
   it('disables non-security rules by default when no config entry', () => {
     const rules = new Map<string, Rule>();
-    rules.set('quality/not-auto', makeRule('quality/not-auto', {
-      events: ['PreToolUse'],
-    }));
+    rules.set(
+      'quality/not-auto',
+      makeRule('quality/not-auto', {
+        events: ['PreToolUse'],
+      }),
+    );
     _setMockRules(rules);
 
     const config = makeConfig();
@@ -101,12 +108,18 @@ describe('resolveRules', () => {
 
   it('filters by event type', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/pre-only', makeRule('security/pre-only', {
-      events: ['PreToolUse'],
-    }));
-    rules.set('security/post-only', makeRule('security/post-only', {
-      events: ['PostToolUse'],
-    }));
+    rules.set(
+      'security/pre-only',
+      makeRule('security/pre-only', {
+        events: ['PreToolUse'],
+      }),
+    );
+    rules.set(
+      'security/post-only',
+      makeRule('security/post-only', {
+        events: ['PostToolUse'],
+      }),
+    );
     _setMockRules(rules);
 
     const config = makeConfig({
@@ -125,10 +138,13 @@ describe('resolveRules', () => {
 
   it('filters by tool matcher', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/bash-only', makeRule('security/bash-only', {
-      events: ['PreToolUse'],
-      match: { tools: ['Bash'] },
-    }));
+    rules.set(
+      'security/bash-only',
+      makeRule('security/bash-only', {
+        events: ['PreToolUse'],
+        match: { tools: ['Bash'] },
+      }),
+    );
     _setMockRules(rules);
 
     const config = makeConfig({ 'security/bash-only': { enabled: true } });
@@ -139,10 +155,13 @@ describe('resolveRules', () => {
 
   it('supports pipe-separated tool matchers (Edit|Write)', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/edit-write', makeRule('security/edit-write', {
-      events: ['PreToolUse'],
-      match: { tools: ['Edit|Write'] },
-    }));
+    rules.set(
+      'security/edit-write',
+      makeRule('security/edit-write', {
+        events: ['PreToolUse'],
+        match: { tools: ['Edit|Write'] },
+      }),
+    );
     _setMockRules(rules);
 
     const config = makeConfig({ 'security/edit-write': { enabled: true } });
@@ -182,10 +201,13 @@ describe('resolveRules', () => {
 
   it('uses rule default severity when no config override', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/warn-rule', makeRule('security/warn-rule', {
-      severity: 'warn',
-      events: ['PreToolUse'],
-    }));
+    rules.set(
+      'security/warn-rule',
+      makeRule('security/warn-rule', {
+        severity: 'warn',
+        events: ['PreToolUse'],
+      }),
+    );
     _setMockRules(rules);
 
     // No config entry — default-enables security rules
@@ -197,10 +219,13 @@ describe('resolveRules', () => {
 
   it('applies config severity override', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/overridden', makeRule('security/overridden', {
-      severity: 'block',
-      events: ['PreToolUse'],
-    }));
+    rules.set(
+      'security/overridden',
+      makeRule('security/overridden', {
+        severity: 'block',
+        events: ['PreToolUse'],
+      }),
+    );
     _setMockRules(rules);
 
     const config = makeConfig({
@@ -212,10 +237,13 @@ describe('resolveRules', () => {
 
   it('passes through rules without tool matcher to all tools', () => {
     const rules = new Map<string, Rule>();
-    rules.set('security/any-tool', makeRule('security/any-tool', {
-      events: ['PreToolUse'],
-      // No match.tools — should match all tools
-    }));
+    rules.set(
+      'security/any-tool',
+      makeRule('security/any-tool', {
+        events: ['PreToolUse'],
+        // No match.tools — should match all tools
+      }),
+    );
     _setMockRules(rules);
 
     const config = makeConfig({ 'security/any-tool': { enabled: true } });

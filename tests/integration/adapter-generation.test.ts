@@ -84,7 +84,9 @@ describe('Cursor Adapter Integration', () => {
     const files = await cursorAdapter.generate(config, '/tmp/test-project');
 
     // At least one file should mention the rules
-    const hasRuleMention = files.some((f) => f.content.includes('branch-protection') || f.content.includes('security'));
+    const hasRuleMention = files.some(
+      (f) => f.content.includes('branch-protection') || f.content.includes('security'),
+    );
     expect(hasRuleMention).toBe(true);
   });
 });
@@ -101,7 +103,9 @@ describe('Codex Adapter Integration', () => {
     const config = makeConfig({ agents: ['codex'] });
     const files = await codexAdapter.generate(config, '/tmp/test-project');
 
-    const hasRuleInfo = files.some((f) => f.content.includes('branch-protection') || f.content.includes('VGuard'));
+    const hasRuleInfo = files.some(
+      (f) => f.content.includes('branch-protection') || f.content.includes('VGuard'),
+    );
     expect(hasRuleInfo).toBe(true);
   });
 });

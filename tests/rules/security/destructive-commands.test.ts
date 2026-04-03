@@ -65,9 +65,7 @@ describe('security/destructive-commands', () => {
   });
 
   it('should block git reset --hard', () => {
-    const result = destructiveCommands.check(
-      createContext(cmd('git reset ', '--hard ', 'HEAD~1')),
-    );
+    const result = destructiveCommands.check(createContext(cmd('git reset ', '--hard ', 'HEAD~1')));
     expect(result.status).toBe('block');
   });
 
@@ -79,9 +77,7 @@ describe('security/destructive-commands', () => {
   });
 
   it('should block chmod 777', () => {
-    const result = destructiveCommands.check(
-      createContext(cmd('chmod 777 ', '/etc/passwd')),
-    );
+    const result = destructiveCommands.check(createContext(cmd('chmod 777 ', '/etc/passwd')));
     expect(result.status).toBe('block');
   });
 
@@ -91,9 +87,7 @@ describe('security/destructive-commands', () => {
   });
 
   it('should include fix suggestion', () => {
-    const result = destructiveCommands.check(
-      createContext(cmd('rm ', '-rf /tmp/build')),
-    );
+    const result = destructiveCommands.check(createContext(cmd('rm ', '-rf /tmp/build')));
     // rm -rf /tmp/build should match rm -rf / pattern since /tmp starts with /
     if (result.status === 'block') {
       expect(result.fix).toBeDefined();

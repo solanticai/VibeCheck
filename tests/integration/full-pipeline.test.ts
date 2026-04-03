@@ -4,7 +4,11 @@ import { clearRegistry, registerRules } from '../../src/engine/registry.js';
 import { resolveRules } from '../../src/engine/resolver.js';
 import { runRules } from '../../src/engine/runner.js';
 import { formatPreToolUseOutput } from '../../src/engine/output.js';
-import { createPreToolUseContext, createGitContext, createResolvedConfig } from '../fixtures/mock-contexts/hook-contexts.js';
+import {
+  createPreToolUseContext,
+  createGitContext,
+  createResolvedConfig,
+} from '../fixtures/mock-contexts/hook-contexts.js';
 
 // Minimal real rules for integration testing
 const branchProtectionRule: Rule = {
@@ -101,9 +105,7 @@ describe('Full Pipeline Integration', () => {
 
   it('warns on console.log with anti-patterns rule', async () => {
     const config = createResolvedConfig({
-      rules: new Map([
-        ['quality/anti-patterns', { enabled: true, severity: 'warn', options: {} }],
-      ]),
+      rules: new Map([['quality/anti-patterns', { enabled: true, severity: 'warn', options: {} }]]),
     });
 
     const resolved = resolveRules('PreToolUse', 'Write', config);

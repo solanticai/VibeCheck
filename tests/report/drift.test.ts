@@ -42,13 +42,21 @@ describe('Drift Detector', () => {
 
   it('detects dropped conventions', () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(readFileSync).mockReturnValue(JSON.stringify({
-      promotablePatterns: [
-        { type: 'import', description: 'Uses @/ path alias', confidence: 0.9, totalFiles: 100, occurrences: 90 },
-      ],
-      allPatterns: [],
-      summary: {},
-    }));
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        promotablePatterns: [
+          {
+            type: 'import',
+            description: 'Uses @/ path alias',
+            confidence: 0.9,
+            totalFiles: 100,
+            occurrences: 90,
+          },
+        ],
+        allPatterns: [],
+        summary: {},
+      }),
+    );
     vi.mocked(walkProject).mockReturnValue([]);
     vi.mocked(aggregateConventions).mockReturnValue({
       allPatterns: [], // Convention no longer found
@@ -62,39 +70,69 @@ describe('Drift Detector', () => {
 
   it('detects confidence drops', () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(readFileSync).mockReturnValue(JSON.stringify({
-      promotablePatterns: [
-        { type: 'import', description: 'Uses @/ path alias', confidence: 0.9, totalFiles: 100, occurrences: 90 },
-      ],
-      allPatterns: [],
-      summary: {},
-    }));
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        promotablePatterns: [
+          {
+            type: 'import',
+            description: 'Uses @/ path alias',
+            confidence: 0.9,
+            totalFiles: 100,
+            occurrences: 90,
+          },
+        ],
+        allPatterns: [],
+        summary: {},
+      }),
+    );
     vi.mocked(walkProject).mockReturnValue([]);
     vi.mocked(aggregateConventions).mockReturnValue({
       allPatterns: [
-        { type: 'import', description: 'Uses @/ path alias', confidence: 0.5, totalFiles: 100, occurrences: 50 },
+        {
+          type: 'import',
+          description: 'Uses @/ path alias',
+          confidence: 0.5,
+          totalFiles: 100,
+          occurrences: 50,
+        },
       ],
       promotablePatterns: [],
       summary: {},
     } as ReturnType<typeof aggregateConventions>);
 
     const issues = detectDrift('/project');
-    expect(issues.some((i) => i.severity === 'high' && i.description.includes('Confidence dropped'))).toBe(true);
+    expect(
+      issues.some((i) => i.severity === 'high' && i.description.includes('Confidence dropped')),
+    ).toBe(true);
   });
 
   it('returns empty results when conventions match', () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(readFileSync).mockReturnValue(JSON.stringify({
-      promotablePatterns: [
-        { type: 'import', description: 'Uses @/ path alias', confidence: 0.9, totalFiles: 100, occurrences: 90 },
-      ],
-      allPatterns: [],
-      summary: {},
-    }));
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        promotablePatterns: [
+          {
+            type: 'import',
+            description: 'Uses @/ path alias',
+            confidence: 0.9,
+            totalFiles: 100,
+            occurrences: 90,
+          },
+        ],
+        allPatterns: [],
+        summary: {},
+      }),
+    );
     vi.mocked(walkProject).mockReturnValue([]);
     vi.mocked(aggregateConventions).mockReturnValue({
       allPatterns: [
-        { type: 'import', description: 'Uses @/ path alias', confidence: 0.88, totalFiles: 100, occurrences: 88 },
+        {
+          type: 'import',
+          description: 'Uses @/ path alias',
+          confidence: 0.88,
+          totalFiles: 100,
+          occurrences: 88,
+        },
       ],
       promotablePatterns: [],
       summary: {},

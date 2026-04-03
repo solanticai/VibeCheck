@@ -29,7 +29,19 @@ describe('commit-conventions rule', () => {
   });
 
   it('passes all standard types', () => {
-    const types = ['feat', 'fix', 'docs', 'style', 'refactor', 'perf', 'test', 'build', 'ci', 'chore', 'revert'];
+    const types = [
+      'feat',
+      'fix',
+      'docs',
+      'style',
+      'refactor',
+      'perf',
+      'test',
+      'build',
+      'ci',
+      'chore',
+      'revert',
+    ];
     for (const type of types) {
       vi.mocked(gitCommand).mockReturnValue(`${type}: some description`);
       const result = commitConventions.check(createStopContext());

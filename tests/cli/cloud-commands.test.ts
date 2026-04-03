@@ -6,7 +6,11 @@ vi.mock('../../src/cloud/credentials.js', () => ({
   clearCredentials: vi.fn(),
 }));
 
-import { writeCredentials, readCredentials, clearCredentials } from '../../src/cloud/credentials.js';
+import {
+  writeCredentials,
+  readCredentials,
+  clearCredentials,
+} from '../../src/cloud/credentials.js';
 
 // Import the commands (we'll need to check if they exist and test them)
 // These tests verify the credential management that cloud commands rely on

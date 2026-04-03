@@ -21,10 +21,31 @@ vi.mock('../../src/presets/index.js', () => ({}));
 vi.mock('../../src/rules/index.js', () => ({}));
 
 vi.mock('../../src/config/presets.js', () => ({
-  getAllPresets: vi.fn(() => new Map([
-    ['nextjs-15', { id: 'nextjs-15', name: 'Next.js 15', description: 'Next.js 15 App Router', version: '1.0.0', rules: {} }],
-    ['typescript-strict', { id: 'typescript-strict', name: 'TypeScript Strict', description: 'Strict TS', version: '1.0.0', rules: {} }],
-  ])),
+  getAllPresets: vi.fn(
+    () =>
+      new Map([
+        [
+          'nextjs-15',
+          {
+            id: 'nextjs-15',
+            name: 'Next.js 15',
+            description: 'Next.js 15 App Router',
+            version: '1.0.0',
+            rules: {},
+          },
+        ],
+        [
+          'typescript-strict',
+          {
+            id: 'typescript-strict',
+            name: 'TypeScript Strict',
+            description: 'Strict TS',
+            version: '1.0.0',
+            rules: {},
+          },
+        ],
+      ]),
+  ),
 }));
 
 vi.mock('../../src/config/loader.js', () => ({
@@ -43,10 +64,16 @@ vi.mock('../../src/config/compile.js', () => ({
 
 vi.mock('../../src/adapters/claude-code/adapter.js', () => ({
   claudeCodeAdapter: {
-    generate: vi.fn(() => Promise.resolve([
-      { path: '.vguard/hooks/vguard-pretooluse.js', content: '// hook', mergeStrategy: 'overwrite' },
-      { path: '.claude/settings.json', content: '{"hooks":{}}', mergeStrategy: 'merge' },
-    ])),
+    generate: vi.fn(() =>
+      Promise.resolve([
+        {
+          path: '.vguard/hooks/vguard-pretooluse.js',
+          content: '// hook',
+          mergeStrategy: 'overwrite',
+        },
+        { path: '.claude/settings.json', content: '{"hooks":{}}', mergeStrategy: 'merge' },
+      ]),
+    ),
   },
 }));
 

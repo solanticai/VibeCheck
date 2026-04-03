@@ -22,17 +22,17 @@ Husky installs automatically via the `prepare` script.
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run build` | Bundle with tsup + generate declarations + inject shebang |
-| `npm run dev` | Watch mode (tsup --watch) |
-| `npm test` | Run tests once (vitest) |
-| `npm run test:watch` | Watch mode tests |
-| `npm run test:coverage` | Tests with V8 coverage |
-| `npm run lint` | ESLint |
-| `npm run type-check` | TypeScript `--noEmit` check |
-| `npm run format` | Prettier write |
-| `npm run format:check` | Prettier check |
+| Command                 | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| `npm run build`         | Bundle with tsup + generate declarations + inject shebang |
+| `npm run dev`           | Watch mode (tsup --watch)                                 |
+| `npm test`              | Run tests once (vitest)                                   |
+| `npm run test:watch`    | Watch mode tests                                          |
+| `npm run test:coverage` | Tests with V8 coverage                                    |
+| `npm run lint`          | ESLint                                                    |
+| `npm run type-check`    | TypeScript `--noEmit` check                               |
+| `npm run format`        | Prettier write                                            |
+| `npm run format:check`  | Prettier check                                            |
 
 ## Project Structure
 
@@ -125,12 +125,12 @@ tests/
 
 ### Coverage Thresholds
 
-| Metric | Target |
-| --- | ---: |
-| Lines | 80% |
-| Branches | 70% |
-| Functions | 75% |
-| Statements | 80% |
+| Metric     | Target |
+| ---------- | -----: |
+| Lines      |    80% |
+| Branches   |    70% |
+| Functions  |    75% |
+| Statements |    80% |
 
 ### Writing Tests
 
@@ -145,12 +145,12 @@ tests/
 
 ## Code Style
 
-| Tool | Config | Purpose |
-| --- | --- | --- |
-| ESLint 10 | `eslint.config.js` | Linting (typescript-eslint, no `any`, unused vars) |
-| Prettier 3 | `.prettierrc` | Formatting (single quotes, trailing commas, 100 char width) |
+| Tool       | Config                  | Purpose                                                                             |
+| ---------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| ESLint 10  | `eslint.config.js`      | Linting (typescript-eslint, no `any`, unused vars)                                  |
+| Prettier 3 | `.prettierrc`           | Formatting (single quotes, trailing commas, 100 char width)                         |
 | commitlint | `commitlint.config.mjs` | Conventional commits (feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert) |
-| Husky 9 | `.husky/` | Pre-commit (lint + type-check), commit-msg (commitlint) |
+| Husky 9    | `.husky/`               | Pre-commit (lint + type-check), commit-msg (commitlint)                             |
 
 ### TypeScript
 

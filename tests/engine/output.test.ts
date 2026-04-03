@@ -24,7 +24,9 @@ function makeBlockResult(ruleId = 'security/test', message = 'Blocked', fix?: st
   };
 }
 
-function makeWarnResult(warnings: Array<{ ruleId: string; message: string; fix?: string }>): RunResult {
+function makeWarnResult(
+  warnings: Array<{ ruleId: string; message: string; fix?: string }>,
+): RunResult {
   return {
     blocked: false,
     blockingResult: null,
@@ -50,9 +52,7 @@ describe('formatPreToolUseOutput', () => {
   });
 
   it('returns exit code 0 with JSON stdout for warnings', () => {
-    const result = makeWarnResult([
-      { ruleId: 'quality/test', message: 'Consider using aliases' },
-    ]);
+    const result = makeWarnResult([{ ruleId: 'quality/test', message: 'Consider using aliases' }]);
     const output = formatPreToolUseOutput(result);
     expect(output.exitCode).toBe(0);
     expect(output.stderr).toBe('');
@@ -90,9 +90,7 @@ describe('formatPostToolUseOutput', () => {
       blocked: false,
       blockingResult: null,
       warnings: [],
-      results: [
-        { status: 'warn', ruleId: 'quality/test', message: 'Issue found' },
-      ],
+      results: [{ status: 'warn', ruleId: 'quality/test', message: 'Issue found' }],
     };
     const output = formatPostToolUseOutput(result);
     const parsed = JSON.parse(output.stdout);

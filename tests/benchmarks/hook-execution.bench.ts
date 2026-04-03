@@ -47,7 +47,10 @@ function makeContext(): HookContext {
 }
 
 function makeConfig(ruleCount: number): ResolvedConfig {
-  const rules = new Map<string, { enabled: boolean; severity: 'block' | 'warn' | 'info'; options: Record<string, unknown> }>();
+  const rules = new Map<
+    string,
+    { enabled: boolean; severity: 'block' | 'warn' | 'info'; options: Record<string, unknown> }
+  >();
   for (let i = 0; i < ruleCount; i++) {
     rules.set(`security/rule-${i}`, { enabled: true, severity: 'block', options: {} });
   }
@@ -55,38 +58,54 @@ function makeConfig(ruleCount: number): ResolvedConfig {
 }
 
 describe('Hook Execution Performance', () => {
-  bench('PreToolUse hook with 5 rules', async () => {
-    clearRegistry();
-    const rules = Array.from({ length: 5 }, (_, i) => makeTestRule(`security/rule-${i}`));
-    registerRules(rules);
+  bench(
+    'PreToolUse hook with 5 rules',
+    async () => {
+      clearRegistry();
+      const rules = Array.from({ length: 5 }, (_, i) => makeTestRule(`security/rule-${i}`));
+      registerRules(rules);
 
-    const config = makeConfig(5);
-    const resolved = resolveRules('PreToolUse', 'Edit', config);
-    await runRules(resolved, makeContext());
-  }, { time: 2000 });
+      const config = makeConfig(5);
+      const resolved = resolveRules('PreToolUse', 'Edit', config);
+      await runRules(resolved, makeContext());
+    },
+    { time: 2000 },
+  );
 
-  bench('PreToolUse hook with 15 rules', async () => {
-    clearRegistry();
-    const rules = Array.from({ length: 15 }, (_, i) => makeTestRule(`security/rule-${i}`));
-    registerRules(rules);
+  bench(
+    'PreToolUse hook with 15 rules',
+    async () => {
+      clearRegistry();
+      const rules = Array.from({ length: 15 }, (_, i) => makeTestRule(`security/rule-${i}`));
+      registerRules(rules);
 
-    const config = makeConfig(15);
-    const resolved = resolveRules('PreToolUse', 'Edit', config);
-    await runRules(resolved, makeContext());
-  }, { time: 2000 });
+      const config = makeConfig(15);
+      const resolved = resolveRules('PreToolUse', 'Edit', config);
+      await runRules(resolved, makeContext());
+    },
+    { time: 2000 },
+  );
 
-  bench('Rule resolution for 25 rules', () => {
-    clearRegistry();
-    const rules = Array.from({ length: 25 }, (_, i) => makeTestRule(`security/rule-${i}`));
-    registerRules(rules);
+  bench(
+    'Rule resolution for 25 rules',
+    () => {
+      clearRegistry();
+      const rules = Array.from({ length: 25 }, (_, i) => makeTestRule(`security/rule-${i}`));
+      registerRules(rules);
 
-    const config = makeConfig(25);
-    resolveRules('PreToolUse', 'Edit', config);
-  }, { time: 2000 });
+      const config = makeConfig(25);
+      resolveRules('PreToolUse', 'Edit', config);
+    },
+    { time: 2000 },
+  );
 
-  bench('Config serialization roundtrip', () => {
-    const config = makeConfig(20);
-    const serialized = serializeConfig(config);
-    deserializeConfig(serialized);
-  }, { time: 2000 });
+  bench(
+    'Config serialization roundtrip',
+    () => {
+      const config = makeConfig(20);
+      const serialized = serializeConfig(config);
+      deserializeConfig(serialized);
+    },
+    { time: 2000 },
+  );
 });

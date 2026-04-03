@@ -40,7 +40,9 @@ describe('Rule Registry', () => {
 
   it('throws on duplicate rule ID', () => {
     registerRule(makeRule('test/dup'));
-    expect(() => registerRule(makeRule('test/dup'))).toThrow('Rule "test/dup" is already registered');
+    expect(() => registerRule(makeRule('test/dup'))).toThrow(
+      'Rule "test/dup" is already registered',
+    );
   });
 
   it('returns undefined for unknown rule ID', () => {
