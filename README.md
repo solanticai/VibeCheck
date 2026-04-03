@@ -1,21 +1,22 @@
+<div align="center">
+
 # VGuard
 
-**AI coding guardrails that actually enforce.** Runtime quality controls for Claude Code, Cursor, Codex, and more.
+**AI coding guardrails that actually enforce.**
+
+[![npm version](https://img.shields.io/npm/v/@solanticai/vguard?color=2563EB&label=npm)](https://www.npmjs.com/package/@solanticai/vguard)
+[![npm downloads](https://img.shields.io/npm/dm/@solanticai/vguard?color=2563EB)](https://www.npmjs.com/package/@solanticai/vguard)
+[![license](https://img.shields.io/github/license/solanticai/vibe-guard?color=2563EB)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/solanticai/vibe-guard/ci.yml?label=CI&color=16A34A)](https://github.com/solanticai/vibe-guard/actions)
+[![node](https://img.shields.io/badge/node-%3E%3D20-16A34A)](package.json)
+
+</div>
 
 ---
 
-## The Problem
+AI coding tools write code fast, but they also introduce security vulnerabilities, break project conventions, and push to protected branches. VGuard sits between the AI tool and your codebase, checking every proposed change before it happens. Bad changes get blocked with a clear explanation and a suggested fix. Good changes pass through without friction.
 
-AI coding tools are everywhere. **84% of developers** use them daily. But only **29% trust the output**, and **45% of AI-generated code contains security vulnerabilities.**
-
-The current solutions? Monolithic prompt libraries with 136+ skills you'll never use. Methodology-locked frameworks that slow you down 3.7x. Or writing your own hooks from scratch every time.
-
-**VGuard is different.** It's a composable, agent-agnostic guardrails framework that:
-
-- **Blocks bad code at runtime** -- not just suggestions, actual enforcement
-- **Works across AI tools** -- Claude Code, Cursor, Codex, OpenCode
-- **Starts small, scales up** -- add one rule or a full preset
-- **Only flags new problems** -- pre-existing issues aren't your fault today
+<img src="docs/assets/architecture-flow.svg" alt="VGuard architecture flow: Developer Prompt → AI Agent → VGuard → Pass or Block" width="100%" />
 
 ## Quick Start
 
@@ -24,148 +25,79 @@ npm install -D @solanticai/vguard
 npx vguard init
 ```
 
-Answer 4 questions and you have working guardrails. The init wizard detects your framework, asks which AI tools you use, and generates everything.
+Answer four questions and you have working guardrails. The init wizard detects your framework, asks which AI tools you use, and generates everything. See the full [Getting Started](https://vguard.dev/docs/getting-started) guide.
 
-## What It Does
+## Features
 
-### Runtime Enforcement (Claude Code)
+**Runtime Enforcement** — Claude Code hooks run before every tool call. VGuard inspects the proposed change, evaluates it against your rules, and blocks anything that violates them. The AI agent sees exactly what went wrong and how to fix it. [Adapter docs →](https://vguard.dev/docs/adapters/claude-code)
 
-VGuard generates hook scripts that run **before** your AI agent makes changes. Bad code gets blocked with a clear explanation and suggested fix.
+**Advisory Guidance** — Cursor, Codex, and OpenCode don't support runtime hooks, so VGuard generates configuration files that teach the AI your project's rules before it starts writing. [Agent setup →](https://vguard.dev/docs/agent-setup)
 
-```
-BLOCKED by VGuard [security/branch-protection]
+**Smart Detection** — Edit rules only flag problems that are newly introduced. Pre-existing issues in the file are left alone so you can adopt guardrails incrementally without fixing every legacy violation first. [Rules overview →](https://vguard.dev/docs/rules/overview)
 
-Cannot write to files on branch 'main'.
-Create a feature branch first: git checkout -b feat/your-change
-```
+## Rule Layers
 
-### Advisory Guidance (Cursor, Codex, OpenCode)
+<img src="docs/assets/rule-layers.svg" alt="Five rule layers: Security, Quality, Workflow, Custom, Analytics" width="100%" />
 
-For agents without hook support, VGuard generates configuration files that guide AI behavior.
+### Rules — 25 built-in
 
-| Agent           | Enforcement          | Mechanism                    |
-| --------------- | -------------------- | ---------------------------- |
-| **Claude Code** | **Runtime (blocks)** | Hook scripts with exit codes |
-| Cursor          | Advisory             | `.cursorrules`               |
-| Codex           | Advisory             | `AGENTS.md`                  |
-| OpenCode        | Advisory             | Config file                  |
+| Category     | Count | Examples                                                              | Docs                                                     |
+| ------------ | ----: | --------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Security** |     7 | branch-protection, secret-detection, prompt-injection, rls-required   | [security rules](https://vguard.dev/docs/rules/security) |
+| **Quality**  |    11 | import-aliases, naming-conventions, hallucination-guard, dead-exports | [quality rules](https://vguard.dev/docs/rules/quality)   |
+| **Workflow** |     7 | commit-conventions, pr-reminder, migration-safety, changelog-reminder | [workflow rules](https://vguard.dev/docs/rules/workflow) |
 
-## Built-in Rules
+### Presets — 14 ecosystem presets
 
-### Security (enabled by default)
+nextjs-15 · react-19 · typescript-strict · supabase · tailwind · django · fastapi · laravel · wordpress · react-native · astro · sveltekit · python-strict · go
 
-| Rule                            | What it prevents                                         |
-| ------------------------------- | -------------------------------------------------------- |
-| `security/branch-protection`    | Writing to `main`, `master`, or other protected branches |
-| `security/destructive-commands` | `rm -rf ~/`, `git push --force`, `git reset --hard`      |
-| `security/secret-detection`     | API keys, tokens, and passwords in committed code        |
+[Browse all presets →](https://vguard.dev/docs/presets)
 
-### Quality (via presets)
+### Agent Support
 
-| Rule                             | What it enforces                           |
-| -------------------------------- | ------------------------------------------ |
-| `quality/import-aliases`         | Use `@/` instead of deep relative imports  |
-| `quality/no-use-client-in-pages` | No `"use client"` in Next.js pages/layouts |
+<img src="docs/assets/agent-support.svg" alt="Agent support: Claude Code (runtime), Cursor/Codex/OpenCode (advisory), GitHub Actions (CI)" width="100%" />
 
-## Presets
+## Documentation
 
-Presets bundle ecosystem-specific rules:
+| Section                                                     | Description                                   |
+| ----------------------------------------------------------- | --------------------------------------------- |
+| [Getting Started](https://vguard.dev/docs/getting-started)  | Install, init wizard, first run               |
+| [Configuration](https://vguard.dev/docs/configuration)      | `vguard.config.ts` reference                  |
+| [CLI](https://vguard.dev/docs/cli)                          | `init`, `add`, `remove`, `generate`, `doctor` |
+| [Rules](https://vguard.dev/docs/rules/overview)             | All built-in rules with examples              |
+| [Presets](https://vguard.dev/docs/presets)                  | Framework-specific rule bundles               |
+| [Agent Setup](https://vguard.dev/docs/agent-setup)          | Per-agent adapter configuration               |
+| [Custom Rules](https://vguard.dev/docs/guides/custom-rules) | Write your own guardrails                     |
+| [Troubleshooting](https://vguard.dev/docs/troubleshooting)  | Common issues and fixes                       |
 
-```typescript
-import { defineConfig } from '@solanticai/vguard';
+## VGuard Cloud
 
-export default defineConfig({
-  presets: ['nextjs-15', 'typescript-strict'],
-  agents: ['claude-code'],
-});
-```
+[VGuard Cloud](https://vguard.dev) gives your team a dashboard for AI coding activity — which rules fire most, who's triggering blocks, and how conventions drift over time. Set up drift alerts, connect webhooks, and export analytics. Free tier available for small teams.
 
-| Preset              | What it enforces                                        |
-| ------------------- | ------------------------------------------------------- |
-| `nextjs-15`         | App Router conventions, Server Components, path aliases |
-| `typescript-strict` | Import aliases, no deep relative imports                |
+[Cloud docs →](https://vguard.dev/docs/cloud-integration) · [Sign up →](https://vguard.dev)
 
-## Configuration
+## Sponsors
 
-```typescript
-import { defineConfig } from '@solanticai/vguard';
+This project is maintained by [Solantic AI](https://github.com/solanticai) and funded by our sponsors.
 
-export default defineConfig({
-  presets: ['nextjs-15'],
-  agents: ['claude-code'],
-  rules: {
-    'security/branch-protection': {
-      protectedBranches: ['main', 'master', 'staging'],
-    },
-    'quality/import-aliases': false, // Disable a rule
-  },
-});
-```
+[Become a sponsor →](https://github.com/sponsors/solanticai)
 
-## CLI
+### Featured Sponsors
 
-| Command                        | Description                     |
-| ------------------------------ | ------------------------------- |
-| `vguard init`                  | Interactive setup wizard        |
-| `vguard add <rule\|preset>`    | Add a rule or preset            |
-| `vguard remove <rule\|preset>` | Remove a rule or preset         |
-| `vguard generate`              | Regenerate hook scripts         |
-| `vguard doctor`                | Validate config and hook health |
+<!-- readme-sponsors-featured --><!-- readme-sponsors-featured -->
 
-## How It Works
+### All Sponsors
 
-```
-Developer prompt
-      |
-      v
-  AI Agent (Claude Code / Cursor / Codex)
-      |
-      v
-  VGuard hooks  <--  vguard.config.ts
-      |                     |
-      +-- PASS --------->  Change applied
-      |
-      +-- BLOCK -------->  Change rejected
-                            with explanation + fix
-```
+<!-- readme-sponsors-all --><!-- readme-sponsors-all -->
 
-For Claude Code, hooks execute as subprocesses before each tool use. They read the proposed change from stdin, evaluate it against your rules, and either allow (exit 0) or block (exit 2) the operation.
+## Community
 
-### The Edit Rule Factory
-
-VGuard's key innovation: **Edit rules only flag newly introduced problems.** If a pattern existed before the edit, it's pre-existing and won't be flagged. This allows incremental improvement without forcing you to fix every legacy issue first.
-
-## Creating Custom Rules
-
-```typescript
-import type { Rule } from '@solanticai/vguard';
-
-export const noConsoleLog: Rule = {
-  id: 'custom/no-console-log',
-  name: 'No console.log',
-  description: 'Prevents console.log in production code',
-  severity: 'warn',
-  events: ['PreToolUse'],
-  match: { tools: ['Write', 'Edit'] },
-  check: (context) => {
-    const content = String(context.toolInput.content || '');
-    if (/console\.log\(/.test(content)) {
-      return {
-        status: 'warn',
-        ruleId: 'custom/no-console-log',
-        message: 'console.log detected. Use a proper logger instead.',
-        fix: "Replace with your project's logger.",
-      };
-    }
-    return { status: 'pass', ruleId: 'custom/no-console-log' };
-  },
-};
-```
-
-## Contributing
-
-We welcome contributions! Adding a rule takes ~30 minutes. See [CONTRIBUTING.md](CONTRIBUTING.md).
+- [GitHub Discussions](https://github.com/solanticai/vibe-guard/discussions)
+- [Contributing](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 
-[Apache 2.0](LICENSE)
+[Apache 2.0](LICENSE) — Solantic AI

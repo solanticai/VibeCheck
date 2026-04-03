@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" role="img" aria-labelledby="agents-title agents-desc">
+  <title id="agents-title">VGuard Agent Support</title>
+  <desc id="agents-desc">Agent support matrix: Claude Code has runtime enforcement, Cursor/Codex/OpenCode have advisory guidance, GitHub Actions has CI enforcement</desc>
+  <style>
+    text { font-family: system-ui, -apple-system, sans-serif; }
+    .agent-name { font-size: 14px; font-weight: 600; }
+    .agent-type { font-size: 11px; font-weight: 500; }
+    .agent-detail { font-size: 10px; }
+    .card { rx: 10; ry: 10; stroke-width: 1.5; }
+    .name-dark { fill: #1F2937; }
+    .detail-dark { fill: #6B7280; }
+    @media (prefers-color-scheme: dark) {
+      .name-dark { fill: #F3F4F6; }
+      .detail-dark { fill: #9CA3AF; }
+    }
+  </style>
+
+  <!-- Claude Code — Runtime -->
+  <rect x="10" y="30" width="170" height="140" class="card" fill="#F0FDF4" stroke="#16A34A" />
+  <rect x="10" y="30" width="170" height="32" rx="10" ry="10" fill="#16A34A" />
+  <text x="95" y="51" text-anchor="middle" style="fill:#fff;font-size:11px;font-weight:600;">RUNTIME</text>
+  <text x="95" y="88" text-anchor="middle" class="agent-name name-dark">Claude Code</text>
+  <text x="95" y="108" text-anchor="middle" class="agent-detail detail-dark">Hook scripts</text>
+  <text x="95" y="124" text-anchor="middle" class="agent-detail detail-dark">Blocks bad changes</text>
+  <text x="95" y="140" text-anchor="middle" class="agent-detail detail-dark">Exit-code enforcement</text>
+
+  <!-- Cursor — Advisory -->
+  <rect x="195" y="30" width="130" height="140" class="card" fill="#FFFBEB" stroke="#D97706" />
+  <rect x="195" y="30" width="130" height="32" rx="10" ry="10" fill="#D97706" />
+  <text x="260" y="51" text-anchor="middle" style="fill:#fff;font-size:11px;font-weight:600;">ADVISORY</text>
+  <text x="260" y="88" text-anchor="middle" class="agent-name name-dark">Cursor</text>
+  <text x="260" y="108" text-anchor="middle" class="agent-detail detail-dark">.cursorrules</text>
+  <text x="260" y="124" text-anchor="middle" class="agent-detail detail-dark">.cursor/rules/</text>
+
+  <!-- Codex — Advisory -->
+  <rect x="340" y="30" width="130" height="140" class="card" fill="#FFFBEB" stroke="#D97706" />
+  <rect x="340" y="30" width="130" height="32" rx="10" ry="10" fill="#D97706" />
+  <text x="405" y="51" text-anchor="middle" style="fill:#fff;font-size:11px;font-weight:600;">ADVISORY</text>
+  <text x="405" y="88" text-anchor="middle" class="agent-name name-dark">Codex</text>
+  <text x="405" y="108" text-anchor="middle" class="agent-detail detail-dark">AGENTS.md</text>
+  <text x="405" y="124" text-anchor="middle" class="agent-detail detail-dark">Config file</text>
+
+  <!-- OpenCode — Advisory -->
+  <rect x="485" y="30" width="130" height="140" class="card" fill="#FFFBEB" stroke="#D97706" />
+  <rect x="485" y="30" width="130" height="32" rx="10" ry="10" fill="#D97706" />
+  <text x="550" y="51" text-anchor="middle" style="fill:#fff;font-size:11px;font-weight:600;">ADVISORY</text>
+  <text x="550" y="88" text-anchor="middle" class="agent-name name-dark">OpenCode</text>
+  <text x="550" y="108" text-anchor="middle" class="agent-detail detail-dark">Config file</text>
+  <text x="550" y="124" text-anchor="middle" class="agent-detail detail-dark">Rule guidance</text>
+
+  <!-- GitHub Actions — CI -->
+  <rect x="630" y="30" width="80" height="140" class="card" fill="#EFF6FF" stroke="#2563EB" />
+  <rect x="630" y="30" width="80" height="32" rx="10" ry="10" fill="#2563EB" />
+  <text x="670" y="51" text-anchor="middle" style="fill:#fff;font-size:11px;font-weight:600;">CI</text>
+  <text x="670" y="85" text-anchor="middle" class="agent-name name-dark" style="font-size:12px;">GitHub</text>
+  <text x="670" y="102" text-anchor="middle" class="agent-name name-dark" style="font-size:12px;">Actions</text>
+  <text x="670" y="122" text-anchor="middle" class="agent-detail detail-dark">PR checks</text>
+  <text x="670" y="138" text-anchor="middle" class="agent-detail detail-dark">vguard lint</text>
+</svg>

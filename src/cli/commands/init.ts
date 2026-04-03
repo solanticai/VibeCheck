@@ -1,8 +1,8 @@
 import inquirer from 'inquirer';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
-import type { VGuardConfig, AgentType } from '../../types.js';
+import { join, dirname } from 'node:path';
+import type { VGuardConfig, AgentType, GeneratedFile } from '../../types.js';
 
 // Import to register presets and rules
 import '../../presets/index.js';
@@ -12,6 +12,10 @@ import { getAllPresets } from '../../config/presets.js';
 import { resolveConfig } from '../../config/loader.js';
 import { compileConfig } from '../../config/compile.js';
 import { claudeCodeAdapter } from '../../adapters/claude-code/adapter.js';
+import { cursorAdapter } from '../../adapters/cursor/adapter.js';
+import { codexAdapter } from '../../adapters/codex/adapter.js';
+import { openCodeAdapter } from '../../adapters/opencode/adapter.js';
+import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
 
 export async function initCommand(): Promise<void> {
@@ -66,6 +70,22 @@ export async function initCommand(): Promise<void> {
     },
   ]);
 
+  const selectedAgents = answers.agents as AgentType[];
+
+  // Ask about updating AI agent configuration folders
+  const folderChoices = buildFolderChoices(selectedAgents);
+
+  const folderAnswers = await inquirer.prompt([
+    {
+      type: 'checkbox',
+      name: 'folders',
+      message: 'Update AI agent configuration folders? (Recommended)',
+      choices: folderChoices,
+    },
+  ]);
+
+  const selectedFolders = new Set(folderAnswers.folders as string[]);
+
   // Build config
   const protectedBranches = (answers.protectedBranches as string)
     .split(',')
@@ -74,7 +94,7 @@ export async function initCommand(): Promise<void> {
 
   const config: VGuardConfig = {
     presets: answers.presets as string[],
-    agents: answers.agents as AgentType[],
+    agents: selectedAgents,
     rules: {
       'security/branch-protection': {
         protectedBranches,
@@ -99,30 +119,100 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
   await compileConfig(resolvedConfig, projectRoot);
   console.log('  Created .vguard/cache/resolved-config.json');
 
-  // Generate adapter output
-  if ((answers.agents as string[]).includes('claude-code')) {
-    const files = await claudeCodeAdapter.generate(resolvedConfig, projectRoot);
+  // File writer with merge strategy handling
+  const writeGeneratedFile = async (file: GeneratedFile) => {
+    const fullPath = join(projectRoot, file.path);
 
-    for (const file of files) {
-      const fullPath = join(projectRoot, file.path);
-
-      if (file.mergeStrategy === 'merge' && file.path.endsWith('settings.json')) {
-        const generated = JSON.parse(file.content);
-        await mergeSettings(projectRoot, generated);
-        console.log(`  Merged ${file.path}`);
-      } else {
-        const dir = join(projectRoot, file.path, '..');
-        await mkdir(dir, { recursive: true });
-        await writeFile(fullPath, file.content, 'utf-8');
-        console.log(`  Created ${file.path}`);
+    // Handle create-only: skip if file already exists
+    if (file.mergeStrategy === 'create-only') {
+      if (existsSync(fullPath)) {
+        console.log(`  Skipped ${file.path} (already exists)`);
+        return;
       }
     }
+
+    if (file.mergeStrategy === 'merge' && file.path.endsWith('settings.json')) {
+      const generated = JSON.parse(file.content);
+      await mergeSettings(projectRoot, generated);
+      console.log(`  Merged ${file.path}`);
+    } else {
+      await mkdir(dirname(fullPath), { recursive: true });
+      await writeFile(fullPath, file.content, 'utf-8');
+      console.log(`  Created ${file.path}`);
+    }
+  };
+
+  // Generate adapter output for selected agents and folders
+  if (selectedAgents.includes('claude-code') && selectedFolders.has('claude-code')) {
+    const files = await claudeCodeAdapter.generate(resolvedConfig, projectRoot);
+    for (const file of files) await writeGeneratedFile(file);
+  }
+
+  if (selectedAgents.includes('cursor') && selectedFolders.has('cursor')) {
+    const files = await cursorAdapter.generate(resolvedConfig, projectRoot);
+    for (const file of files) await writeGeneratedFile(file);
+  }
+
+  if (selectedAgents.includes('codex') && selectedFolders.has('codex')) {
+    const files = await codexAdapter.generate(resolvedConfig, projectRoot);
+    for (const file of files) await writeGeneratedFile(file);
+  }
+
+  if (selectedAgents.includes('opencode') && selectedFolders.has('opencode')) {
+    const files = await openCodeAdapter.generate(resolvedConfig, projectRoot);
+    for (const file of files) await writeGeneratedFile(file);
+  }
+
+  // GitHub Actions is always generated
+  if (selectedFolders.has('github-actions')) {
+    const gaFiles = await githubActionsAdapter.generate(resolvedConfig, projectRoot);
+    for (const file of gaFiles) await writeGeneratedFile(file);
   }
 
   // Summary
   const ruleCount = resolvedConfig.rules.size;
   console.log(`\n  VGuard initialized with ${ruleCount} active rules.`);
   console.log('  Run `vguard doctor` to verify your setup.\n');
+}
+
+/**
+ * Build folder choices for the "update AI agent folders" prompt.
+ * Selected agents are auto-checked.
+ */
+function buildFolderChoices(selectedAgents: AgentType[]) {
+  const agentFolderMap: Record<string, { name: string; description: string }> = {
+    'claude-code': {
+      name: '.claude/',
+      description: 'hooks, commands, and rules for Claude Code',
+    },
+    cursor: {
+      name: '.cursor/',
+      description: 'rules for Cursor',
+    },
+    codex: {
+      name: '.codex/ + AGENTS.md',
+      description: 'instructions and guidelines for Codex',
+    },
+    opencode: {
+      name: '.opencode/',
+      description: 'instructions for OpenCode',
+    },
+  };
+
+  const choices = Object.entries(agentFolderMap).map(([agentId, info]) => ({
+    name: `${info.name} — ${info.description}`,
+    value: agentId,
+    checked: selectedAgents.includes(agentId as AgentType),
+  }));
+
+  // Always offer GitHub Actions
+  choices.push({
+    name: '.github/workflows/ — CI workflow for VGuard',
+    value: 'github-actions',
+    checked: true,
+  });
+
+  return choices;
 }
 
 function detectFramework(projectRoot: string): string | null {

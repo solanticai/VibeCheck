@@ -1,0 +1,10 @@
+{
+  "name": "@mixed/web",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "next": "15.0.0",
+    "react": "19.0.0",
+    "@mixed/ui": "workspace:*"
+  }
+}

@@ -1,4 +1,5 @@
 import { writeFile as fsWriteFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
 import '../../presets/index.js';
@@ -10,6 +11,8 @@ import { resolveConfig } from '../../config/loader.js';
 import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import { claudeCodeAdapter } from '../../adapters/claude-code/adapter.js';
 import { cursorAdapter } from '../../adapters/cursor/adapter.js';
+import { codexAdapter } from '../../adapters/codex/adapter.js';
+import { openCodeAdapter } from '../../adapters/opencode/adapter.js';
 import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
 import type { VGuardConfig, GeneratedFile } from '../../types.js';
@@ -38,6 +41,14 @@ export async function generateCommand(): Promise<void> {
   const writeGeneratedFile = async (file: GeneratedFile) => {
     const fullPath = join(projectRoot, file.path);
 
+    // Handle create-only: skip if file already exists
+    if (file.mergeStrategy === 'create-only') {
+      if (existsSync(fullPath)) {
+        console.log(`  Skipped ${file.path} (already exists)`);
+        return;
+      }
+    }
+
     if (file.mergeStrategy === 'merge' && file.path.endsWith('settings.json')) {
       const generated = JSON.parse(file.content);
       await mergeSettings(projectRoot, generated);
@@ -56,6 +67,16 @@ export async function generateCommand(): Promise<void> {
 
   if (resolvedConfig.agents.includes('cursor')) {
     const files = await cursorAdapter.generate(resolvedConfig, projectRoot);
+    for (const file of files) await writeGeneratedFile(file);
+  }
+
+  if (resolvedConfig.agents.includes('codex')) {
+    const files = await codexAdapter.generate(resolvedConfig, projectRoot);
+    for (const file of files) await writeGeneratedFile(file);
+  }
+
+  if (resolvedConfig.agents.includes('opencode')) {
+    const files = await openCodeAdapter.generate(resolvedConfig, projectRoot);
     for (const file of files) await writeGeneratedFile(file);
   }
 
