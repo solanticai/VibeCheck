@@ -57,9 +57,75 @@ npm run format       # Prettier
 3. **Config resolution**: defaults → presets → user rules. Severity can only be *downgraded*, never upgraded by presets
 4. **Claude Code adapter** generates hooks and merges into `.claude/settings.json` — it does NOT overwrite existing settings
 
+## Slash Commands
+
+Use these project commands for common development tasks:
+
+| Command | Purpose |
+|---------|---------|
+| `/project:add-rule` | Scaffold a new rule with file, test, and registration |
+| `/project:add-preset` | Scaffold a new preset for a tech stack |
+| `/project:run-tests` | Run test suite and analyze failures |
+| `/project:build` | Build, type-check, lint, and verify dist output |
+| `/project:release` | Guide through version bump, changelog, and release |
+| `/project:adapter-check` | Verify all adapter outputs are correct |
+| `/project:publish-changelog` | Publish changelog discussion to GitHub after release |
+
+## Skills
+
+Use these skills for scaffolding new components:
+
+| Skill | Trigger | What It Creates |
+|-------|---------|-----------------|
+| `/new-rule` | "create a rule", "add rule" | Rule file + test + registration |
+| `/new-preset` | "create a preset", "add preset" | Preset file + registration |
+| `/new-adapter` | "add adapter", "support new agent" | Adapter file + type updates |
+
 ## Adding a New Rule
+
+Use the `/new-rule` skill or follow manually:
 
 1. Create `src/rules/{category}/{rule-name}.ts` exporting a `Rule` object
 2. Register in `src/rules/{category}/index.ts`
 3. Create `tests/rules/{category}/{rule-name}.test.ts`
 4. Add to relevant presets in `src/presets/`
+
+## Adapter System
+
+Each adapter in `src/adapters/` generates agent-specific files:
+
+| Adapter | Generated Files | Strategy |
+|---------|----------------|----------|
+| `claude-code` | `.vguard/hooks/*.js`, `.claude/settings.json`, `.claude/commands/vguard-*.md`, `.claude/rules/vguard-enforcement.md` | hooks: overwrite, settings: merge, commands: create-only, rules: overwrite |
+| `cursor` | `.cursorrules`, `.cursor/rules/*.mdc` | overwrite |
+| `codex` | `AGENTS.md`, `.codex/instructions.md` | overwrite / create-only |
+| `opencode` | `.opencode/instructions.md` | overwrite |
+| `github-actions` | `.github/workflows/vguard.yml` | create-only |
+
+## Git Workflow
+
+- **`master`** — production, squash merges from `dev` via PR only
+- **`dev`** — integration branch, all work merges here first
+- Branch from `dev`: `feature/<name>`, `fix/<name>`, `chore/<name>`
+
+## Enforcement Rules
+
+### Pre-Commit Hooks (`.husky/pre-commit`)
+
+1. **Lint + Type-check** — always runs on every commit
+2. **CHANGELOG.md required** — on `dev`, `master`, `main` branches, `CHANGELOG.md` must be staged
+3. **Version bump required** — on `master`/`main` branches, `package.json` must be staged (version bump)
+
+### CI Checks (`.github/workflows/ci.yml`)
+
+- **`release-checks` job** — runs only on PRs targeting `master`:
+  - Fails if `package.json` version matches the current `master` version (no bump)
+  - Fails if `CHANGELOG.md` has no diff compared to `master`
+
+### Publish Workflow (`.github/workflows/publish.yml`)
+
+- Triggers on push to `master` (PR merge)
+- **`preflight`** — checks if PR merge, version unpublished, tag missing
+- **`validate`** — full CI (lint, format, type-check, test, build)
+- **`publish`** — npm publish with OIDC provenance, git tag, GitHub Release
+- **`changelog`** — creates a GitHub Discussion post in the Changelog category with version notes and commit list
