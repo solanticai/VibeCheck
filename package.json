@@ -1,6 +1,6 @@
 {
   "name": "@solanticai/vguard",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "description": "AI coding guardrails framework. Runtime-enforced quality controls for Claude Code, Cursor, Codex, and more.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -11,14 +11,14 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     },
     "./hooks/runner": {
+      "types": "./dist/hooks/runner.d.ts",
       "import": "./dist/hooks/runner.js",
-      "require": "./dist/hooks/runner.cjs",
-      "types": "./dist/hooks/runner.d.ts"
+      "require": "./dist/hooks/runner.cjs"
     }
   },
   "files": [
@@ -52,10 +52,10 @@
   "homepage": "https://vguard.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SolanticAi/vguard.git"
+    "url": "git+https://github.com/solanticai/vibe-guard.git"
   },
   "bugs": {
-    "url": "https://github.com/SolanticAi/vguard/issues"
+    "url": "https://github.com/solanticai/vibe-guard/issues"
   },
   "publishConfig": {
     "access": "public",
