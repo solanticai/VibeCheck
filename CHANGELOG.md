@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Resolved merge conflicts from master
+
+## [1.1.2] - 2026-04-03
+
+### Fixed
+
+- Publish workflow: add NODE_AUTH_TOKEN env for npm OIDC authentication
+
 ## [1.1.1] - 2026-04-03
 
 ### Changed
