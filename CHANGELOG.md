@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Prettier formatting applied to 6 new rule and test files
+
 ## [1.3.0] - 2026-04-04
 
 ### Added

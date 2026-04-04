@@ -33,7 +33,8 @@ describe('quality/error-handling', () => {
     const ctx = createContext({
       toolInput: {
         file_path: '/project/src/services/api.ts',
-        content: 'try { await fetch(url); } catch (err) { throw new AppError("Request failed", err); }',
+        content:
+          'try { await fetch(url); } catch (err) { throw new AppError("Request failed", err); }',
       },
     });
     const result = errorHandling.check(ctx);

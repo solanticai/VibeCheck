@@ -17,7 +17,8 @@ const configSchema = z.object({
 export const noHardcodedUrls: Rule = {
   id: 'security/no-hardcoded-urls',
   name: 'No Hardcoded URLs',
-  description: 'Warns about hardcoded localhost and API URLs that should use environment variables.',
+  description:
+    'Warns about hardcoded localhost and API URLs that should use environment variables.',
   severity: 'warn',
   events: ['PreToolUse'],
   match: { tools: ['Write'] },

@@ -56,7 +56,7 @@ describe('security/sql-injection', () => {
     const ctx = createContext({
       toolInput: {
         file_path: '/project/src/db/queries.ts',
-        content: "const query = \"SELECT * FROM users WHERE name = '\" + userName;",
+        content: 'const query = "SELECT * FROM users WHERE name = \'" + userName;',
       },
     });
     const result = sqlInjection.check(ctx);

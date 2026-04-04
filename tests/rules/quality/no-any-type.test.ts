@@ -100,7 +100,8 @@ describe('quality/no-any-type', () => {
     const ctx = createContext({
       toolInput: {
         file_path: '/project/src/utils/parser.ts',
-        content: '// eslint-disable-next-line @typescript-eslint/no-explicit-any\nconst safe = true;',
+        content:
+          '// eslint-disable-next-line @typescript-eslint/no-explicit-any\nconst safe = true;',
       },
     });
     const result = noAnyType.check(ctx);

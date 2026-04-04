@@ -68,8 +68,9 @@ export async function executeHook(event: HookEvent): Promise<void> {
     const hookDuration = Date.now() - hookStart;
 
     // 6b. Record rule hits for local analytics + cloud sync
-    const filePath =
-      (rawInput.tool_input as Record<string, unknown>)?.file_path as string | undefined;
+    const filePath = (rawInput.tool_input as Record<string, unknown>)?.file_path as
+      | string
+      | undefined;
     for (const ruleResult of result.results) {
       recordRuleHit(ruleResult, event, toolName, filePath, process.cwd());
     }
@@ -117,10 +118,7 @@ export async function executeHook(event: HookEvent): Promise<void> {
  * Attempt a real-time streaming flush if buffer thresholds are met.
  * Non-blocking, fire-and-forget — errors are silently ignored.
  */
-function triggerRealTimeStream(
-  projectRoot: string,
-  cloudConfig: NonNullable<CloudConfig>,
-): void {
+function triggerRealTimeStream(projectRoot: string, cloudConfig: NonNullable<CloudConfig>): void {
   import('../cloud/streamer.js')
     .then(({ maybeFlushToCloud }) => {
       const apiKey = process.env.VGUARD_API_KEY;

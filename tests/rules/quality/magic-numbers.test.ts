@@ -44,8 +44,7 @@ describe('quality/magic-numbers', () => {
     const ctx = createContext({
       toolInput: {
         file_path: '/project/src/utils/calc.ts',
-        content:
-          'if (x > 42) { y = 86; }\nif (z < 99) { w = 123; }\nreturn value * 7;',
+        content: 'if (x > 42) { y = 86; }\nif (z < 99) { w = 123; }\nreturn value * 7;',
       },
     });
     const result = magicNumbers.check(ctx);
