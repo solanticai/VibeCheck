@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `.husky/pre-commit` now skips the CHANGELOG.md / version-bump checks
+  when a merge is in progress (detected via `.git/MERGE_HEAD`). Merge
+  commits consolidate existing history and don't introduce new entries,
+  so blocking them forced empty CHANGELOG edits that added no value.
+  Lint and type-check still run on every commit, including merges.
+
 ### Fixed
 
 - Cloud sync default URL now points to `https://vguard.dev` instead of the

@@ -1,5 +1,14 @@
 npm run lint && npm run type-check
 
+# ── Skip CHANGELOG/version checks on merge commits ──
+# Merge commits consolidate existing history; they don't introduce new
+# changelog entries of their own. Blocking them forces empty edits that
+# don't add value. Quality checks above still run on every commit.
+GIT_DIR=$(git rev-parse --git-dir 2>/dev/null || echo ".git")
+if [ -f "$GIT_DIR/MERGE_HEAD" ]; then
+  exit 0
+fi
+
 # ── Require CHANGELOG.md to be updated ──
 # Check if CHANGELOG.md is staged or was recently modified
 BRANCH=$(git branch --show-current 2>/dev/null || echo "")
