@@ -42,10 +42,7 @@ describe('config-pusher payload building', () => {
   });
 
   it('includes language + framework only when present', () => {
-    const withBoth = buildPayload(
-      { language: 'typescript', framework: 'nextjs-15' },
-      '1.4.0',
-    );
+    const withBoth = buildPayload({ language: 'typescript', framework: 'nextjs-15' }, '1.4.0');
     expect(withBoth.language).toBe('typescript');
     expect(withBoth.framework).toBe('nextjs-15');
 

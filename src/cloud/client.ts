@@ -66,9 +66,7 @@ export class CloudClient {
       });
       if (!res.ok) {
         const errBody = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-        throw new Error(
-          `Config push failed (${res.status}): ${errBody.message ?? res.statusText}`,
-        );
+        throw new Error(`Config push failed (${res.status}): ${errBody.message ?? res.statusText}`);
       }
       return (await res.json()) as { updated: boolean; projectId: string };
     } finally {

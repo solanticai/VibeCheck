@@ -217,7 +217,10 @@ export interface ProjectConfigPushPayload {
   /** Resolved project configuration, serializable to JSON */
   configSnapshot: {
     presets: string[];
-    rules: Record<string, { enabled: boolean; severity: 'pass' | 'warn' | 'block'; options?: unknown }>;
+    rules: Record<
+      string,
+      { enabled: boolean; severity: 'pass' | 'warn' | 'block'; options?: unknown }
+    >;
     agents: string[];
     profile?: string;
     resolvedAt: string;
