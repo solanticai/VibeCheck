@@ -41,6 +41,12 @@ interface ResolvedConfigFile {
   resolvedAt?: string;
   language?: string;
   framework?: string;
+  cloud?: {
+    enabled?: boolean;
+    autoSync?: boolean;
+    projectId?: string;
+    excludePaths?: string[];
+  };
 }
 
 /**
@@ -116,6 +122,19 @@ export function buildPayload(
       resolvedAt: resolved.resolvedAt ?? new Date().toISOString(),
     },
   };
+  // Include the cloud config block so the dashboard can render the
+  // real-time sync state ("Cloud sync: enabled" / "disabled") in the
+  // resolved-config summary. Never ship an empty object — the
+  // dashboard's parseConfigSnapshot keeps cloud=undefined semantics
+  // equivalent to "not configured" if no fields are present.
+  if (resolved.cloud && Object.keys(resolved.cloud).length > 0) {
+    payload.configSnapshot.cloud = {
+      enabled: resolved.cloud.enabled,
+      autoSync: resolved.cloud.autoSync,
+      projectId: resolved.cloud.projectId,
+      excludePaths: resolved.cloud.excludePaths,
+    };
+  }
   if (resolved.language) payload.language = resolved.language;
   if (resolved.framework) payload.framework = resolved.framework;
   return payload;
