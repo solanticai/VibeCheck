@@ -1,6 +1,14 @@
 import { readCredentials, getValidCredentials } from './credentials.js';
+import type { ProjectConfigPushPayload } from '../types.js';
 
 const DEFAULT_API_URL = process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev';
+/**
+ * Base URL for Supabase Edge Functions. These live on a different host
+ * from the main Next.js app. Override via VGUARD_FUNCTIONS_URL for
+ * self-hosted Supabase instances or preview environments.
+ */
+const DEFAULT_FUNCTIONS_URL =
+  process.env.VGUARD_FUNCTIONS_URL ?? 'https://mpisrdadthdhpvgimtzv.supabase.co';
 
 export interface CloudClientOptions {
   apiUrl?: string;
@@ -27,6 +35,43 @@ export class CloudClient {
     const url = options.apiUrl ?? creds?.apiUrl ?? DEFAULT_API_URL;
     this.apiUrl = url.replace(/\/$/, '');
     this.apiKey = options.apiKey;
+  }
+
+  /**
+   * POST a resolved config snapshot + vguard version to the
+   * ingest-config Edge Function so the dashboard can populate its
+   * presets / rules / version widgets for this project. Uses project
+   * API key authentication (same X-API-Key as `ingest()`).
+   *
+   * The endpoint lives on the Supabase Edge Function host, not on the
+   * main API host — hence the separate base URL.
+   */
+  async pushConfigSnapshot(
+    apiKey: string,
+    payload: ProjectConfigPushPayload,
+    timeoutMs = 5_000,
+  ): Promise<{ updated: boolean; projectId: string }> {
+    const url = DEFAULT_FUNCTIONS_URL.replace(/\/$/, '') + '/functions/v1/ingest-config';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        const errBody = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+        throw new Error(`Config push failed (${res.status}): ${errBody.message ?? res.statusText}`);
+      }
+      return (await res.json()) as { updated: boolean; projectId: string };
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   /**

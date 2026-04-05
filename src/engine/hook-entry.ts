@@ -86,6 +86,7 @@ export async function executeHook(event: HookEvent): Promise<void> {
     // 7. Real-time streaming to cloud (every hook event if autoSync enabled)
     if (config.cloud?.autoSync === true) {
       triggerRealTimeStream(process.cwd(), config.cloud);
+      triggerConfigPush(process.cwd());
     }
 
     // 7b. Full flush on Stop events (catch any remaining buffered records)
@@ -133,6 +134,30 @@ function triggerRealTimeStream(projectRoot: string, cloudConfig: NonNullable<Clo
     })
     .catch(() => {
       // Fail open — streaming errors should never impact the developer
+    });
+}
+
+/**
+ * Push the resolved config snapshot to Cloud if it has changed since
+ * the last push (or if 24h have passed). Non-blocking, fire-and-forget
+ * — errors are silently ignored. The pusher has its own internal
+ * throttle + state file, so it is safe to call on every hook event.
+ */
+function triggerConfigPush(projectRoot: string): void {
+  void import('../cloud/config-pusher.js')
+    .then(({ maybePushConfigSnapshot }) => {
+      const envKey = process.env.VGUARD_API_KEY;
+      if (envKey) {
+        return maybePushConfigSnapshot(projectRoot, envKey);
+      }
+      return import('../cloud/credentials.js').then(({ readCredentials }) => {
+        const key = readCredentials()?.apiKey;
+        if (!key) return;
+        return maybePushConfigSnapshot(projectRoot, key);
+      });
+    })
+    .catch(() => {
+      // Fail open — config push errors should never impact the developer
     });
 }
 

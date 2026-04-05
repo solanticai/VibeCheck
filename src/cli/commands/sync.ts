@@ -1,5 +1,6 @@
 import { syncToCloud } from '../../cloud/sync.js';
 import { readCredentials } from '../../cloud/credentials.js';
+import { maybePushConfigSnapshot } from '../../cloud/config-pusher.js';
 
 /**
  * `vguard sync`
@@ -38,9 +39,20 @@ export async function syncCommand(
 
   if (options.dryRun) {
     console.log(`  Would sync ${result.skipped} records.\n`);
-  } else if (result.synced > 0) {
-    console.log(`  Synced ${result.synced} records to Cloud.\n`);
+    return;
+  }
+
+  if (result.synced > 0) {
+    console.log(`  Synced ${result.synced} records to Cloud.`);
   } else {
-    console.log('  No new records to sync.\n');
+    console.log('  No new records to sync.');
+  }
+
+  // Also push the resolved config snapshot (no-op if unchanged + recent)
+  const configPush = await maybePushConfigSnapshot(projectRoot, apiKey);
+  if (configPush.pushed) {
+    console.log('  Pushed project config snapshot to Cloud.\n');
+  } else {
+    console.log('');
   }
 }

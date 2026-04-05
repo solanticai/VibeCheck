@@ -204,6 +204,33 @@ export interface ResolvedConfig {
   cloud?: CloudConfig;
 }
 
+// ─── Cloud Config-Snapshot Push ─────────────────────────────────────────────
+
+/**
+ * Payload sent to POST /functions/v1/ingest-config.
+ * Populates projects.config_snapshot + projects.vguard_version so the
+ * dashboard can render preset/rules/config widgets for this project.
+ */
+export interface ProjectConfigPushPayload {
+  /** Semver of the @solanticai/vguard package running on the consumer */
+  vguardVersion: string;
+  /** Resolved project configuration, serializable to JSON */
+  configSnapshot: {
+    presets: string[];
+    rules: Record<
+      string,
+      { enabled: boolean; severity: 'pass' | 'warn' | 'block'; options?: unknown }
+    >;
+    agents: string[];
+    profile?: string;
+    resolvedAt: string;
+  };
+  /** Primary language of the consumer codebase (e.g. "typescript") */
+  language?: string;
+  /** Primary framework (e.g. "nextjs-15") */
+  framework?: string;
+}
+
 // ─── Preset ─────────────────────────────────────────────────────────────────
 
 /** A preset bundles rule configurations for a tech stack */

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Config-snapshot sync: the hook runner now pushes the resolved project
+  configuration + CLI version to VGuard Cloud whenever the resolved
+  config hash changes or 24h have passed since the last push. This
+  populates `projects.config_snapshot` and `projects.vguard_version`
+  in the cloud database, which in turn lights up the dashboard's
+  Active Presets, Quick Stats, Project Rules, Config Resolution
+  Pipeline, and version-badge widgets. Previously those widgets were
+  always empty because nothing in the CLI ever wrote to those columns.
+  Override the endpoint host via `VGUARD_FUNCTIONS_URL` for self-hosted
+  Supabase projects.
+- `vguard sync` command also pushes the config snapshot after a
+  successful rule-hits sync, as a manual fallback when hooks are
+  disabled or haven't run recently.
+
 ### Changed
 
 - `.husky/pre-commit` now skips the CHANGELOG.md / version-bump checks
