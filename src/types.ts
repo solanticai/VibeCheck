@@ -224,6 +224,17 @@ export interface ProjectConfigPushPayload {
     agents: string[];
     profile?: string;
     resolvedAt: string;
+    /**
+     * Cloud sync config as declared in vguard.config.ts. Pushed so the
+     * dashboard can render "Cloud sync: enabled" and the project's live
+     * sync state in the resolved-config summary.
+     */
+    cloud?: {
+      enabled?: boolean;
+      autoSync?: boolean;
+      projectId?: string;
+      excludePaths?: string[];
+    };
   };
   /** Primary language of the consumer codebase (e.g. "typescript") */
   language?: string;

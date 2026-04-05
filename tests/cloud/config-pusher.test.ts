@@ -144,3 +144,55 @@ describe('config-pusher hash stability', () => {
     expect(hashPayload(withLang)).toBe(hashPayload(basePayload));
   });
 });
+
+describe('config-pusher cloud section', () => {
+  it('includes cloud config when present in resolved file', () => {
+    const payload = buildPayload(
+      {
+        cloud: {
+          enabled: true,
+          autoSync: true,
+          projectId: 'proj_123',
+          excludePaths: ['node_modules/**'],
+        },
+      },
+      '1.4.1',
+    );
+    expect(payload.configSnapshot.cloud).toEqual({
+      enabled: true,
+      autoSync: true,
+      projectId: 'proj_123',
+      excludePaths: ['node_modules/**'],
+    });
+  });
+
+  it('omits cloud when not in resolved file', () => {
+    const payload = buildPayload({}, '1.4.1');
+    expect(payload.configSnapshot.cloud).toBeUndefined();
+  });
+
+  it('omits cloud when resolved file has empty cloud object', () => {
+    const payload = buildPayload({ cloud: {} }, '1.4.1');
+    expect(payload.configSnapshot.cloud).toBeUndefined();
+  });
+
+  it('propagates partial cloud config (undefined fields stay undefined)', () => {
+    const payload = buildPayload({ cloud: { enabled: true, autoSync: true } }, '1.4.1');
+    expect(payload.configSnapshot.cloud?.enabled).toBe(true);
+    expect(payload.configSnapshot.cloud?.autoSync).toBe(true);
+    expect(payload.configSnapshot.cloud?.projectId).toBeUndefined();
+    expect(payload.configSnapshot.cloud?.excludePaths).toBeUndefined();
+  });
+
+  it('changes hash when cloud.enabled flips', () => {
+    const enabled = buildPayload({ cloud: { enabled: true, autoSync: true } }, '1.4.1');
+    const disabled = buildPayload({ cloud: { enabled: false, autoSync: true } }, '1.4.1');
+    expect(hashPayload(enabled)).not.toBe(hashPayload(disabled));
+  });
+
+  it('changes hash when cloud.autoSync flips', () => {
+    const on = buildPayload({ cloud: { enabled: true, autoSync: true } }, '1.4.1');
+    const off = buildPayload({ cloud: { enabled: true, autoSync: false } }, '1.4.1');
+    expect(hashPayload(on)).not.toBe(hashPayload(off));
+  });
+});

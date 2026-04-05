@@ -85,6 +85,27 @@ function updateConfigFile(projectRoot: string, projectId: string): boolean {
     if (/cloud\s*:\s*\{/.test(content)) {
       // Update existing projectId
       content = content.replace(/projectId\s*:\s*['"][^'"]*['"]/, `projectId: '${projectId}'`);
+
+      // Upsert enabled: true. `cloud connect` is an explicit opt-in to
+      // real-time cloud sync, so any existing `enabled: false` must
+      // flip to true. If the field is missing, insert it after the
+      // cloud: { opening brace.
+      if (/enabled\s*:\s*(?:true|false)/.test(content)) {
+        content = content.replace(/enabled\s*:\s*false/, 'enabled: true');
+      } else {
+        content = content.replace(/(cloud\s*:\s*\{\s*\n)/, `$1    enabled: true,\n`);
+      }
+
+      // Upsert autoSync: true for the same reason — `cloud connect`
+      // should opt the project into real-time streaming by default.
+      if (/autoSync\s*:\s*(?:true|false)/.test(content)) {
+        content = content.replace(/autoSync\s*:\s*false/, 'autoSync: true');
+      } else {
+        content = content.replace(
+          /(projectId\s*:\s*['"][^'"]*['"],?\s*\n)/,
+          `$1    autoSync: true,\n`,
+        );
+      }
     } else {
       // Ensure the last property before }); has a trailing comma
       content = content.replace(/(\s*)(}|])\s*\n(\}\);?\s*)$/, '$1$2,\n$3');

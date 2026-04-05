@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-04-05
+
+### Fixed
+
+- Config-snapshot push now includes the `cloud` block (`enabled`,
+  `autoSync`, `projectId`, `excludePaths`) so the dashboard's resolved-
+  config summary can correctly render "Cloud sync: enabled" for
+  projects that have streaming turned on. In 1.4.0 the cloud fields
+  were silently omitted from the payload, which made every project
+  show as "Cloud sync: disabled" even when real-time streaming was
+  working.
+- `vguard cloud connect` now upserts `enabled: true` and `autoSync:
+true` into an existing `cloud: { … }` block in vguard.config.ts,
+  not just `projectId`. Before this fix, a user who had previously
+  set `enabled: false` or `autoSync: false` and then ran
+  `cloud connect` would get their project ID updated but would still
+  have cloud sync disabled. Connecting a project to the cloud is an
+  explicit opt-in, so those flags now get flipped to true every time.
+
 ## [1.4.0] - 2026-04-05
 
 ### Added
