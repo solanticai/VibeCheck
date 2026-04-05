@@ -58,6 +58,16 @@ vi.mock('../../src/utils/validation.js', () => ({
   isValidHookEvent: vi.fn((e: string) => ['PreToolUse', 'PostToolUse', 'Stop'].includes(e)),
 }));
 
+vi.mock('../../src/utils/ignore.js', () => ({
+  createIgnoreMatcher: vi.fn(() => ({
+    isIgnored: vi.fn(() => false),
+    patterns: [],
+    filePatterns: [],
+    hasFile: false,
+    projectRoot: '/project',
+  })),
+}));
+
 // Mock rule imports (side-effect only)
 vi.mock('../../src/rules/index.js', () => ({}));
 
@@ -67,6 +77,7 @@ import { resolveRules } from '../../src/engine/resolver.js';
 import { runRules } from '../../src/engine/runner.js';
 import { recordPerfEntry } from '../../src/engine/perf.js';
 import { formatPreToolUseOutput } from '../../src/engine/output.js';
+import { createIgnoreMatcher } from '../../src/utils/ignore.js';
 
 describe('Hook Execution Integration', () => {
   let exitSpy: ReturnType<typeof vi.spyOn>;
@@ -105,6 +116,33 @@ describe('Hook Execution Integration', () => {
 
     await expect(executeHook('PreToolUse')).rejects.toThrow('process.exit called');
     expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
+  it('exits 0 when tool_input.file_path matches .vguardignore', async () => {
+    vi.mocked(parseStdinJson).mockReturnValue({
+      tool_name: 'Edit',
+      tool_input: { file_path: '/project/src/components/ui/button.tsx' },
+    });
+    vi.mocked(loadCompiledConfig).mockResolvedValue({
+      presets: [],
+      agents: ['claude-code'],
+      rules: new Map(),
+    });
+    vi.mocked(createIgnoreMatcher).mockReturnValueOnce({
+      isIgnored: vi.fn(() => true),
+      patterns: ['src/components/ui/'],
+      filePatterns: ['src/components/ui/'],
+      hasFile: true,
+      projectRoot: '/project',
+    });
+
+    const { executeHook } = await import('../../src/engine/hook-entry.js');
+    await expect(executeHook('PreToolUse')).rejects.toThrow('process.exit called');
+    expect(exitSpy).toHaveBeenCalledWith(0);
+    // Rule resolution / execution must be skipped.
+    expect(resolveRules).not.toHaveBeenCalled();
+    expect(runRules).not.toHaveBeenCalled();
+    expect(recordPerfEntry).not.toHaveBeenCalled();
   });
 
   it('exits 0 when no matching rules', async () => {

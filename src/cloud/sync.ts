@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { readRuleHits, type RuleHitRecord } from '../engine/tracker.js';
 import { CloudClient } from './client.js';
+import { createIgnoreMatcher } from '../utils/ignore.js';
 
 const CURSOR_FILE = '.vguard/data/sync-cursor.json';
 
@@ -51,29 +52,33 @@ export function getUnsyncedRecords(
 }
 
 /**
- * Apply excludePaths patterns to strip file paths from records.
+ * Strip `filePath` from any record whose path matches `.vguardignore` or
+ * the `cloud.excludePaths` config (merged via IgnoreMatcher extras).
+ *
+ * This is a PRIVACY filter — it only nulls out the `filePath` field
+ * before upload. Rules still run on these files; we simply don't send
+ * the path to the cloud.
+ *
+ * `projectRoot` is required so paths can be normalised relative to it
+ * and so `.vguardignore` is honoured the same way it is everywhere else.
  */
-export function applyExclusions(records: RuleHitRecord[], excludePaths: string[]): RuleHitRecord[] {
-  if (excludePaths.length === 0) return records;
+export function applyExclusions(
+  records: RuleHitRecord[],
+  projectRoot: string,
+  excludePaths: readonly string[] = [],
+): RuleHitRecord[] {
+  // Empty defaults + empty extras is the common case: no matcher needed.
+  if (excludePaths.length === 0) {
+    // Still run through .vguardignore if one exists.
+    const defaultMatcher = createIgnoreMatcher(projectRoot);
+    if (!defaultMatcher.hasFile) return records;
+  }
+
+  const matcher = createIgnoreMatcher(projectRoot, excludePaths);
 
   return records.map((record) => {
     if (!record.filePath) return record;
-
-    const shouldExclude = excludePaths.some((pattern) => {
-      if (pattern === '**/*') return true;
-      // Simple glob matching for common patterns
-      const normalized = pattern.replace(/\\/g, '/').replace(/\*\*/g, '').replace(/\/\//g, '/');
-      const filePath = record.filePath?.replace(/\\/g, '/') ?? '';
-      // Match if the file path contains the pattern's non-glob segments
-      const segments = normalized.split('/').filter(Boolean);
-      return segments.every((seg) => {
-        if (seg === '*') return true;
-        if (seg.startsWith('*.')) return filePath.includes(seg.slice(1)); // *.env → .env
-        return filePath.includes(seg);
-      });
-    });
-
-    if (shouldExclude) {
+    if (matcher.isIgnored(record.filePath)) {
       return { ...record, filePath: undefined };
     }
     return record;
@@ -113,10 +118,8 @@ export async function syncToCloud(
       return { synced: 0, skipped: 0 };
     }
 
-    // Apply path exclusions
-    if (options.excludePaths && options.excludePaths.length > 0) {
-      unsyncedRecords = applyExclusions(unsyncedRecords, options.excludePaths);
-    }
+    // Apply path exclusions (matches both .vguardignore + cloud.excludePaths)
+    unsyncedRecords = applyExclusions(unsyncedRecords, projectRoot, options.excludePaths ?? []);
 
     if (options.dryRun) {
       return { synced: 0, skipped: unsyncedRecords.length };

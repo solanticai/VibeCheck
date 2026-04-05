@@ -9,6 +9,7 @@ import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
 import { getAllRules } from '../../engine/registry.js';
 import { readPerfEntries, calculatePerfStats, PERF_BUDGET_MS } from '../../engine/perf.js';
+import { createIgnoreMatcher, HARDCODED_DEFAULTS } from '../../utils/ignore.js';
 import type { VGuardConfig } from '../../types.js';
 
 interface CheckResult {
@@ -42,10 +43,11 @@ export async function doctorCommand(): Promise<void> {
 
   // 2. Validate config
   let resolvedConfig;
+  let rawConfig: VGuardConfig;
   try {
-    const rawConfig = await readRawConfig(discovered);
+    rawConfig = (await readRawConfig(discovered)) as VGuardConfig;
     const presetMap = getAllPresets();
-    resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
+    resolvedConfig = resolveConfig(rawConfig, presetMap);
     results.push({
       name: 'Config valid',
       status: 'pass',
@@ -168,6 +170,41 @@ export async function doctorCommand(): Promise<void> {
       name: 'node_modules',
       status: 'warn',
       message: 'VGuard not found in node_modules. Hook scripts may not work. Run `npm install`.',
+    });
+  }
+
+  // 9. Check .vguardignore + legacy ignore-field deprecations.
+  const matcher = createIgnoreMatcher(projectRoot);
+  if (matcher.hasFile) {
+    results.push({
+      name: 'Ignore rules',
+      status: 'pass',
+      message: `${matcher.filePatterns.length} patterns from .vguardignore + ${HARDCODED_DEFAULTS.length} defaults active`,
+    });
+  } else {
+    results.push({
+      name: 'Ignore rules',
+      status: 'warn',
+      message:
+        'No .vguardignore found — using defaults only. Run `vguard ignore init` to add project-specific excludes.',
+    });
+  }
+
+  const learnIgnore = (rawConfig.learn?.ignorePaths ?? []).length;
+  if (learnIgnore > 0) {
+    results.push({
+      name: 'Legacy config',
+      status: 'warn',
+      message: `learn.ignorePaths is deprecated (${learnIgnore} entries) — move them to .vguardignore so they apply to lint + hooks too.`,
+    });
+  }
+
+  const cloudExclude = (resolvedConfig.cloud?.excludePaths ?? []).length;
+  if (cloudExclude > 0) {
+    results.push({
+      name: 'Legacy config',
+      status: 'warn',
+      message: `cloud.excludePaths is deprecated (${cloudExclude} entries) — move them to .vguardignore for project-wide exclusion.`,
     });
   }
 

@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-04-05
+
+### Added
+
+- **`.vguardignore` file support.** VGuard now reads a project-level
+  `.vguardignore` (gitignore syntax) that excludes files and folders
+  from every VGuard execution path — `vguard lint`, Claude Code
+  runtime hooks (PreToolUse / PostToolUse), and `vguard learn`. This
+  solves the common complaint that auto-generated UI libraries
+  (shadcn/ui) and frozen SQL migrations were surfacing false-positive
+  violations that had no clean project-wide opt-out.
+- **`vguard init` creates a starter `.vguardignore`** with active
+  defaults (generated-code globs, IDE/OS cruft) plus commented hints
+  for common opt-ins (`src/components/ui/`, `supabase/migrations/`,
+  `prisma/migrations/`, snapshot/fixture folders). Existing
+  `.vguardignore` files are never overwritten.
+- **New `vguard ignore` subcommand** for managing the file without
+  opening it: `vguard ignore list` prints active patterns grouped by
+  source (defaults vs file), `vguard ignore add <pattern>` / `remove
+<pattern>` edit the file safely (dedupes, preserves comments),
+  `vguard ignore check <path>` reports whether a path is ignored and
+  which pattern matched, and `vguard ignore init` standalone-creates
+  the file for projects that predate v1.7.0.
+- **`vguard doctor` new check** reports `.vguardignore` status and
+  active pattern count, and warns when legacy `learn.ignorePaths` or
+  `cloud.excludePaths` config fields are set (with guidance to move
+  them into `.vguardignore`).
+
+### Changed
+
+- `vguard learn` now merges `.vguardignore` with its existing
+  `learn.ignorePaths` config field — they compose, so users don't
+  have to choose. Same pattern for `cloud.excludePaths` in the sync /
+  streamer privacy filter.
+- `vguard generate` now clears the ignore-matcher cache so edits to
+  `.vguardignore` propagate to the next hook / lint run without
+  needing to restart the process.
+- Added `ignore@^7.0.5` as a runtime dependency. This is the same
+  ~8KB MIT package used by ESLint, Prettier, and stylelint for full
+  gitignore semantics (negation with `!`, directory suffixes, globs,
+  comments, nested patterns).
+
+### Deprecated
+
+- `learn.ignorePaths` and `cloud.excludePaths` config fields — both
+  still work unchanged but are bridged into the new `IgnoreMatcher`.
+  `vguard doctor` surfaces a deprecation hint when either is set.
+  Plan to remove in v2.0.
+
 ## [1.4.1] - 2026-04-05
 
 ### Fixed

@@ -4,6 +4,7 @@ import type { Rule, HookContext, ResolvedConfig } from '../types.js';
 import { getAllRules } from './registry.js';
 import { normalizePath, getExtension, matchesPattern } from '../utils/path.js';
 import { buildGitContext } from '../utils/git.js';
+import { createIgnoreMatcher, type IgnoreMatcher } from '../utils/ignore.js';
 
 /** A single issue found during scanning */
 export interface ScanIssue {
@@ -26,19 +27,12 @@ export interface ScanOptions {
   rootDir: string;
   config: ResolvedConfig;
   include?: string[];
-  exclude?: string[];
+  /**
+   * Optional ignore matcher override (primarily for tests). When absent, a
+   * matcher is created from `.vguardignore` + built-in defaults at `rootDir`.
+   */
+  ignoreMatcher?: IgnoreMatcher;
 }
-
-const DEFAULT_EXCLUDE = [
-  'node_modules/',
-  '.next/',
-  'dist/',
-  'build/',
-  '.git/',
-  'coverage/',
-  '.vguard/',
-  '__pycache__/',
-];
 
 const SCANNABLE_EXTENSIONS = new Set([
   'ts',
@@ -59,7 +53,8 @@ const SCANNABLE_EXTENSIONS = new Set([
  * This is the engine behind `vguard lint`.
  */
 export async function scanProject(options: ScanOptions): Promise<ScanResult> {
-  const { rootDir, config, exclude = DEFAULT_EXCLUDE } = options;
+  const { rootDir, config } = options;
+  const ignoreMatcher = options.ignoreMatcher ?? createIgnoreMatcher(rootDir);
 
   const allRules = getAllRules();
   const gitContext = buildGitContext(rootDir);
@@ -84,7 +79,7 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
   }
 
   // Walk the directory
-  const files = walkDirectory(rootDir, exclude);
+  const files = walkDirectory(rootDir, ignoreMatcher);
   const issues: ScanIssue[] = [];
 
   for (const filePath of files) {
@@ -145,8 +140,13 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
   };
 }
 
-/** Recursively walk a directory, respecting exclude patterns */
-function walkDirectory(dir: string, exclude: string[]): string[] {
+/**
+ * Recursively walk a directory, skipping any paths that the IgnoreMatcher
+ * says to ignore. Ignored directories are short-circuited (their contents
+ * are never read), so the scanner doesn't walk into node_modules/, .next/,
+ * etc.
+ */
+function walkDirectory(dir: string, matcher: IgnoreMatcher): string[] {
   const files: string[] = [];
 
   try {
@@ -154,21 +154,14 @@ function walkDirectory(dir: string, exclude: string[]): string[] {
     for (const entry of entries) {
       const fullPath = join(dir, entry);
 
-      // Check exclude — match against directory/file name segments, not substrings
-      const entryLower = entry.toLowerCase();
-      const isExcluded = exclude.some((pattern) => {
-        const cleanPattern = pattern.replace(/\/$/, '').toLowerCase();
-        // Match exact directory/file name to avoid false positives
-        // (e.g., exclude "node_modules" should not exclude "node-utils")
-        return entryLower === cleanPattern;
-      });
-      if (isExcluded) continue;
-
       try {
         const stat = statSync(fullPath);
         if (stat.isDirectory()) {
-          files.push(...walkDirectory(fullPath, exclude));
+          // Probe with a trailing slash so directory-only patterns match.
+          if (matcher.isIgnored(fullPath + '/')) continue;
+          files.push(...walkDirectory(fullPath, matcher));
         } else if (stat.isFile()) {
+          if (matcher.isIgnored(fullPath)) continue;
           files.push(fullPath);
         }
       } catch {

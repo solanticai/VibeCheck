@@ -180,4 +180,49 @@ program
     await syncCommand(options);
   });
 
+// Ignore subcommands (.vguardignore management)
+const ignore = program
+  .command('ignore')
+  .description('Manage .vguardignore (exclude files from rules, hooks, and scans)');
+
+ignore
+  .command('list')
+  .description('List all active ignore patterns, grouped by source')
+  .action(async () => {
+    const { ignoreListCommand } = await import('./commands/ignore.js');
+    ignoreListCommand();
+  });
+
+ignore
+  .command('add <pattern>')
+  .description('Append a pattern to .vguardignore (creates it if missing)')
+  .action(async (pattern: string) => {
+    const { ignoreAddCommand } = await import('./commands/ignore.js');
+    await ignoreAddCommand(pattern);
+  });
+
+ignore
+  .command('remove <pattern>')
+  .description('Remove an exact pattern from .vguardignore')
+  .action(async (pattern: string) => {
+    const { ignoreRemoveCommand } = await import('./commands/ignore.js');
+    await ignoreRemoveCommand(pattern);
+  });
+
+ignore
+  .command('check <path>')
+  .description('Print whether a path is ignored and which source matched')
+  .action(async (path: string) => {
+    const { ignoreCheckCommand } = await import('./commands/ignore.js');
+    ignoreCheckCommand(path);
+  });
+
+ignore
+  .command('init')
+  .description('Create a .vguardignore with the default template')
+  .action(async () => {
+    const { ignoreInitCommand } = await import('./commands/ignore.js');
+    await ignoreInitCommand();
+  });
+
 program.parse();

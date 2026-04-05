@@ -15,6 +15,7 @@ import { recordRuleHit } from './tracker.js';
 import { recordPerfEntry } from './perf.js';
 import { formatPreToolUseOutput, formatPostToolUseOutput, formatStopOutput } from './output.js';
 import { isValidHookEvent } from '../utils/validation.js';
+import { createIgnoreMatcher } from '../utils/ignore.js';
 
 // Import and register all built-in rules
 import '../rules/index.js';
@@ -44,6 +45,18 @@ export async function executeHook(event: HookEvent): Promise<void> {
 
     // 3. Extract tool info
     const { toolName } = extractToolInput(rawInput);
+
+    // 3b. Honour .vguardignore — if the file being touched matches an
+    // ignore pattern, short-circuit BEFORE running rules, recording hits,
+    // or doing any cloud work. This keeps shadcn edits, migrations, etc.
+    // from triggering blocks/warns at edit time.
+    const ignoredFilePath = (rawInput.tool_input as { file_path?: string } | undefined)?.file_path;
+    if (ignoredFilePath) {
+      const matcher = createIgnoreMatcher(process.cwd());
+      if (matcher.isIgnored(ignoredFilePath)) {
+        process.exit(0);
+      }
+    }
 
     // 4. Build context
     const context = buildHookContext(

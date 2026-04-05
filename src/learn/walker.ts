@@ -1,20 +1,7 @@
 import { readdirSync, statSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { normalizePath } from '../utils/path.js';
-
-const DEFAULT_EXCLUDE = [
-  'node_modules',
-  '.next',
-  'dist',
-  'build',
-  '.git',
-  'coverage',
-  '.vguard',
-  '__pycache__',
-  '.venv',
-  'vendor',
-  '.turbo',
-];
+import { createIgnoreMatcher, type IgnoreMatcher } from '../utils/ignore.js';
 
 const ANALYZABLE_EXTENSIONS = new Set([
   'ts',
@@ -41,6 +28,11 @@ export interface WalkedFile {
 export interface WalkOptions {
   rootDir: string;
   scanPaths?: string[];
+  /**
+   * Legacy per-walk ignore patterns (from `config.learn.ignorePaths`).
+   * These are merged on top of `.vguardignore` + hardcoded defaults.
+   * Prefer `.vguardignore` for new projects — see `vguard ignore`.
+   */
   ignorePaths?: string[];
   maxFiles?: number;
 }
@@ -49,19 +41,20 @@ export interface WalkOptions {
  * Walk a project directory and return analyzable source files.
  */
 export function walkProject(options: WalkOptions): WalkedFile[] {
-  const { rootDir, ignorePaths = DEFAULT_EXCLUDE, maxFiles = 5000 } = options;
+  const { rootDir, ignorePaths = [], maxFiles = 5000 } = options;
+  const matcher = createIgnoreMatcher(rootDir, ignorePaths);
   const files: WalkedFile[] = [];
   const scanDirs = options.scanPaths?.map((p) => join(rootDir, p)) ?? [rootDir];
 
   for (const dir of scanDirs) {
-    walkDir(dir, ignorePaths, files, maxFiles);
+    walkDir(dir, matcher, files, maxFiles);
     if (files.length >= maxFiles) break;
   }
 
   return files;
 }
 
-function walkDir(dir: string, exclude: string[], files: WalkedFile[], maxFiles: number): void {
+function walkDir(dir: string, matcher: IgnoreMatcher, files: WalkedFile[], maxFiles: number): void {
   if (files.length >= maxFiles) return;
 
   let entries: string[];
@@ -73,15 +66,15 @@ function walkDir(dir: string, exclude: string[], files: WalkedFile[], maxFiles: 
 
   for (const entry of entries) {
     if (files.length >= maxFiles) return;
-    if (exclude.some((ex) => entry === ex || entry.startsWith('.'))) continue;
-
     const fullPath = join(dir, entry);
 
     try {
       const stat = statSync(fullPath);
       if (stat.isDirectory()) {
-        walkDir(fullPath, exclude, files, maxFiles);
+        if (matcher.isIgnored(fullPath + '/')) continue;
+        walkDir(fullPath, matcher, files, maxFiles);
       } else if (stat.isFile()) {
+        if (matcher.isIgnored(fullPath)) continue;
         const ext = entry.split('.').pop()?.toLowerCase() ?? '';
         if (!ANALYZABLE_EXTENSIONS.has(ext)) continue;
         if (stat.size > 500_000) continue; // Skip files > 500KB

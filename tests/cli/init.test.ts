@@ -144,4 +144,25 @@ describe('initCommand', () => {
     );
     consoleSpy.mockRestore();
   });
+
+  it('writes .vguardignore when none exists', async () => {
+    vi.mocked(inquirer.prompt)
+      .mockResolvedValueOnce({
+        presets: [],
+        agents: ['claude-code'],
+        protectedBranches: 'main',
+      })
+      .mockResolvedValueOnce({ folders: [] })
+      .mockResolvedValueOnce({ enableCloud: false });
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    await initCommand();
+
+    expect(writeFile).toHaveBeenCalledWith(
+      expect.stringContaining('.vguardignore'),
+      expect.stringContaining('VGuard ignore'),
+      'utf-8',
+    );
+    consoleSpy.mockRestore();
+  });
 });

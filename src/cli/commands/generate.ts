@@ -15,12 +15,17 @@ import { codexAdapter } from '../../adapters/codex/adapter.js';
 import { openCodeAdapter } from '../../adapters/opencode/adapter.js';
 import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
+import { clearIgnoreMatcherCache } from '../../utils/ignore.js';
 import type { VGuardConfig, GeneratedFile } from '../../types.js';
 
 export async function generateCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
   console.log('\n  VGuard — Regenerating hooks...\n');
+
+  // Drop the ignore-matcher cache so the next lint/hook run re-reads
+  // any edits the user made to .vguardignore.
+  clearIgnoreMatcherCache();
 
   // Load config
   const discovered = discoverConfigFile(projectRoot);

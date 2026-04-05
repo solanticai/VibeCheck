@@ -45,9 +45,11 @@ describe('cloud/sync', () => {
   });
 
   describe('applyExclusions', () => {
+    const projectRoot = '/project';
+
     it('should return records unchanged when no exclusions', () => {
       const records = [makeRecord()];
-      const result = applyExclusions(records, []);
+      const result = applyExclusions(records, projectRoot, []);
       expect(result[0].filePath).toBe('/project/src/index.ts');
     });
 
@@ -56,7 +58,7 @@ describe('cloud/sync', () => {
         makeRecord({ filePath: '/project/secrets/api-key.json' }),
         makeRecord({ filePath: '/project/src/index.ts' }),
       ];
-      const result = applyExclusions(records, ['**/secrets/**']);
+      const result = applyExclusions(records, projectRoot, ['secrets/']);
       expect(result[0].filePath).toBeUndefined();
       expect(result[1].filePath).toBe('/project/src/index.ts');
     });
@@ -66,14 +68,14 @@ describe('cloud/sync', () => {
         makeRecord({ filePath: '/project/src/index.ts' }),
         makeRecord({ filePath: '/project/lib/utils.ts' }),
       ];
-      const result = applyExclusions(records, ['**/*']);
+      const result = applyExclusions(records, projectRoot, ['**/*']);
       expect(result[0].filePath).toBeUndefined();
       expect(result[1].filePath).toBeUndefined();
     });
 
     it('should preserve records with no filePath', () => {
       const records = [makeRecord({ filePath: undefined })];
-      const result = applyExclusions(records, ['**/*']);
+      const result = applyExclusions(records, projectRoot, ['**/*']);
       expect(result).toHaveLength(1);
     });
   });

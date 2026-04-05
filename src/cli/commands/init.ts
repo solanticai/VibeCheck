@@ -17,6 +17,7 @@ import { codexAdapter } from '../../adapters/codex/adapter.js';
 import { openCodeAdapter } from '../../adapters/opencode/adapter.js';
 import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
+import { DEFAULT_VGUARDIGNORE } from './init-templates/vguardignore.js';
 
 export async function initCommand(): Promise<void> {
   const projectRoot = process.cwd();
@@ -222,6 +223,15 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
   if (selectedFolders.has('github-actions')) {
     const gaFiles = await githubActionsAdapter.generate(resolvedConfig, projectRoot);
     for (const file of gaFiles) await writeGeneratedFile(file);
+  }
+
+  // Write starter .vguardignore (create-only — don't overwrite existing).
+  const ignorePath = join(projectRoot, '.vguardignore');
+  if (!existsSync(ignorePath)) {
+    await writeFile(ignorePath, DEFAULT_VGUARDIGNORE, 'utf-8');
+    console.log('  Created .vguardignore');
+  } else {
+    console.log('  Skipped .vguardignore (already exists)');
   }
 
   // Offer to add convenience npm scripts

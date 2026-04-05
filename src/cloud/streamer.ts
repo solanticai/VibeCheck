@@ -144,10 +144,8 @@ export async function maybeFlushToCloud(
       return;
     }
 
-    // Apply path exclusions
-    if (cloudConfig.excludePaths && cloudConfig.excludePaths.length > 0) {
-      unsyncedRecords = applyExclusions(unsyncedRecords, cloudConfig.excludePaths);
-    }
+    // Apply path exclusions (.vguardignore + cloud.excludePaths)
+    unsyncedRecords = applyExclusions(unsyncedRecords, projectRoot, cloudConfig.excludePaths ?? []);
 
     // Limit batch size to avoid large payloads during streaming
     const maxStreamBatch = Math.min(unsyncedRecords.length, 50);
