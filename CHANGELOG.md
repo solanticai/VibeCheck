@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Cloud sync default URL now points to `https://vguard.dev` instead of the
+  non-resolving `https://api.vguard.dev` / `https://app.vguard.dev` subdomains.
+  Affected the streamer (`/api/v1/ingest`), CloudClient base URL, and the
+  `cloud login` / `cloud connect` browser URLs. Users can still override via
+  `VGUARD_CLOUD_URL`.
+- `vguard cloud connect --key <vc_...> --project-id <id>` now always writes
+  the API key + project ID to `~/.vguard/credentials.json`, even when the
+  user has not previously run `vguard cloud login`. Previously the
+  credentials file was only updated if it already existed, which meant
+  Claude Code hooks had no way to read the API key and silently skipped
+  real-time cloud streaming.
 - Prettier formatting applied to 6 new rule and test files
 
 ## [1.3.0] - 2026-04-04

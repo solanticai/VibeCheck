@@ -6,8 +6,9 @@ const CREDENTIALS_DIR = join(homedir(), '.vguard');
 const CREDENTIALS_FILE = join(CREDENTIALS_DIR, 'credentials.json');
 
 export interface CloudCredentials {
-  /** Supabase access token (JWT) */
-  accessToken: string;
+  /** Supabase access token (JWT) — set by `cloud login`, absent when user
+   *  connects via `cloud connect --key` with an existing API key. */
+  accessToken?: string;
   /** Supabase refresh token — used to get new access tokens when expired */
   refreshToken?: string;
   /** Token expiry timestamp (ISO 8601) */

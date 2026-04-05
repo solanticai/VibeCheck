@@ -1,6 +1,6 @@
 import { readCredentials, getValidCredentials } from './credentials.js';
 
-const DEFAULT_API_URL = process.env.VGUARD_CLOUD_URL ?? 'https://api.vguard.dev';
+const DEFAULT_API_URL = process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev';
 
 export interface CloudClientOptions {
   apiUrl?: string;
@@ -79,7 +79,7 @@ export class CloudClient {
 
   private async authenticatedRequest(path: string, init?: RequestInit): Promise<unknown> {
     const credentials = await getValidCredentials();
-    if (!credentials) {
+    if (!credentials?.accessToken) {
       throw new Error('Not logged in or session expired. Run `npx vguard cloud login` first.');
     }
 

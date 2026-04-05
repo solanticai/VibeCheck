@@ -29,10 +29,10 @@ describe('cloud credential operations', () => {
 
   describe('login credential storage', () => {
     it('stores credentials on success', () => {
-      writeCredentials({ apiKey: 'vguard_test_key_123', endpoint: 'https://api.vguard.dev' });
+      writeCredentials({ apiKey: 'vguard_test_key_123', endpoint: 'https://vguard.dev' });
       expect(writeCredentials).toHaveBeenCalledWith({
         apiKey: 'vguard_test_key_123',
-        endpoint: 'https://api.vguard.dev',
+        endpoint: 'https://vguard.dev',
       });
     });
   });
@@ -48,7 +48,7 @@ describe('cloud credential operations', () => {
     it('detects valid credentials', () => {
       vi.mocked(readCredentials).mockReturnValue({
         apiKey: 'vguard_test_key_123',
-        endpoint: 'https://api.vguard.dev',
+        endpoint: 'https://vguard.dev',
       });
       const creds = readCredentials();
       expect(creds).toBeDefined();

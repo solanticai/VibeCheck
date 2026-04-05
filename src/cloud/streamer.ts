@@ -161,7 +161,7 @@ export async function maybeFlushToCloud(
     try {
       const body = batch.map((r) => JSON.stringify(r)).join('\n');
       const url =
-        (process.env.VGUARD_CLOUD_URL ?? 'https://api.vguard.dev').replace(/\/$/, '') +
+        (process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev').replace(/\/$/, '') +
         '/api/v1/ingest';
 
       const res = await fetch(url, {

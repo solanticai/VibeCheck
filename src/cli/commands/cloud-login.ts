@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { readCredentials, writeCredentials, getCredentialsPath } from '../../cloud/credentials.js';
 
-const DEFAULT_CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://app.vguard.dev';
+const DEFAULT_CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev';
 const DEFAULT_SUPABASE_URL =
   process.env.VGUARD_SUPABASE_URL ?? 'https://mpisrdadthdhpvgimtzv.supabase.co';
 const DEFAULT_OAUTH_CLIENT_ID =

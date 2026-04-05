@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { hasValidCredentials, readCredentials, writeCredentials } from '../../cloud/credentials.js';
 import { CloudClient } from '../../cloud/client.js';
 
-const CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://app.vguard.dev';
+const CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev';
 
 /**
  * `vguard cloud connect`
@@ -55,12 +55,12 @@ export async function cloudConnectCommand(
     }
   }
 
-  // Save API key and project ID to credentials
+  // Save API key and project ID to credentials.
+  // Always persist so Claude Code hooks can read them, even when the user
+  // connects via --key/--project-id without having run `cloud login` first.
   const creds = readCredentials();
-  if (creds) {
-    writeCredentials({ ...creds, apiKey, projectId });
-    console.log('  Saved API key to credentials.');
-  }
+  writeCredentials({ ...(creds ?? {}), apiKey, projectId });
+  console.log('  Saved API key to credentials.');
 
   // Auto-update vguard.config.ts
   if (updateConfigFile(projectRoot, projectId)) {
