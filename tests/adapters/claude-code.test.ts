@@ -79,6 +79,46 @@ describe('Claude Code adapter', () => {
     expect(commandNames).toContain('vguard-status');
     expect(commandNames).toContain('vguard-upgrade');
   });
+
+  it('should always generate SessionStart and SessionEnd hook scripts', async () => {
+    const files = await claudeCodeAdapter.generate(makeConfig(), '/project');
+    const hookPaths = files.filter((f) => f.path.startsWith('.vguard/hooks/')).map((f) => f.path);
+
+    expect(hookPaths).toContain('.vguard/hooks/vguard-sessionstart.js');
+    expect(hookPaths).toContain('.vguard/hooks/vguard-sessionend.js');
+  });
+
+  it('should register SessionStart and SessionEnd in settings.json without a matcher', async () => {
+    const files = await claudeCodeAdapter.generate(makeConfig(), '/project');
+    const settings = files.find((f) => f.path === '.claude/settings.json');
+    expect(settings).toBeDefined();
+
+    const parsed = JSON.parse(settings!.content) as {
+      hooks: Record<string, Array<Record<string, unknown>>>;
+    };
+
+    expect(parsed.hooks.SessionStart).toBeDefined();
+    expect(parsed.hooks.SessionEnd).toBeDefined();
+
+    // Lifecycle hooks are matcher-less
+    expect(parsed.hooks.SessionStart[0].matcher).toBeUndefined();
+    expect(parsed.hooks.SessionEnd[0].matcher).toBeUndefined();
+  });
+
+  it('should register SessionStart/SessionEnd even when no rules reference those events', async () => {
+    // Minimal config with rules that only target PreToolUse/PostToolUse/Stop
+    const config: ResolvedConfig = {
+      presets: [],
+      agents: ['claude-code'],
+      rules: new Map(),
+    };
+
+    const files = await claudeCodeAdapter.generate(config, '/project');
+    const hookPaths = files.filter((f) => f.path.startsWith('.vguard/hooks/')).map((f) => f.path);
+
+    expect(hookPaths).toContain('.vguard/hooks/vguard-sessionstart.js');
+    expect(hookPaths).toContain('.vguard/hooks/vguard-sessionend.js');
+  });
 });
 
 describe('Command generator', () => {

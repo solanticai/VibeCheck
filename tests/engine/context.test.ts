@@ -129,4 +129,34 @@ describe('buildHookContext', () => {
       hasRemote: false,
     });
   });
+
+  it('forwards session_id onto HookContext.sessionId', () => {
+    const ctx = buildHookContext(
+      'PreToolUse',
+      {
+        tool_name: 'Edit',
+        tool_input: { file_path: '/project/src/index.ts' },
+        session_id: 'sess_xyz789',
+      },
+      config,
+    );
+
+    expect(ctx.sessionId).toBe('sess_xyz789');
+  });
+
+  it('omits sessionId when session_id is not provided', () => {
+    const ctx = buildHookContext('PreToolUse', { tool_name: 'Edit', tool_input: {} }, config);
+
+    expect(ctx.sessionId).toBeUndefined();
+  });
+
+  it('omits sessionId when session_id is an empty string', () => {
+    const ctx = buildHookContext(
+      'PreToolUse',
+      { tool_name: 'Edit', tool_input: {}, session_id: '' },
+      config,
+    );
+
+    expect(ctx.sessionId).toBeUndefined();
+  });
 });

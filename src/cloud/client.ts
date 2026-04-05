@@ -92,6 +92,26 @@ export class CloudClient {
   }
 
   /**
+   * POST session lifecycle events (start/end) to the sessions endpoint.
+   * Uses project API key authentication. Events are NDJSON.
+   */
+  async postSessionEvents(
+    apiKey: string,
+    events: unknown[],
+  ): Promise<{ processed: number; starts: number; ends: number }> {
+    const body = events.map((e) => JSON.stringify(e)).join('\n');
+    const res = await this.request('/api/v1/sessions/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-ndjson',
+        'X-API-Key': apiKey,
+      },
+      body,
+    });
+    return res as { processed: number; starts: number; ends: number };
+  }
+
+  /**
    * Register a project with Cloud.
    * Returns the generated API key (shown once).
    */

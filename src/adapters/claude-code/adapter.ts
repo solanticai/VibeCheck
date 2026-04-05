@@ -5,7 +5,26 @@ import { generateCommands } from './command-generator.js';
 import { generateEnforcementRules } from './rules-generator.js';
 
 /** Hook event types that VGuard generates scripts for */
-const HOOK_EVENTS: HookEvent[] = ['PreToolUse', 'PostToolUse', 'Stop'];
+const HOOK_EVENTS: HookEvent[] = [
+  'PreToolUse',
+  'PostToolUse',
+  'Stop',
+  'SessionStart',
+  'SessionEnd',
+];
+
+/**
+ * Events that do not run rules and therefore do not need a tool matcher.
+ * These are recorded for telemetry only (session lifecycle + Stop flush).
+ */
+const MATCHERLESS_EVENTS = new Set<HookEvent>(['Stop', 'SessionStart', 'SessionEnd']);
+
+/**
+ * Events that should always be registered, even when no active rules
+ * reference them. Session lifecycle hooks exist purely to capture
+ * start/end markers for the cloud dashboard.
+ */
+const ALWAYS_REGISTERED_EVENTS: HookEvent[] = ['SessionStart', 'SessionEnd'];
 
 /**
  * Claude Code adapter.
@@ -44,6 +63,14 @@ export const claudeCodeAdapter: Adapter = {
             activeEvents.get(event)!.add(tool);
           }
         }
+      }
+    }
+
+    // Session lifecycle hooks are always registered — they capture
+    // telemetry even when no rules fire.
+    for (const event of ALWAYS_REGISTERED_EVENTS) {
+      if (!activeEvents.has(event)) {
+        activeEvents.set(event, new Set());
       }
     }
 
@@ -102,8 +129,9 @@ function buildSettingsHooks(
       ],
     };
 
-    // Add matcher for PreToolUse and PostToolUse (Stop has no matcher)
-    if (event !== 'Stop' && toolMatcher) {
+    // Matcher only applies to tool-based events (PreToolUse, PostToolUse).
+    // Stop, SessionStart, and SessionEnd have no tool context.
+    if (!MATCHERLESS_EVENTS.has(event) && toolMatcher) {
       hookEntry.matcher = toolMatcher;
     }
 

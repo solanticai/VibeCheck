@@ -53,3 +53,19 @@ export function extractToolInput(data: Record<string, unknown>): {
   const toolInput = (data.tool_input as Record<string, unknown>) ?? {};
   return { toolName, toolInput };
 }
+
+/**
+ * Extract the Claude Code session identifier from a hook payload.
+ *
+ * Claude Code passes the active session's id as `session_id` in every
+ * hook stdin JSON payload. We forward it onto RuleHitRecord + session
+ * lifecycle events so the cloud dashboard can group rule hits by
+ * session and surface per-session drill-downs.
+ *
+ * Returns `undefined` when the caller didn't include a session id
+ * (e.g. another agent that doesn't support sessions, or malformed input).
+ */
+export function extractSessionId(data: Record<string, unknown>): string | undefined {
+  const sessionId = data.session_id;
+  return typeof sessionId === 'string' && sessionId.length > 0 ? sessionId : undefined;
+}

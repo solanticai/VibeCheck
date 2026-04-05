@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractToolInput } from '../../src/utils/stdin.js';
+import { extractToolInput, extractSessionId } from '../../src/utils/stdin.js';
 
 describe('extractToolInput', () => {
   it('extracts tool_name and tool_input', () => {
@@ -30,6 +30,33 @@ describe('extractToolInput', () => {
     const result = extractToolInput({ unrelated: true });
     expect(result.toolName).toBe('');
     expect(result.toolInput).toEqual({});
+  });
+});
+
+describe('extractSessionId', () => {
+  it('extracts session_id when present', () => {
+    const result = extractSessionId({ session_id: 'sess_abc123', tool_name: 'Edit' });
+    expect(result).toBe('sess_abc123');
+  });
+
+  it('returns undefined when session_id is missing', () => {
+    const result = extractSessionId({ tool_name: 'Edit' });
+    expect(result).toBeUndefined();
+  });
+
+  it('returns undefined when session_id is empty string', () => {
+    const result = extractSessionId({ session_id: '', tool_name: 'Edit' });
+    expect(result).toBeUndefined();
+  });
+
+  it('returns undefined when session_id is a non-string', () => {
+    const result = extractSessionId({ session_id: 123 as unknown as string });
+    expect(result).toBeUndefined();
+  });
+
+  it('returns undefined when session_id is null', () => {
+    const result = extractSessionId({ session_id: null as unknown as string });
+    expect(result).toBeUndefined();
   });
 });
 

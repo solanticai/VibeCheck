@@ -78,4 +78,22 @@ describe('engine/tracker', () => {
     expect(hits.length).toBeGreaterThanOrEqual(1);
     expect(hits[0].ruleId).toBe('valid');
   });
+
+  it('should include sessionId when provided', () => {
+    const result: RuleResult = { status: 'pass', ruleId: 'security/branch-protection' };
+    recordRuleHit(result, 'PreToolUse', 'Edit', '/src/a.ts', '/project', 'sess_abc123');
+
+    const hits = readRuleHits('/project');
+    expect(hits).toHaveLength(1);
+    expect(hits[0].sessionId).toBe('sess_abc123');
+  });
+
+  it('should omit sessionId when not provided', () => {
+    const result: RuleResult = { status: 'pass', ruleId: 'rule' };
+    recordRuleHit(result, 'PreToolUse', 'Edit', '/src/a.ts', '/project');
+
+    const hits = readRuleHits('/project');
+    expect(hits).toHaveLength(1);
+    expect(hits[0].sessionId).toBeUndefined();
+  });
 });

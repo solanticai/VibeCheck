@@ -10,6 +10,8 @@ export interface RuleHitRecord {
   filePath?: string;
   event: HookEvent;
   tool: string;
+  /** Claude Code session identifier (forwarded from hook stdin) */
+  sessionId?: string;
 }
 
 const LOG_FILENAME = '.vguard/data/rule-hits.jsonl';
@@ -25,6 +27,7 @@ export function recordRuleHit(
   tool: string,
   filePath: string | undefined,
   projectRoot: string,
+  sessionId?: string,
 ): void {
   try {
     const logPath = join(projectRoot, LOG_FILENAME);
@@ -50,6 +53,7 @@ export function recordRuleHit(
       filePath,
       event,
       tool,
+      ...(sessionId !== undefined ? { sessionId } : {}),
     };
 
     appendFileSync(logPath, JSON.stringify(record) + '\n', 'utf-8');

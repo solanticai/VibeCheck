@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-04-05
+
+### Added
+
+- Session tracking: Claude Code's `session_id` hook payload is now
+  captured on every hook invocation and attached to every rule-hit
+  record. Previously `session_id` was silently discarded, which meant
+  every synced `rule_hits.session_id` on the cloud dashboard was null
+  and sessions could not be grouped, filtered, or drilled into.
+- New `SessionStart` and `SessionEnd` Claude Code hooks are generated
+  by the claude-code adapter. Both are always registered (regardless
+  of active rules) and run matcher-less. They write lifecycle markers
+  to `.vguard/data/session-events.jsonl` with branch, cli_version,
+  agent, and cwd metadata, then fire a best-effort flush to the new
+  cloud `/api/v1/sessions/events` endpoint.
+- New `session-tracker.ts` / `session-streamer.ts` modules maintain
+  an append-only JSONL log of session lifecycle events and stream
+  them to the cloud with cursor-based deduplication. Fail-open
+  throughout — session telemetry never blocks developer work.
+- `HookContext` now carries an optional `sessionId` field, so custom
+  rules can read the active session id if they need it (e.g. to
+  include it in messages or autofix metadata).
+
+### Changed
+
+- `RuleHitRecord` (the JSONL shape written to
+  `.vguard/data/rule-hits.jsonl`) now carries an optional `sessionId`
+  field. Existing records without `sessionId` remain valid.
+- `recordRuleHit()` gained an optional `sessionId` parameter. Call
+  sites inside the CLI pass the session id extracted from stdin;
+  the parameter is backward compatible for any external callers.
+- `vguard generate` refreshes `.claude/settings.json` to include the
+  new SessionStart/SessionEnd hook entries. Existing projects only
+  need to re-run `vguard generate` once to start forwarding session
+  lifecycle events.
+
 ## [1.4.1] - 2026-04-05
 
 ### Fixed

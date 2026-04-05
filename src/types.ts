@@ -55,6 +55,8 @@ export interface HookContext {
   projectConfig: ResolvedConfig;
   /** Git repository context */
   gitContext: GitContext;
+  /** Claude Code session identifier (forwarded from the hook stdin payload) */
+  sessionId?: string;
 }
 
 // ─── Rule Result ────────────────────────────────────────────────────────────

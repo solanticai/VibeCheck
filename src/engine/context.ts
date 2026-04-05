@@ -8,6 +8,8 @@ import { isValidFilePath } from '../utils/validation.js';
 export interface RawHookInput {
   tool_name?: string;
   tool_input?: Record<string, unknown>;
+  /** Claude Code session identifier — forwarded onto HookContext + RuleHitRecord. */
+  session_id?: string;
   [key: string]: unknown;
 }
 
@@ -21,6 +23,10 @@ export function buildHookContext(
 ): HookContext {
   const tool = rawInput.tool_name ?? '';
   const toolInput = rawInput.tool_input ?? {};
+  const sessionId =
+    typeof rawInput.session_id === 'string' && rawInput.session_id.length > 0
+      ? rawInput.session_id
+      : undefined;
 
   // Extract file path for git context, validating it does not contain shell metacharacters
   const rawFilePath = (toolInput.file_path as string) ?? (toolInput.path as string) ?? '';
@@ -35,5 +41,6 @@ export function buildHookContext(
     toolInput,
     projectConfig: config,
     gitContext,
+    ...(sessionId !== undefined ? { sessionId } : {}),
   };
 }

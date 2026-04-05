@@ -5,16 +5,21 @@
  * It reads stdin, builds context, resolves rules, runs them, and outputs results.
  */
 
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import type { HookEvent, CloudConfig } from '../types.js';
-import { parseStdinJson, extractToolInput } from '../utils/stdin.js';
+import { parseStdinJson, extractToolInput, extractSessionId } from '../utils/stdin.js';
 import { loadCompiledConfig } from '../config/compile.js';
 import { buildHookContext } from './context.js';
 import { resolveRules } from './resolver.js';
 import { runRules } from './runner.js';
 import { recordRuleHit } from './tracker.js';
+import { recordSessionEvent } from './session-tracker.js';
 import { recordPerfEntry } from './perf.js';
 import { formatPreToolUseOutput, formatPostToolUseOutput, formatStopOutput } from './output.js';
 import { isValidHookEvent } from '../utils/validation.js';
+import { buildGitContext } from '../utils/git.js';
 
 // Import and register all built-in rules
 import '../rules/index.js';
@@ -42,8 +47,16 @@ export async function executeHook(event: HookEvent): Promise<void> {
       process.exit(0); // No config = no enforcement
     }
 
-    // 3. Extract tool info
+    // 3. Extract tool info + session identifier
     const { toolName } = extractToolInput(rawInput);
+    const sessionId = extractSessionId(rawInput);
+
+    // 3b. Session lifecycle events are short-circuited — no rules run,
+    // we just record a session marker and (optionally) kick off a flush.
+    if (event === 'SessionStart' || event === 'SessionEnd') {
+      handleSessionLifecycleEvent(event, sessionId, config.cloud);
+      process.exit(0);
+    }
 
     // 4. Build context
     const context = buildHookContext(
@@ -72,7 +85,7 @@ export async function executeHook(event: HookEvent): Promise<void> {
       | string
       | undefined;
     for (const ruleResult of result.results) {
-      recordRuleHit(ruleResult, event, toolName, filePath, process.cwd());
+      recordRuleHit(ruleResult, event, toolName, filePath, process.cwd(), sessionId);
     }
 
     // Record perf data
@@ -87,6 +100,9 @@ export async function executeHook(event: HookEvent): Promise<void> {
     if (config.cloud?.autoSync === true) {
       triggerRealTimeStream(process.cwd(), config.cloud);
       triggerConfigPush(process.cwd());
+      // Piggy-back a session-events flush on every hook — inexpensive
+      // safety net in case SessionEnd never fires (e.g. Claude Code crash).
+      triggerSessionEventFlush(process.cwd());
     }
 
     // 7b. Full flush on Stop events (catch any remaining buffered records)
@@ -178,4 +194,84 @@ function triggerCloudSync(projectRoot: string): void {
     .catch(() => {
       // Fail open — cloud sync errors should never impact the developer
     });
+}
+
+/**
+ * Handle a SessionStart or SessionEnd hook event.
+ *
+ * Records a session lifecycle marker to
+ * `.vguard/data/session-events.jsonl` (with branch/cli_version/cwd
+ * metadata on start) and fires a best-effort flush to the cloud
+ * sessions endpoint. No rules run on lifecycle events.
+ */
+function handleSessionLifecycleEvent(
+  event: 'SessionStart' | 'SessionEnd',
+  sessionId: string | undefined,
+  cloudConfig: CloudConfig | undefined,
+): void {
+  if (!sessionId) return; // Nothing we can correlate without a session id.
+
+  const projectRoot = process.cwd();
+
+  if (event === 'SessionStart') {
+    const gitContext = buildGitContext(projectRoot);
+    recordSessionEvent(
+      {
+        type: 'start',
+        sessionId,
+        branch: gitContext.branch ?? undefined,
+        cliVersion: readVguardVersion(projectRoot) ?? undefined,
+        agent: 'claude-code',
+        cwd: projectRoot,
+      },
+      projectRoot,
+    );
+  } else {
+    recordSessionEvent({ type: 'end', sessionId }, projectRoot);
+  }
+
+  // Kick off a background flush if cloud sync is enabled.
+  if (cloudConfig?.autoSync === true) {
+    triggerSessionEventFlush(projectRoot);
+  }
+}
+
+/**
+ * Non-blocking, fire-and-forget flush of pending session lifecycle events.
+ */
+function triggerSessionEventFlush(projectRoot: string): void {
+  void import('../cloud/credentials.js')
+    .then(({ readCredentials }) => {
+      const apiKey = process.env.VGUARD_API_KEY ?? readCredentials()?.apiKey;
+      if (!apiKey) return;
+      return import('../cloud/session-streamer.js').then(({ flushSessionEvents }) =>
+        flushSessionEvents(projectRoot, apiKey),
+      );
+    })
+    .catch(() => {
+      // Fail open — session telemetry must never impact the developer.
+    });
+}
+
+/**
+ * Best-effort read of the installed @solanticai/vguard package version,
+ * falling back to the consumer project's package.json during dev.
+ * Duplicated here (vs imported from config-pusher) to avoid a dependency
+ * cycle and to keep hook startup fast.
+ */
+function readVguardVersion(projectRoot: string): string | null {
+  const candidates = ['node_modules/@solanticai/vguard/package.json', 'package.json'];
+  for (const candidate of candidates) {
+    try {
+      const path = join(projectRoot, candidate);
+      if (!existsSync(path)) continue;
+      const pkg = JSON.parse(readFileSync(path, 'utf-8')) as { version?: string };
+      if (typeof pkg.version === 'string' && pkg.version.length > 0) {
+        return pkg.version;
+      }
+    } catch {
+      // Try next candidate
+    }
+  }
+  return null;
 }

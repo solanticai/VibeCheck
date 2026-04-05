@@ -7,6 +7,7 @@ vi.mock('../../src/utils/stdin.js', () => ({
     toolName: (data.tool_name as string) ?? '',
     toolInput: (data.tool_input as Record<string, unknown>) ?? {},
   })),
+  extractSessionId: vi.fn((data: Record<string, unknown>) => data.session_id as string | undefined),
 }));
 
 vi.mock('../../src/config/compile.js', () => ({
