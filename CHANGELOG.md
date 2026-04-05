@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-04-05
+
+### Added
+
+- `vguard init` now exposes **every** VGuard CLI command as a namespaced
+  `vguard:*` script in the project's `package.json`. Previously only six
+  commands were injected (`lint`, `fix`, `doctor`, `sync`, `report`, and
+  the base `vguard` alias); now all 16 commands are registered — including
+  `vguard:generate`, `vguard:learn`, `vguard:upgrade`, `vguard:eject`,
+  `vguard:add`, `vguard:remove`, and the four `vguard:cloud:*` subcommands.
+  Users can run `npm run vguard:<cmd>` for any command without having to
+  remember the full CLI surface.
+- `.vguard/COMMANDS.md` is now generated on `vguard init` and refreshed on
+  `vguard generate`. This is a universal reference file that lists every
+  CLI command grouped by category (Setup, Quality, Analysis, Maintenance,
+  Cloud) with its description, npm script shortcut, and argument-
+  passthrough hints. It also serves projects that don't have a
+  `package.json` ("the project's equivalent file"), giving every project
+  a single, local, discoverable index of every VGuard command.
+- `vguard generate` now refreshes the `vguard:*` scripts list and rewrites
+  `.vguard/COMMANDS.md` as part of its normal flow. This ensures that new
+  commands added in future VGuard releases automatically surface in
+  existing projects the next time they regenerate their hooks — no manual
+  `package.json` edits required.
+
+### Changed
+
+- The command registry has moved to `src/utils/command-registry.ts` as a
+  single source of truth shared by `init`, `generate`, and the
+  `COMMANDS.md` renderer. Additions to the CLI only need to be registered
+  in one place to appear across all surfaces.
+
 ## [1.4.1] - 2026-04-05
 
 ### Fixed
