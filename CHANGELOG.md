@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **ai-for-vibe-guard/** — 6 AI-readable SKILL.md files (setup-vguard,
+  add-rules, configure-presets, cloud-connect, troubleshoot, custom-rules)
+  that AI coding assistants can reference to install, configure, and debug
+  VGuard in any project.
+
+### Fixed
+
+- **cloud/session-end sync** — when `cloud.enabled` is true but `autoSync`
+  is off, a batch sync (rule hits + config snapshot + session events) now
+  fires at SessionEnd so data reaches the dashboard without real-time
+  streaming.
+
 ## [1.8.0] - 2026-04-06
 
 ### Added

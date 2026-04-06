@@ -251,6 +251,14 @@ function handleSessionLifecycleEvent(
   if (cloudConfig?.autoSync === true) {
     triggerSessionEventFlush(projectRoot);
   }
+
+  // When cloud is enabled but autoSync is OFF, trigger a batch sync at session
+  // end so data reaches the dashboard even without real-time streaming.
+  if (event === 'SessionEnd' && cloudConfig?.enabled === true && cloudConfig?.autoSync !== true) {
+    triggerSessionEventFlush(projectRoot);
+    triggerCloudSync(projectRoot);
+    triggerConfigPush(projectRoot);
+  }
 }
 
 /**
