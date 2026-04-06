@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-04-06
+
+### Added
+
+#### 5 new rule categories — 14 rules
+
+Expands the guardrail suite from 35 to 49 built-in rules across 5 new
+categories: **performance**, **maintainability**, **testing**,
+**reliability**, and **documentation**.
+
+- **performance/bundle-size** — warns on full-library imports of lodash,
+  moment, rxjs. Suggests tree-shakeable alternatives.
+- **performance/no-sync-io** — warns on readFileSync, execSync, and
+  other synchronous IO that blocks the event loop.
+- **performance/image-optimization** — warns on raw `<img>` tags in JSX
+  files. Suggests next/image or framework-specific alternatives.
+- **maintainability/cyclomatic-complexity** — warns when function
+  complexity exceeds a configurable threshold (default: 10).
+- **maintainability/max-function-params** — warns when functions have
+  more than 4 parameters. Suggests options-object pattern.
+- **maintainability/no-deep-nesting** — warns when brace nesting
+  exceeds 4 levels. Suggests early returns and extraction.
+- **maintainability/consistent-returns** — warns when a function mixes
+  value-returning and void-returning code paths.
+- **maintainability/no-god-files** — warns when a file has more than 15
+  exports, suggesting it should be split into focused modules.
+- **testing/no-test-skip** — warns on .skip(), .only(), xit(),
+  xdescribe() in test files. These disable tests silently.
+- **testing/mock-cleanup** — warns when vi.mock()/jest.mock() are used
+  without afterEach cleanup.
+- **testing/assertion-count** — warns when test blocks have zero
+  expect() assertions.
+- **testing/no-snapshot-abuse** — warns when test files overuse
+  snapshot assertions (default limit: 3).
+- **reliability/no-unhandled-promises** — warns on .then() without
+  .catch() on the same promise chain.
+- **documentation/public-api-jsdoc** — warns when exported functions
+  and classes lack JSDoc comments.
+
+#### Shared code-analysis utility
+
+- New `src/utils/code-analysis.ts` with `extractFunctions()` (brace-
+  counting function extractor), `isTestFile()`, and `isGeneratedFile()`
+  helpers shared across the 14 new rules.
+
+#### Preset updates
+
+- Updated 13 presets (nextjs-15, react-19, typescript-strict, vue,
+  sveltekit, astro, express, go, python-strict, supabase, prisma,
+  remix, react-native) with relevant new rules.
+
+### Changed
+
+- Session lifecycle handler now reads agent type from config instead
+  of hardcoding `'claude-code'`.
+- `.gitignore` now excludes `.vguard/data/rule-hits.jsonl`.
+
 ## [1.7.0] - 2026-04-05
 
 ### Added

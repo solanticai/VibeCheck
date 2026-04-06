@@ -25,5 +25,8 @@ export const nextjs15: Preset = {
     'security/no-hardcoded-urls': true,
     'quality/error-handling': true,
     'quality/a11y-jsx': true,
+    'performance/bundle-size': true,
+    'performance/image-optimization': { framework: 'nextjs' },
+    'maintainability/no-god-files': true,
   },
 };

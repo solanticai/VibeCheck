@@ -19,5 +19,7 @@ export const sveltekit: Preset = {
     },
     'quality/naming-conventions': true,
     'quality/file-structure': true,
+    'performance/bundle-size': true,
+    'performance/image-optimization': true,
   },
 };

@@ -25,5 +25,8 @@ export const react19: Preset = {
     },
     'quality/a11y-jsx': true,
     'security/xss-prevention': true,
+    'performance/bundle-size': true,
+    'performance/image-optimization': true,
+    'maintainability/max-function-params': true,
   },
 };

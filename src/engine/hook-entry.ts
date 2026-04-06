@@ -55,7 +55,7 @@ export async function executeHook(event: HookEvent): Promise<void> {
     // 3b. Session lifecycle events are short-circuited — no rules run,
     // we just record a session marker and (optionally) kick off a flush.
     if (event === 'SessionStart' || event === 'SessionEnd') {
-      handleSessionLifecycleEvent(event, sessionId, config.cloud);
+      handleSessionLifecycleEvent(event, sessionId, config.cloud, config.agents);
       process.exit(0);
     }
 
@@ -216,11 +216,15 @@ function triggerCloudSync(projectRoot: string): void {
  * `.vguard/data/session-events.jsonl` (with branch/cli_version/cwd
  * metadata on start) and fires a best-effort flush to the cloud
  * sessions endpoint. No rules run on lifecycle events.
+ *
+ * The agent is resolved from `config.agents` (set in vguard.config.ts)
+ * — never hardcoded or sniffed from environment variables.
  */
 function handleSessionLifecycleEvent(
   event: 'SessionStart' | 'SessionEnd',
   sessionId: string | undefined,
   cloudConfig: CloudConfig | undefined,
+  agents?: import('../types.js').AgentType[],
 ): void {
   if (!sessionId) return; // Nothing we can correlate without a session id.
 
@@ -232,9 +236,9 @@ function handleSessionLifecycleEvent(
       {
         type: 'start',
         sessionId,
-        branch: gitContext.branch ?? undefined,
-        cliVersion: readVguardVersion(projectRoot) ?? undefined,
-        agent: 'claude-code',
+        branch: gitContext.branch ?? 'unknown',
+        cliVersion: readVguardVersion(projectRoot) ?? 'unknown',
+        agent: agents?.[0] ?? 'unknown',
         cwd: projectRoot,
       },
       projectRoot,

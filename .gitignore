@@ -50,3 +50,4 @@ docs/.astro/
 # Logs
 *.log
 npm-debug.log*
+.vguard/data/rule-hits.jsonl

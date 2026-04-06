@@ -25,5 +25,7 @@ export const vue: Preset = {
     'quality/no-console-log': true,
     'security/xss-prevention': true,
     'quality/a11y-jsx': true,
+    'performance/bundle-size': true,
+    'performance/image-optimization': true,
   },
 };

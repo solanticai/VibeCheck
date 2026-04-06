@@ -20,5 +20,9 @@ export const typescriptStrict: Preset = {
     'quality/no-any-type': true,
     'quality/error-handling': true,
     'security/unsafe-eval': true,
+    'maintainability/cyclomatic-complexity': true,
+    'maintainability/max-function-params': true,
+    'maintainability/consistent-returns': true,
+    'documentation/public-api-jsdoc': true,
   },
 };

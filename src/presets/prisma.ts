@@ -19,5 +19,6 @@ export const prisma: Preset = {
     'quality/naming-conventions': true,
     'security/sql-injection': true,
     'security/secret-detection': true,
+    'reliability/no-unhandled-promises': true,
   },
 };

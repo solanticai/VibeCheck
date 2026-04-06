@@ -16,5 +16,7 @@ export const reactNative: Preset = {
     'quality/file-structure': {
       framework: 'react',
     },
+    'performance/bundle-size': true,
+    'maintainability/max-function-params': true,
   },
 };

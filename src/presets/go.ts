@@ -20,5 +20,7 @@ export const go: Preset = {
     },
     'workflow/format-on-save': true,
     'security/secret-detection': true,
+    'maintainability/cyclomatic-complexity': true,
+    'maintainability/max-function-params': true,
   },
 };

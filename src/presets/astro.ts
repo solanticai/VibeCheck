@@ -21,5 +21,7 @@ export const astro: Preset = {
     'quality/naming-conventions': true,
     'quality/file-structure': true,
     'quality/no-console-log': true,
+    'performance/bundle-size': true,
+    'performance/image-optimization': { framework: 'astro' },
   },
 };

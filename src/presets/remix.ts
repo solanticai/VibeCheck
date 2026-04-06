@@ -25,5 +25,7 @@ export const remix: Preset = {
     'quality/no-console-log': true,
     'quality/error-handling': true,
     'quality/a11y-jsx': true,
+    'performance/bundle-size': true,
+    'performance/image-optimization': true,
   },
 };

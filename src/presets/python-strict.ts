@@ -21,5 +21,7 @@ export const pythonStrict: Preset = {
     },
     'quality/no-console-log': true,
     'security/secret-detection': true,
+    'maintainability/cyclomatic-complexity': true,
+    'maintainability/max-function-params': true,
   },
 };

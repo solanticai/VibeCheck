@@ -23,5 +23,8 @@ export const express: Preset = {
     'security/secret-detection': true,
     'security/sql-injection': true,
     'security/unsafe-eval': true,
+    'performance/no-sync-io': true,
+    'reliability/no-unhandled-promises': true,
+    'maintainability/cyclomatic-complexity': true,
   },
 };
