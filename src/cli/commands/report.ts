@@ -1,7 +1,12 @@
+import { writeFile, mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { aggregateReport } from '../../report/aggregator.js';
 import { generateMarkdownReport, saveReport } from '../../report/markdown.js';
 
-export async function reportCommand(): Promise<void> {
+export async function reportCommand(options?: {
+  output?: string;
+  format?: string;
+}): Promise<void> {
   const projectRoot = process.cwd();
 
   console.log('\n  VGuard Report — Generating quality dashboard...\n');
@@ -14,10 +19,33 @@ export async function reportCommand(): Promise<void> {
     return;
   }
 
-  const markdown = generateMarkdownReport(data);
-  const outputPath = await saveReport(markdown, projectRoot);
+  const format = options?.format ?? 'md';
 
-  console.log(`  Report saved to ${outputPath}`);
+  if (format === 'json') {
+    const json = JSON.stringify(data, null, 2);
+
+    if (options?.output) {
+      await mkdir(dirname(options.output), { recursive: true });
+      await writeFile(options.output, json, 'utf-8');
+      console.log(`  Report saved to ${options.output}`);
+    } else {
+      console.log(json);
+    }
+    return;
+  }
+
+  // Default: markdown
+  const markdown = generateMarkdownReport(data);
+
+  if (options?.output) {
+    await mkdir(dirname(options.output), { recursive: true });
+    await writeFile(options.output, markdown, 'utf-8');
+    console.log(`  Report saved to ${options.output}`);
+  } else {
+    const outputPath = await saveReport(markdown, projectRoot);
+    console.log(`  Report saved to ${outputPath}`);
+  }
+
   console.log(`  Total rule executions: ${data.totalHits}`);
   console.log(`  Technical debt score: ${data.debtScore}/100\n`);
 }

@@ -79,11 +79,21 @@ program
   });
 
 program
+  .command('version')
+  .description('Display the installed VGuard CLI version')
+  .action(async () => {
+    const { versionCommand } = await import('./commands/version.js');
+    versionCommand();
+  });
+
+program
   .command('report')
   .description('Generate quality dashboard from rule hit data')
-  .action(async () => {
+  .option('--output <path>', 'Save report to a specific file path')
+  .option('--format <format>', 'Output format: md or json (default: md)', 'md')
+  .action(async (options: { output?: string; format?: string }) => {
     const { reportCommand } = await import('./commands/report.js');
-    await reportCommand();
+    await reportCommand(options);
   });
 
 program
@@ -113,6 +123,90 @@ program
   .action(async (options: { dryRun?: boolean }) => {
     const { fixCommand } = await import('./commands/fix.js');
     await fixCommand(options);
+  });
+
+// Rules subcommands
+const rules = program
+  .command('rules')
+  .description('Manage rules (list, enable, disable)');
+
+rules
+  .command('list')
+  .description('List rules, their severity, and enabled status')
+  .option('--all', 'Include disabled rules')
+  .option('--json', 'Output as JSON')
+  .action(async (options: { all?: boolean; json?: boolean }) => {
+    const { rulesListCommand } = await import('./commands/rules.js');
+    await rulesListCommand(options);
+  });
+
+rules
+  .command('enable <rule>')
+  .description('Enable a specific rule by its ID')
+  .action(async (ruleId: string) => {
+    const { rulesEnableCommand } = await import('./commands/rules.js');
+    await rulesEnableCommand(ruleId);
+  });
+
+rules
+  .command('disable <rule>')
+  .description('Disable a specific rule by its ID')
+  .action(async (ruleId: string) => {
+    const { rulesDisableCommand } = await import('./commands/rules.js');
+    await rulesDisableCommand(ruleId);
+  });
+
+// Presets subcommands
+const presets = program
+  .command('presets')
+  .description('Manage presets (list, add, remove)');
+
+presets
+  .command('list')
+  .description('List available presets and their status')
+  .option('--installed', 'Show only installed presets')
+  .action(async (options: { installed?: boolean }) => {
+    const { presetsListCommand } = await import('./commands/presets.js');
+    await presetsListCommand(options);
+  });
+
+presets
+  .command('add <preset>')
+  .description('Add and activate a preset')
+  .action(async (presetId: string) => {
+    const { presetsAddCommand } = await import('./commands/presets.js');
+    await presetsAddCommand(presetId);
+  });
+
+presets
+  .command('remove <preset>')
+  .description('Remove a preset from the active configuration')
+  .action(async (presetId: string) => {
+    const { presetsRemoveCommand } = await import('./commands/presets.js');
+    await presetsRemoveCommand(presetId);
+  });
+
+// Config subcommands
+const config = program
+  .command('config')
+  .description('View and modify VGuard configuration');
+
+config
+  .command('show')
+  .description('Display the fully resolved configuration')
+  .option('--json', 'Output as JSON')
+  .option('--raw', 'Show raw config without preset resolution')
+  .action(async (options: { json?: boolean; raw?: boolean }) => {
+    const { configShowCommand } = await import('./commands/config.js');
+    await configShowCommand(options);
+  });
+
+config
+  .command('set <key> <value>')
+  .description('Set a configuration option (supports dot-notation for nested keys)')
+  .action(async (key: string, value: string) => {
+    const { configSetCommand } = await import('./commands/config.js');
+    await configSetCommand(key, value);
   });
 
 // Cloud subcommands
