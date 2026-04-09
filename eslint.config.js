@@ -13,6 +13,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'coverage/', 'docs/', '.claude/skills/'],
+    ignores: ['dist/', 'node_modules/', 'coverage/', 'docs/', '.claude/skills/', 'scripts/'],
   },
 );

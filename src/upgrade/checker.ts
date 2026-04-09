@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execSync } from 'node:child_process';
 import { isNewerVersion } from '../utils/semver.js';
 import { isValidNpmPackageName } from '../utils/validation.js';
 
@@ -12,6 +12,10 @@ export interface VersionInfo {
 
 /**
  * Check npm registry for newer versions of packages.
+ *
+ * Uses execSync (shell mode) because execFileSync cannot spawn .cmd
+ * files on Windows without shell: true. Package names are validated
+ * by isValidNpmPackageName before interpolation.
  */
 export function checkForUpdates(packages: string[]): VersionInfo[] {
   const results: VersionInfo[] = [];
@@ -24,7 +28,7 @@ export function checkForUpdates(packages: string[]): VersionInfo[] {
 
     try {
       // Get current installed version
-      const currentRaw = execFileSync('npm', ['list', pkg, '--depth=0', '--json'], {
+      const currentRaw = execSync(`npm list ${pkg} --depth=0 --json`, {
         encoding: 'utf-8',
         timeout: 10000,
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -33,7 +37,7 @@ export function checkForUpdates(packages: string[]): VersionInfo[] {
       const current = currentData.dependencies?.[pkg]?.version ?? 'unknown';
 
       // Get latest version from registry
-      const latestRaw = execFileSync('npm', ['view', pkg, 'version'], {
+      const latestRaw = execSync(`npm view ${pkg} version`, {
         encoding: 'utf-8',
         timeout: 10000,
         stdio: ['pipe', 'pipe', 'pipe'],
