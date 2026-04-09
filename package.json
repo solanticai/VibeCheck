@@ -1,6 +1,6 @@
 {
   "name": "@solanticai/vguard",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "description": "AI coding guardrails framework. Runtime-enforced quality controls for Claude Code, Cursor, Codex, and more.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -19,13 +19,19 @@
       "types": "./dist/hooks/runner.d.ts",
       "import": "./dist/hooks/runner.js",
       "require": "./dist/hooks/runner.cjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
+  "sideEffects": [
+    "./src/rules/index.ts",
+    "./src/presets/index.ts"
+  ],
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup && node -e \"const f='dist/cli.cjs';const c=require('fs').readFileSync(f,'utf8');if(!c.startsWith('#!'))require('fs').writeFileSync(f,'#!/usr/bin/env node\\n'+c)\" && tsc --emitDeclarationOnly --declaration --outDir dist && node -e \"require('fs').writeFileSync('dist/hooks/runner.d.ts','export { executeHook } from \\'../engine/hook-entry.js\\';\\n')\"",
+    "build": "tsup && node scripts/postbuild.mjs",
+    "prepublishOnly": "npm run build && npm test",
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",

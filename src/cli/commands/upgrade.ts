@@ -59,7 +59,7 @@ export async function upgradeCommand(options: { check?: boolean; apply?: boolean
 
   // Apply updates
   console.log('\n  Updating packages...\n');
-  const { execFileSync } = await import('node:child_process');
+  const { execSync } = await import('node:child_process');
   const { isValidNpmPackageName } = await import('../../utils/validation.js');
 
   for (const update of available) {
@@ -70,7 +70,7 @@ export async function upgradeCommand(options: { check?: boolean; apply?: boolean
 
     try {
       console.log(`    Updating ${update.name}...`);
-      execFileSync('npm', ['install', `${update.name}@${update.latest}`], {
+      execSync(`npm install ${update.name}@${update.latest}`, {
         encoding: 'utf-8',
         timeout: 60000,
         stdio: ['pipe', 'pipe', 'pipe'],
