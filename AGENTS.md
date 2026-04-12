@@ -173,4 +173,4 @@ export default defineConfig({
 });
 ```
 
-See https://github.com/Anthril/vibe-guard for full documentation.
+See https://github.com/anthril/vibe-guard for full documentation.

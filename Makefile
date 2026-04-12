@@ -1,7 +1,7 @@
 # =============================================================================
 # VGuard — Contributor Sync
 # =============================================================================
-# Fetches contributor lists from all Anthril repos (vibe-guard,
+# Fetches contributor lists from all anthril repos (vibe-guard,
 # vibe-guard-cloud) via the GitHub CLI, then merges them into a single
 # deduplicated JSON file at .github/data/all-contributors.json.
 #
@@ -12,7 +12,7 @@
 #   make contributors.vibe-guard   Fetch from a single repo
 # =============================================================================
 
-ORG := Anthril
+ORG := anthril
 REPOS := vibe-guard vibe-guard-cloud
 OUT_DIR := .github/data
 

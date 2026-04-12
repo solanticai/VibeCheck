@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
   Then run `npx vguard generate` to regenerate hooks with the new import paths.
 - **GitHub org renamed** — all repository URLs, CI badges, sponsor links,
-  and documentation now reference `github.com/Anthril` instead of
+  and documentation now reference `github.com/anthril` instead of
   `github.com/solanticai`.
 - **Author and contact updated** — author field changed from "Solantic Ai"
   to "Anthril". Security reports: `security@anthril.com`. General contact:

@@ -58,10 +58,10 @@
   "homepage": "https://vguard.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Anthril/vibe-guard.git"
+    "url": "git+https://github.com/anthril/vibe-guard.git"
   },
   "bugs": {
-    "url": "https://github.com/Anthril/vibe-guard/issues"
+    "url": "https://github.com/anthril/vibe-guard/issues"
   },
   "publishConfig": {
     "access": "public",

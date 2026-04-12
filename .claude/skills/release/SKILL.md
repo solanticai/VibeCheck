@@ -172,14 +172,14 @@ If checks fail:
 
    ---
 
-   **Full changelog:** https://github.com/Anthril/vibe-guard/blob/master/CHANGELOG.md
+   **Full changelog:** https://github.com/anthril/vibe-guard/blob/master/CHANGELOG.md
    **npm:** https://www.npmjs.com/package/@anthril/vguard/v/X.Y.Z
-   **Release:** https://github.com/Anthril/vibe-guard/releases/tag/vX.Y.Z
+   **Release:** https://github.com/anthril/vibe-guard/releases/tag/vX.Y.Z
    ```
 
 7. Get repository and changelog category IDs:
    ```bash
-   gh api graphql -f query='{ repository(owner: "Anthril", name: "vibe-guard") { id, discussionCategories(first: 20) { nodes { id, name } } } }'
+   gh api graphql -f query='{ repository(owner: "anthril", name: "vibe-guard") { id, discussionCategories(first: 20) { nodes { id, name } } } }'
    ```
 
 8. Create the discussion:
