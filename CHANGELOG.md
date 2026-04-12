@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-04-12
+
+### Fixed
+
+- **GitHub URLs** — corrected casing in all GitHub URLs from
+  `github.com/Anthril` to `github.com/anthril` to match the
+  canonical GitHub username. Affects README badges, sponsor links,
+  generated hook rule documentation, and release skill templates.
+
 ## [2.0.0] - 2026-04-12
 
 ### Changed
@@ -19,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
   Then run `npx vguard generate` to regenerate hooks with the new import paths.
 - **GitHub org renamed** — all repository URLs, CI badges, sponsor links,
-  and documentation now reference `github.com/Anthril` instead of
+  and documentation now reference `github.com/anthril` instead of
   `github.com/solanticai`.
 - **Author and contact updated** — author field changed from "Solantic Ai"
   to "Anthril". Security reports: `security@anthril.com`. General contact:

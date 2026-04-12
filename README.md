@@ -6,8 +6,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@anthril/vguard?color=2563EB&label=npm)](https://www.npmjs.com/package/@anthril/vguard)
 [![npm downloads](https://img.shields.io/npm/dm/@anthril/vguard?color=2563EB)](https://www.npmjs.com/package/@anthril/vguard)
-[![license](https://img.shields.io/github/license/Anthril/vibe-guard?color=2563EB)](LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/Anthril/vibe-guard/ci.yml?label=CI&color=16A34A)](https://github.com/Anthril/vibe-guard/actions)
+[![license](https://img.shields.io/github/license/anthril/vibe-guard?color=2563EB)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/anthril/vibe-guard/ci.yml?label=CI&color=16A34A)](https://github.com/anthril/vibe-guard/actions)
 [![node](https://img.shields.io/badge/node-%3E%3D20-16A34A)](package.json)
 
 </div>
@@ -78,9 +78,9 @@ nextjs-15 · react-19 · typescript-strict · supabase · tailwind · django · 
 
 ## Sponsors
 
-This project is maintained by [Anthril](https://github.com/Anthril) and funded by our sponsors.
+This project is maintained by [Anthril](https://github.com/anthril) and funded by our sponsors.
 
-[Become a sponsor →](https://github.com/sponsors/Anthril)
+[Become a sponsor →](https://github.com/sponsors/anthril)
 
 ### Featured Sponsors
 
@@ -92,7 +92,7 @@ This project is maintained by [Anthril](https://github.com/Anthril) and funded b
 
 ## Community
 
-- [GitHub Discussions](https://github.com/Anthril/vibe-guard/discussions)
+- [GitHub Discussions](https://github.com/anthril/vibe-guard/discussions)
 - [Contributing](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
