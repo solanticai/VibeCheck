@@ -4,10 +4,10 @@
 
 **AI coding guardrails that actually enforce.**
 
-[![npm version](https://img.shields.io/npm/v/@solanticai/vguard?color=2563EB&label=npm)](https://www.npmjs.com/package/@solanticai/vguard)
-[![npm downloads](https://img.shields.io/npm/dm/@solanticai/vguard?color=2563EB)](https://www.npmjs.com/package/@solanticai/vguard)
-[![license](https://img.shields.io/github/license/solanticai/vibe-guard?color=2563EB)](LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/solanticai/vibe-guard/ci.yml?label=CI&color=16A34A)](https://github.com/solanticai/vibe-guard/actions)
+[![npm version](https://img.shields.io/npm/v/@anthril/vguard?color=2563EB&label=npm)](https://www.npmjs.com/package/@anthril/vguard)
+[![npm downloads](https://img.shields.io/npm/dm/@anthril/vguard?color=2563EB)](https://www.npmjs.com/package/@anthril/vguard)
+[![license](https://img.shields.io/github/license/Anthril/vibe-guard?color=2563EB)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/Anthril/vibe-guard/ci.yml?label=CI&color=16A34A)](https://github.com/Anthril/vibe-guard/actions)
 [![node](https://img.shields.io/badge/node-%3E%3D20-16A34A)](package.json)
 
 </div>
@@ -21,7 +21,7 @@ AI coding tools write code fast, but they also introduce security vulnerabilitie
 ## Quick Start
 
 ```bash
-npm install -D @solanticai/vguard
+npm install -D @anthril/vguard
 npx vguard init
 ```
 
@@ -78,9 +78,9 @@ nextjs-15 · react-19 · typescript-strict · supabase · tailwind · django · 
 
 ## Sponsors
 
-This project is maintained by [Solantic AI](https://github.com/solanticai) and funded by our sponsors.
+This project is maintained by [Anthril](https://github.com/Anthril) and funded by our sponsors.
 
-[Become a sponsor →](https://github.com/sponsors/solanticai)
+[Become a sponsor →](https://github.com/sponsors/Anthril)
 
 ### Featured Sponsors
 
@@ -92,7 +92,7 @@ This project is maintained by [Solantic AI](https://github.com/solanticai) and f
 
 ## Community
 
-- [GitHub Discussions](https://github.com/solanticai/vibe-guard/discussions)
+- [GitHub Discussions](https://github.com/Anthril/vibe-guard/discussions)
 - [Contributing](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
@@ -100,4 +100,4 @@ This project is maintained by [Solantic AI](https://github.com/solanticai) and f
 
 ## License
 
-[Apache 2.0](LICENSE) — Solantic AI
+[Apache 2.0](LICENSE) — Anthril

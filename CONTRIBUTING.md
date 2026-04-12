@@ -3,7 +3,7 @@
 ## Development Setup
 
 ```bash
-git clone https://github.com/solanticai/vibe-guard.git
+git clone https://github.com/Anthril/vibe-guard.git
 cd vibe-guard
 npm install
 npm run build

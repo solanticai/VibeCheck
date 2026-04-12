@@ -214,7 +214,7 @@ export interface ResolvedConfig {
  * dashboard can render preset/rules/config widgets for this project.
  */
 export interface ProjectConfigPushPayload {
-  /** Semver of the @solanticai/vguard package running on the consumer */
+  /** Semver of the @anthril/vguard package running on the consumer */
   vguardVersion: string;
   /** Resolved project configuration, serializable to JSON */
   configSnapshot: {

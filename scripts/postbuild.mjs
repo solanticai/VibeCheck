@@ -1,5 +1,5 @@
 /**
- * Post-build script for @solanticai/vguard.
+ * Post-build script for @anthril/vguard.
  *
  * Runs after tsup to:
  *   1. Inject a shebang into dist/cli.cjs (if missing)

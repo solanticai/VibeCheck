@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-04-12
+
+### Changed
+
+- **BREAKING: npm scope renamed** — package published as `@anthril/vguard`
+  (previously `@solanticai/vguard`). Update your `package.json`:
+  ```diff
+  - "@solanticai/vguard": "^1.8.3"
+  + "@anthril/vguard": "^2.0.0"
+  ```
+  Then run `npx vguard generate` to regenerate hooks with the new import paths.
+- **GitHub org renamed** — all repository URLs, CI badges, sponsor links,
+  and documentation now reference `github.com/Anthril` instead of
+  `github.com/solanticai`.
+- **Author and contact updated** — author field changed from "Solantic Ai"
+  to "Anthril". Security reports: `security@anthril.com`. General contact:
+  `info@anthril.com`.
+- **Generated hook imports updated** — `vguard generate` now emits
+  `import { executeHook } from '@anthril/vguard/hooks/runner'` in
+  generated hook scripts. Existing hooks using the old scope will
+  continue to work until regenerated.
+- **CLI upgrade command** — `vguard upgrade` now checks for updates to
+  `@anthril/vguard` instead of the old package name.
+- **Plugin marketplace** — the official Claude plugin marketplace has been
+  renamed from `solanticai-official-claude-plugins` to
+  `anthril-official-claude-plugins`. Existing marketplace users should
+  re-add the marketplace under the new name.
+
+### Removed
+
+- `learn.ignorePaths` and `cloud.excludePaths` config fields (deprecated
+  since v1.7.0). Use `.vguardignore` instead.
+
+### Migration Guide
+
+1. Install the new package:
+   ```bash
+   npm uninstall @solanticai/vguard
+   npm install -D @anthril/vguard@2.0.0
+   ```
+2. Update your `vguard.config.ts` import:
+   ```diff
+   - import { defineConfig } from '@solanticai/vguard';
+   + import { defineConfig } from '@anthril/vguard';
+   ```
+3. Regenerate hooks: `npx vguard generate`
+4. Remove deprecated config fields (`learn.ignorePaths`,
+   `cloud.excludePaths`) and use `.vguardignore` instead.
+
 ## [1.8.3] - 2026-04-09
 
 ### Changed

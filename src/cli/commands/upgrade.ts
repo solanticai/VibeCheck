@@ -8,7 +8,7 @@ export async function upgradeCommand(options: { check?: boolean; apply?: boolean
   console.log('\n  VGuard Upgrade\n');
 
   // Determine packages to check
-  const packagesToCheck = ['@solanticai/vguard'];
+  const packagesToCheck = ['@anthril/vguard'];
 
   // Check for plugin packages
   const discovered = discoverConfigFile(projectRoot);
@@ -41,7 +41,7 @@ export async function upgradeCommand(options: { check?: boolean; apply?: boolean
   }
 
   // Show what's new (for the main VGuard package)
-  const mainUpdate = available.find((u) => u.name === '@solanticai/vguard');
+  const mainUpdate = available.find((u) => u.name === '@anthril/vguard');
   if (mainUpdate) {
     console.log('');
     displayVersionChanges(mainUpdate.current, mainUpdate.latest);

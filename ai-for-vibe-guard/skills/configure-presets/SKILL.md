@@ -38,7 +38,7 @@ Read `vguard.config.ts` and note the current `presets` array.
 Edit the `presets` array in `vguard.config.ts`:
 
 ```typescript
-import { defineConfig } from '@solanticai/vguard';
+import { defineConfig } from '@anthril/vguard';
 
 export default defineConfig({
   presets: ['nextjs-15', 'typescript-strict', 'tailwind'], // Add preset here

@@ -1,13 +1,13 @@
 # AI Skills for VGuard
 
-This directory contains AI-readable skill definitions that help AI coding assistants set up, configure, and troubleshoot [VGuard](https://github.com/solanticai/vibe-guard) — the open-source AI coding guardrails framework.
+This directory contains AI-readable skill definitions that help AI coding assistants set up, configure, and troubleshoot [VGuard](https://github.com/Anthril/vibe-guard) — the open-source AI coding guardrails framework.
 
 ## How to Use
 
 Point your AI assistant at the relevant skill file:
 
 ```
-Read and follow: https://github.com/solanticai/vibe-guard/blob/master/ai-for-vibe-guard/skills/setup-vguard/SKILL.md
+Read and follow: https://github.com/Anthril/vibe-guard/blob/master/ai-for-vibe-guard/skills/setup-vguard/SKILL.md
 ```
 
 Or reference the local path if you have the repo cloned.
@@ -35,7 +35,7 @@ VGuard enforces code quality guardrails when AI coding agents (Claude Code, Curs
 
 ## Links
 
-- [npm package](https://www.npmjs.com/package/@solanticai/vguard)
+- [npm package](https://www.npmjs.com/package/@anthril/vguard)
 - [Documentation](https://vguard.dev/docs)
-- [GitHub](https://github.com/solanticai/vibe-guard)
+- [GitHub](https://github.com/Anthril/vibe-guard)
 - [VGuard Cloud](https://vguard.dev)

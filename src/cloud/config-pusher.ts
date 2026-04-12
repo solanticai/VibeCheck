@@ -22,7 +22,7 @@ import { CloudClient } from './client.js';
 const STATE_FILE = '.vguard/data/config-sync-state.json';
 const RESOLVED_CONFIG_FILE = '.vguard/cache/resolved-config.json';
 const PACKAGE_JSON_FILE = 'package.json';
-const VGUARD_PACKAGE_JSON_PATH = 'node_modules/@solanticai/vguard/package.json';
+const VGUARD_PACKAGE_JSON_PATH = 'node_modules/@anthril/vguard/package.json';
 const THROTTLE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface ConfigSyncState {

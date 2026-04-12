@@ -60,7 +60,7 @@ export async function generateRuleFile(
   await mkdir(dirname(outputPath), { recursive: true });
 
   const configJson = JSON.stringify(suggestion.config, null, 2);
-  const content = `import type { Rule } from '@solanticai/vguard';
+  const content = `import type { Rule } from '@anthril/vguard';
 
 /**
  * Auto-generated rule from convention learning.

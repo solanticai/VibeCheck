@@ -23,7 +23,7 @@ Automate the full release lifecycle for VGuard. This skill replaces the manual r
 
 2. Check the latest published version:
    ```bash
-   npm view @solanticai/vguard version
+   npm view @anthril/vguard version
    ```
 
 3. Review commits since last tag:
@@ -154,7 +154,7 @@ If checks fail:
    # VGuard vX.Y.Z
 
    **Released:** YYYY-MM-DD
-   **Install:** `npm install @solanticai/vguard@X.Y.Z`
+   **Install:** `npm install @anthril/vguard@X.Y.Z`
 
    ## What's Changed
 
@@ -172,14 +172,14 @@ If checks fail:
 
    ---
 
-   **Full changelog:** https://github.com/solanticai/vibe-guard/blob/master/CHANGELOG.md
-   **npm:** https://www.npmjs.com/package/@solanticai/vguard/v/X.Y.Z
-   **Release:** https://github.com/solanticai/vibe-guard/releases/tag/vX.Y.Z
+   **Full changelog:** https://github.com/Anthril/vibe-guard/blob/master/CHANGELOG.md
+   **npm:** https://www.npmjs.com/package/@anthril/vguard/v/X.Y.Z
+   **Release:** https://github.com/Anthril/vibe-guard/releases/tag/vX.Y.Z
    ```
 
 7. Get repository and changelog category IDs:
    ```bash
-   gh api graphql -f query='{ repository(owner: "solanticai", name: "vibe-guard") { id, discussionCategories(first: 20) { nodes { id, name } } } }'
+   gh api graphql -f query='{ repository(owner: "Anthril", name: "vibe-guard") { id, discussionCategories(first: 20) { nodes { id, name } } } }'
    ```
 
 8. Create the discussion:

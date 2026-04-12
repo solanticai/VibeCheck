@@ -21,14 +21,14 @@ Inspect the project to determine the tech stack:
 ## Step 2: Install VGuard
 
 ```bash
-npm install -D @solanticai/vguard
+npm install -D @anthril/vguard
 ```
 
 For other package managers:
 
-- `yarn add -D @solanticai/vguard`
-- `pnpm add -D @solanticai/vguard`
-- `bun add -D @solanticai/vguard`
+- `yarn add -D @anthril/vguard`
+- `pnpm add -D @anthril/vguard`
+- `bun add -D @anthril/vguard`
 
 ## Step 3: Initialize
 
@@ -61,7 +61,7 @@ If using Prisma, add `prisma`.
 Example config:
 
 ```typescript
-import { defineConfig } from '@solanticai/vguard';
+import { defineConfig } from '@anthril/vguard';
 
 export default defineConfig({
   presets: ['nextjs-15', 'typescript-strict', 'tailwind'],

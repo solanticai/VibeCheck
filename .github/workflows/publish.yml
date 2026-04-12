@@ -67,7 +67,7 @@ jobs:
         if: steps.merge.outputs.is_merge == 'true'
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          if npm view "@solanticai/vguard@$VERSION" version 2>/dev/null; then
+          if npm view "@anthril/vguard@$VERSION" version 2>/dev/null; then
             echo "already_published=true" >> "$GITHUB_OUTPUT"
             echo "::notice::Version $VERSION already published to npm. Skipping."
           else

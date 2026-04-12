@@ -1,6 +1,6 @@
 {
-  "name": "@solanticai/vguard",
-  "version": "1.8.3",
+  "name": "@anthril/vguard",
+  "version": "2.0.0",
   "description": "AI coding guardrails framework. Runtime-enforced quality controls for Claude Code, Cursor, Codex, and more.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -53,15 +53,15 @@
     "linter",
     "developer-tools"
   ],
-  "author": "Solantic Ai",
+  "author": "Anthril",
   "license": "Apache-2.0",
   "homepage": "https://vguard.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/solanticai/vibe-guard.git"
+    "url": "git+https://github.com/Anthril/vibe-guard.git"
   },
   "bugs": {
-    "url": "https://github.com/solanticai/vibe-guard/issues"
+    "url": "https://github.com/Anthril/vibe-guard/issues"
   },
   "publishConfig": {
     "access": "public",

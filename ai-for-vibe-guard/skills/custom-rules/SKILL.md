@@ -25,7 +25,7 @@ Gather from the user:
 Create a file at `src/rules/<category>/<rule-name>.ts` (or any location — the path is registered via config):
 
 ```typescript
-import type { Rule, HookContext, RuleResult } from '@solanticai/vguard';
+import type { Rule, HookContext, RuleResult } from '@anthril/vguard';
 
 export const myCustomRule: Rule = {
   id: '<category>/<rule-name>',
@@ -94,7 +94,7 @@ The `check()` function receives a `HookContext` with:
 Add the rule to `vguard.config.ts` using the `plugins` array:
 
 ```typescript
-import { defineConfig } from '@solanticai/vguard';
+import { defineConfig } from '@anthril/vguard';
 import { myCustomRule } from './src/rules/quality/my-custom-rule';
 
 export default defineConfig({
@@ -110,7 +110,7 @@ Create a test file alongside the rule:
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { myCustomRule } from './my-custom-rule';
-import type { HookContext } from '@solanticai/vguard';
+import type { HookContext } from '@anthril/vguard';
 
 function makeContext(overrides: Partial<HookContext>): HookContext {
   return {

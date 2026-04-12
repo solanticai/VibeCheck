@@ -1,8 +1,8 @@
 # =============================================================================
-# Solantic AI — Sponsor Sync (Repo-Level)
+# Anthril — Sponsor Sync (Repo-Level)
 # =============================================================================
 # Updates README.md and SPONSORS.md in individual project repos.
-# Drop this into .github/workflows/ of any Solantic AI repo.
+# Drop this into .github/workflows/ of any Anthril repo.
 #
 # Setup:
 #   1. Add the SPONSORS_TOKEN secret to the repo (or use an org-level secret)

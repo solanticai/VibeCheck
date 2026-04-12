@@ -9,13 +9,13 @@
 
 ## Reporting a Vulnerability
 
-We take security seriously at Solantic AI. If you discover a security vulnerability in VGuard, please report it responsibly.
+We take security seriously at Anthril. If you discover a security vulnerability in VGuard, please report it responsibly.
 
 ### How to Report
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, please email us at **security@solanticai.com** with:
+Instead, please email us at **security@anthril.com** with:
 
 1. **Description** of the vulnerability
 2. **Steps to reproduce** the issue

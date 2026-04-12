@@ -43,7 +43,7 @@ export function buildEnforcementRulesMarkdown(config: ResolvedConfig): string {
     '',
     '# VGuard Enforcement Rules',
     '',
-    `This project uses [VGuard](https://github.com/solanticai/vibe-guard) for AI coding guardrails.`,
+    `This project uses [VGuard](https://github.com/Anthril/vibe-guard) for AI coding guardrails.`,
     `**${totalCount} rules** are actively enforced via runtime hooks.`,
     '',
   ];

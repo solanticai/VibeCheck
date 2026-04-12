@@ -166,7 +166,7 @@ export async function initCommand(options?: { force?: boolean }): Promise<void> 
   };
 
   // Write config file
-  const configContent = `import { defineConfig } from '@solanticai/vguard';
+  const configContent = `import { defineConfig } from '@anthril/vguard';
 
 export default defineConfig(${JSON.stringify(config, null, 2)});
 `;

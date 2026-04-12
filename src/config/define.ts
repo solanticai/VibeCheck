@@ -7,7 +7,7 @@ import type { VGuardConfig } from '../types.js';
  * @example
  * ```typescript
  * // vguard.config.ts
- * import { defineConfig } from '@solanticai/vguard';
+ * import { defineConfig } from '@anthril/vguard';
  *
  * export default defineConfig({
  *   presets: ['nextjs-15', 'tailwind'],

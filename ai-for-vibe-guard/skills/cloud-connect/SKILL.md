@@ -37,7 +37,7 @@ export VGUARD_API_KEY=vc_your_api_key_here
 Edit `vguard.config.ts` to enable cloud sync:
 
 ```typescript
-import { defineConfig } from '@solanticai/vguard';
+import { defineConfig } from '@anthril/vguard';
 
 export default defineConfig({
   presets: ['nextjs-15'],

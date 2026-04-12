@@ -17,7 +17,7 @@ describe('vibeCheckConfigSchema', () => {
         'quality/import-aliases': true,
         'workflow/pr-reminder': false,
       },
-      plugins: ['@solanticai/vguard-plugin-custom'],
+      plugins: ['@anthril/vguard-plugin-custom'],
       learn: {
         enabled: true,
         scanPaths: ['src/'],

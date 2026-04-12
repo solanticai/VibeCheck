@@ -128,7 +128,7 @@ Summarize:
 - How many rules are enabled, grouped by category (security, quality, workflow)
 - Which AI agents are configured
 - Whether VGuard Cloud is connected
-- The current VGuard version (check \`node_modules/@solanticai/vguard/package.json\`)
+- The current VGuard version (check \`node_modules/@anthril/vguard/package.json\`)
 `;
 
 const VGUARD_UPGRADE = `Check for VGuard updates and apply them.

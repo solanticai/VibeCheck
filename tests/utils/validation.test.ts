@@ -16,7 +16,7 @@ describe('isValidNpmPackageName', () => {
 
   it('accepts valid scoped names', () => {
     expect(isValidNpmPackageName('@scope/name')).toBe(true);
-    expect(isValidNpmPackageName('@solanticai/vguard')).toBe(true);
+    expect(isValidNpmPackageName('@anthril/vguard')).toBe(true);
     expect(isValidNpmPackageName('@types/node')).toBe(true);
   });
 

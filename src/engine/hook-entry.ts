@@ -1,6 +1,6 @@
 /**
  * Hook entry point for generated hook scripts.
- * This module is imported by generated hook scripts via `require('@solanticai/vguard/hooks/runner')`.
+ * This module is imported by generated hook scripts via `require('@anthril/vguard/hooks/runner')`.
  *
  * It reads stdin, builds context, resolves rules, runs them, and outputs results.
  */
@@ -279,13 +279,13 @@ function triggerSessionEventFlush(projectRoot: string): void {
 }
 
 /**
- * Best-effort read of the installed @solanticai/vguard package version,
+ * Best-effort read of the installed @anthril/vguard package version,
  * falling back to the consumer project's package.json during dev.
  * Duplicated here (vs imported from config-pusher) to avoid a dependency
  * cycle and to keep hook startup fast.
  */
 function readVguardVersion(projectRoot: string): string | null {
-  const candidates = ['node_modules/@solanticai/vguard/package.json', 'package.json'];
+  const candidates = ['node_modules/@anthril/vguard/package.json', 'package.json'];
   for (const candidate of candidates) {
     try {
       const path = join(projectRoot, candidate);

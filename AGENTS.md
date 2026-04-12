@@ -10,7 +10,7 @@ Copy the relevant section below and provide it to your AI coding assistant (Clau
 I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
 1. Install the package:
-   npm install -D @solanticai/vguard
+   npm install -D @anthril/vguard
 
 2. Run the interactive setup:
    npx vguard init
@@ -52,7 +52,7 @@ Key commands:
 ```
 I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
-1. Install: npm install -D @solanticai/vguard
+1. Install: npm install -D @anthril/vguard
 2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "Codex" as the AI agent
@@ -73,7 +73,7 @@ After setup, run `npx vguard generate` whenever you change vguard.config.ts.
 ```
 I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
-1. Install: npm install -D @solanticai/vguard
+1. Install: npm install -D @anthril/vguard
 2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "Cursor" as the AI agent
@@ -94,7 +94,7 @@ After setup, run `npx vguard generate` whenever you change vguard.config.ts.
 ```
 I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
-1. Install: npm install -D @solanticai/vguard
+1. Install: npm install -D @anthril/vguard
 2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "OpenCode" as the AI agent
@@ -113,7 +113,7 @@ After setup, run `npx vguard generate` whenever you change vguard.config.ts.
 ```
 I want you to set up VGuard as a CI quality gate in this project's GitHub Actions workflow.
 
-1. Install: npm install -D @solanticai/vguard
+1. Install: npm install -D @anthril/vguard
 2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "Claude Code" (or any agent — the CI adapter is always generated)
@@ -155,7 +155,7 @@ To customize the CI output format:
 After `vguard init`, your `vguard.config.ts` looks like:
 
 ```typescript
-import { defineConfig } from '@solanticai/vguard';
+import { defineConfig } from '@anthril/vguard';
 
 export default defineConfig({
   presets: ['nextjs-15', 'typescript-strict'],
@@ -173,4 +173,4 @@ export default defineConfig({
 });
 ```
 
-See https://github.com/solanticai/VGuard for full documentation.
+See https://github.com/Anthril/vibe-guard for full documentation.
