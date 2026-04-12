@@ -105,9 +105,9 @@ npx vguard generate       # Regenerate all hook files
 
 ## Common Error Messages
 
-| Error                                     | Cause                      | Fix                                            |
-| ----------------------------------------- | -------------------------- | ---------------------------------------------- |
-| `Cannot find module '@anthril/vguard'` | Package not installed      | Run `npm install -D @anthril/vguard`        |
-| `Config file not found`                   | Missing `vguard.config.ts` | Run `npx vguard init`                          |
-| `Hook script failed`                      | Compiled config corrupted  | Run `npx vguard generate --force`              |
-| `Permission denied` on credentials        | File permissions issue     | Check `~/.vguard/credentials.json` permissions |
+| Error                                  | Cause                      | Fix                                            |
+| -------------------------------------- | -------------------------- | ---------------------------------------------- |
+| `Cannot find module '@anthril/vguard'` | Package not installed      | Run `npm install -D @anthril/vguard`           |
+| `Config file not found`                | Missing `vguard.config.ts` | Run `npx vguard init`                          |
+| `Hook script failed`                   | Compiled config corrupted  | Run `npx vguard generate --force`              |
+| `Permission denied` on credentials     | File permissions issue     | Check `~/.vguard/credentials.json` permissions |
