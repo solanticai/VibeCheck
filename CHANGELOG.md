@@ -135,6 +135,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ai-for-vibe-guard/skills/auto-configure/templates/custom-rule.ts.tmpl`
   so the generator chooses the right status and doesn't produce code
   that fails type-check.
+### Added
+
+- **`loadValidatedConfig()` helper** in `src/config/load-validated.ts`
+  plus a `ConfigValidationError` class. Consolidates the
+  discover → read → Zod-validate flow so hand-edited config typos fail
+  fast at one place with a `path.to.field: expected X` message instead
+  of surfacing as cryptic TypeErrors deep in rule execution. `upgrade`
+  now reads plugins through this helper. Addresses #55.
+- **`cloudConfigSchema.streaming` sub-object** is now validated. The
+  Zod schema gained a strict `streamingConfigSchema` covering
+  `batchSize`, `flushIntervalMs`, `timeoutMs` (all positive integers),
+  and `cloudConfigSchema` itself is now `.strict()` so typo'd keys
+  like `flushInervalMs: 500` are rejected at config load rather than
+  silently falling through to defaults. Fixes #54.
+
+### Changed
+
+- **`vibeCheckConfigSchema` → `vguardConfigSchema`.** The Zod schema
+  export was renamed to match the post-rebrand product name. The old
+  identifier remains as a `@deprecated` re-export for one minor release
+  so external callers can migrate without breakage. Addresses #57.2.
 
 ### Fixed
 

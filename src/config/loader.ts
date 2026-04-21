@@ -5,7 +5,7 @@ import type {
   RuleConfig,
   Preset,
 } from '../types.js';
-import { vibeCheckConfigSchema } from './schema.js';
+import { vguardConfigSchema } from './schema.js';
 import { DEFAULT_CONFIG } from './defaults.js';
 import { discoverConfigFile, readRawConfig } from './discovery.js';
 import { getProfileSeverity, type ProfileName } from './profiles.js';
@@ -77,7 +77,7 @@ export function resolveConfig(
   presetMap?: Map<string, Preset>,
 ): ResolvedConfig {
   // Validate config shape
-  const parseResult = vibeCheckConfigSchema.safeParse(userConfig);
+  const parseResult = vguardConfigSchema.safeParse(userConfig);
   if (!parseResult.success) {
     const errors = parseResult.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`);
     throw new Error(`Invalid VGuard config:\n${errors.join('\n')}`);

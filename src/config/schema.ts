@@ -19,6 +19,15 @@ export const learnConfigSchema = z
   })
   .optional();
 
+/** Schema for cloud streaming configuration — mirrors StreamingConfig */
+export const streamingConfigSchema = z
+  .object({
+    batchSize: z.number().int().positive().optional(),
+    flushIntervalMs: z.number().int().positive().optional(),
+    timeoutMs: z.number().int().positive().optional(),
+  })
+  .strict();
+
 /** Schema for cloud sync settings */
 export const cloudConfigSchema = z
   .object({
@@ -26,7 +35,9 @@ export const cloudConfigSchema = z
     projectId: z.string().optional(),
     autoSync: z.boolean().optional(),
     excludePaths: z.array(z.string()).optional(),
+    streaming: streamingConfigSchema.optional(),
   })
+  .strict()
   .optional();
 
 /** Schema for monorepo configuration */
@@ -49,7 +60,7 @@ export const monorepoConfigSchema = z
 const npmPackageNamePattern = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
 
 /** Schema for the complete user config (vguard.config.ts) */
-export const vibeCheckConfigSchema = z.object({
+export const vguardConfigSchema = z.object({
   profile: z.enum(['strict', 'standard', 'relaxed', 'audit']).optional(),
   presets: z.array(z.string()).optional(),
   agents: z.array(z.enum(['claude-code', 'cursor', 'codex', 'opencode'])).optional(),
@@ -61,4 +72,11 @@ export const vibeCheckConfigSchema = z.object({
   enforcement: z.enum(['fail-open', 'fail-closed', 'hybrid']).optional(),
 });
 
-export type ValidatedConfig = z.infer<typeof vibeCheckConfigSchema>;
+export type ValidatedConfig = z.infer<typeof vguardConfigSchema>;
+
+/**
+ * @deprecated Use `vguardConfigSchema`. The former name reflected the
+ * product's pre-rebrand identity; this re-export is kept for one minor
+ * release to avoid breaking external callers.
+ */
+export const vibeCheckConfigSchema = vguardConfigSchema;

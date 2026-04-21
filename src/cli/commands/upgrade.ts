@@ -1,6 +1,6 @@
 import { checkForUpdates } from '../../upgrade/checker.js';
-import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
-import type { VGuardConfig } from '../../types.js';
+import { discoverConfigFile } from '../../config/discovery.js';
+import { loadValidatedConfig } from '../../config/load-validated.js';
 import { printBanner } from '../ui/banner.js';
 import { color } from '../ui/colors.js';
 import { glyph } from '../ui/glyphs.js';
@@ -17,13 +17,12 @@ export async function upgradeCommand(options: { check?: boolean; apply?: boolean
   const discovered = discoverConfigFile(projectRoot);
   if (discovered) {
     try {
-      const rawConfig = await readRawConfig(discovered);
-      const config = rawConfig as VGuardConfig;
+      const config = await loadValidatedConfig(projectRoot);
       if (config.plugins) {
         packagesToCheck.push(...config.plugins);
       }
     } catch {
-      // Ignore config errors during upgrade
+      // Config errors during upgrade are non-fatal — still check vguard itself.
     }
   }
 
