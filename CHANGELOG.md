@@ -31,6 +31,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   excerpts) to an attacker-controlled server. Local development against
   `localhost` / private IP ranges is still available behind an explicit
   `VGUARD_DEV=1`. Fixes #48.
+- **Cloud credentials now prefer the OS keychain over the file.**
+  `writeCredentials()` / `readCredentials()` default to the platform
+  secret store (Windows Credential Manager, macOS Keychain, Linux
+  Secret Service via `@napi-rs/keyring`) with the legacy
+  `~/.vguard/credentials.json` path kept as a fallback for
+  environments where the native binding is absent or no secret
+  daemon is running. A new `VGUARD_CREDENTIAL_STORE` env var
+  (`auto` / `keyring` / `file`, default `auto`) pins the backend
+  explicitly for CI. On first read, a legacy file is transparently
+  migrated into the keyring and the plaintext file is removed, so
+  upgrading is zero-friction. `@napi-rs/keyring` ships as an
+  `optionalDependencies` entry — installs that skip the native
+  binding (exotic platforms, `--no-optional` CI) automatically land
+  on the file fallback. Closes the "next-major" half of #47.
 - **Credentials file is now ACL-locked on Windows.** The `mode: 0o600`
   in `writeCredentials()` was silently ignored on NTFS: Node does not
   map POSIX modes to Windows ACLs, so `~/.vguard/credentials.json`
