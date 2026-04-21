@@ -1,5 +1,5 @@
 import { readdirSync, statSync, existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, isAbsolute } from 'node:path';
 import type { Rule } from '../types.js';
 import { registerRule, hasRule } from '../engine/registry.js';
 
@@ -102,6 +102,92 @@ export async function loadLocalRules(
     } catch (err) {
       result.errors.push({
         file: relPath,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Register project-local rules from a pre-discovered path list.
+ *
+ * The runtime hook path uses this to skip the `readdirSync` /
+ * `statSync` scan — the pre-compiled config already records which
+ * files survived validation at `vguard generate` time, so the hook
+ * can jiti-import those directly without re-walking the directory on
+ * every tool call. Saves an `existsSync` + directory walk per hook
+ * invocation; matters on hot paths like Write rules.
+ *
+ * Relative paths are resolved against `projectRoot`. Unknown files
+ * (e.g. deleted since generate ran) are recorded as errors, not
+ * thrown — hook callers must stay fail-open.
+ */
+export async function loadLocalRulesFromPaths(
+  projectRoot: string,
+  relativePaths: readonly string[],
+): Promise<LocalRuleLoadResult> {
+  const result: LocalRuleLoadResult = {
+    loaded: [],
+    errors: [],
+    rulesAdded: 0,
+    directoryExists: relativePaths.length > 0,
+    downgraded: [],
+  };
+
+  if (relativePaths.length === 0) return result;
+
+  const { createJiti } = await import('jiti');
+  const jiti = createJiti(join(projectRoot, 'package.json'), {
+    interopDefault: true,
+  });
+
+  for (const rel of relativePaths) {
+    const absPath = isAbsolute(rel) ? rel : join(projectRoot, rel);
+    const label = isAbsolute(rel) ? relative(projectRoot, rel) : rel;
+
+    if (!existsSync(absPath)) {
+      // Cache referenced a file that no longer exists (edited / deleted
+      // since `generate`). Skip without throwing — `doctor` will surface
+      // this on the next run and the user will regenerate.
+      result.errors.push({ file: label, error: 'file not found (stale cache entry)' });
+      continue;
+    }
+
+    try {
+      const mod = (await jiti.import(absPath)) as Record<string, unknown>;
+      const exported =
+        mod && typeof mod === 'object' && 'default' in mod
+          ? (mod as { default: unknown }).default
+          : mod;
+
+      const validation = validateLocalRule(exported, label);
+      if (!validation.valid || !validation.rule) {
+        result.errors.push({ file: label, error: validation.errors.join('; ') });
+        continue;
+      }
+
+      let rule = validation.rule;
+      if (rule.severity === 'block') {
+        rule = { ...rule, severity: MAX_LOCAL_SEVERITY };
+        result.downgraded.push(label);
+      }
+
+      if (hasRule(rule.id)) {
+        result.errors.push({
+          file: label,
+          error: `rule id "${rule.id}" conflicts with an existing rule (built-in or plugin)`,
+        });
+        continue;
+      }
+
+      registerRule(rule);
+      result.loaded.push(label);
+      result.rulesAdded += 1;
+    } catch (err) {
+      result.errors.push({
+        file: label,
         error: err instanceof Error ? err.message : String(err),
       });
     }

@@ -3,7 +3,11 @@ import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { mkdtempSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { loadLocalRules, validateLocalRule } from '../../src/plugins/local-rule-loader.js';
+import {
+  loadLocalRules,
+  loadLocalRulesFromPaths,
+  validateLocalRule,
+} from '../../src/plugins/local-rule-loader.js';
 import { clearRegistry, getRule } from '../../src/engine/registry.js';
 
 describe('validateLocalRule', () => {
@@ -155,5 +159,98 @@ describe('loadLocalRules', () => {
     const result = await loadLocalRules(projectRoot, { disabled: true });
     expect(result.directoryExists).toBe(true);
     expect(result.rulesAdded).toBe(0);
+  });
+});
+
+describe('loadLocalRulesFromPaths', () => {
+  let projectRoot: string;
+
+  beforeEach(() => {
+    clearRegistry();
+    projectRoot = mkdtempSync(join(tmpdir(), 'vguard-local-rule-cache-'));
+  });
+
+  afterEach(() => {
+    if (existsSync(projectRoot)) {
+      rmSync(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('is a no-op when given an empty list', async () => {
+    const result = await loadLocalRulesFromPaths(projectRoot, []);
+    expect(result.rulesAdded).toBe(0);
+    expect(result.directoryExists).toBe(false);
+  });
+
+  it('replays a pre-discovered path list without re-scanning the directory', async () => {
+    const dir = join(projectRoot, '.vguard', 'rules', 'custom');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, 'foo.mjs'),
+      `export default {
+        id: 'custom/foo',
+        name: 'Foo',
+        description: 'd',
+        severity: 'warn',
+        events: ['PreToolUse'],
+        match: {},
+        check: () => ({ status: 'pass', ruleId: 'custom/foo' }),
+      };`,
+    );
+
+    const result = await loadLocalRulesFromPaths(projectRoot, ['.vguard/rules/custom/foo.mjs']);
+    expect(result.rulesAdded).toBe(1);
+    expect(result.loaded).toContain('.vguard/rules/custom/foo.mjs');
+    expect(getRule('custom/foo')).toBeDefined();
+  });
+
+  it('records stale cache entries as errors, not throws', async () => {
+    const result = await loadLocalRulesFromPaths(projectRoot, ['.vguard/rules/custom/missing.mjs']);
+    expect(result.rulesAdded).toBe(0);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].error).toMatch(/stale cache entry/);
+  });
+
+  it('downgrades block-severity on the replay path too', async () => {
+    const dir = join(projectRoot, '.vguard', 'rules', 'custom');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, 'strict.mjs'),
+      `export default {
+        id: 'custom/strict',
+        name: 'Strict',
+        description: 'd',
+        severity: 'block',
+        events: ['PreToolUse'],
+        match: {},
+        check: () => ({ status: 'pass', ruleId: 'custom/strict' }),
+      };`,
+    );
+
+    const result = await loadLocalRulesFromPaths(projectRoot, ['.vguard/rules/custom/strict.mjs']);
+    expect(result.rulesAdded).toBe(1);
+    expect(result.downgraded).toHaveLength(1);
+    expect(getRule('custom/strict')?.severity).toBe('warn');
+  });
+
+  it('accepts absolute paths and normalises them to project-relative labels', async () => {
+    const dir = join(projectRoot, '.vguard', 'rules', 'custom');
+    mkdirSync(dir, { recursive: true });
+    const absPath = join(dir, 'abs.mjs');
+    writeFileSync(
+      absPath,
+      `export default {
+        id: 'custom/abs',
+        name: 'Abs',
+        description: 'd',
+        severity: 'warn',
+        events: ['PreToolUse'],
+        match: {},
+        check: () => ({ status: 'pass', ruleId: 'custom/abs' }),
+      };`,
+    );
+
+    const result = await loadLocalRulesFromPaths(projectRoot, [absPath]);
+    expect(result.rulesAdded).toBe(1);
   });
 });

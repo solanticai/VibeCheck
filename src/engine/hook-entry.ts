@@ -10,7 +10,7 @@ import { join } from 'node:path';
 
 import type { HookEvent, CloudConfig } from '../types.js';
 import { parseStdinJson, extractToolInput, extractSessionId } from '../utils/stdin.js';
-import { loadCompiledConfig } from '../config/compile.js';
+import { loadCompiledConfigWithMetadata } from '../config/compile.js';
 import { buildHookContext } from './context.js';
 import { resolveRules } from './resolver.js';
 import { runRules } from './runner.js';
@@ -24,7 +24,7 @@ import { createIgnoreMatcher } from '../utils/ignore.js';
 
 // Import and register all built-in rules
 import '../rules/index.js';
-import { loadLocalRules } from '../plugins/local-rule-loader.js';
+import { loadLocalRules, loadLocalRulesFromPaths } from '../plugins/local-rule-loader.js';
 
 /**
  * Main hook execution function.
@@ -44,15 +44,22 @@ export async function executeHook(event: HookEvent): Promise<void> {
     }
 
     // 2. Load pre-compiled config (fast path)
-    const config = await loadCompiledConfig(process.cwd());
-    if (!config) {
+    const cached = await loadCompiledConfigWithMetadata(process.cwd());
+    if (!cached) {
       process.exit(0); // No config = no enforcement
     }
+    const config = cached.config;
 
-    // 2b. Register project-local rules from .vguard/rules/custom/ so any
-    // rule IDs the resolved config references are actually in the registry.
-    // Fail-open: loader records errors internally but never throws.
-    await loadLocalRules(process.cwd());
+    // 2b. Register project-local rules so any rule IDs the resolved
+    // config references are in the registry. Prefer the replay path
+    // (no filesystem scan) when `vguard generate` persisted the list;
+    // fall back to the directory scan for legacy caches or when the
+    // user edited local rules without re-generating. Fail-open.
+    if (cached.metadata.localRulePaths && cached.metadata.localRulePaths.length > 0) {
+      await loadLocalRulesFromPaths(process.cwd(), cached.metadata.localRulePaths);
+    } else {
+      await loadLocalRules(process.cwd());
+    }
 
     // 3. Extract tool info + session identifier
     const { toolName } = extractToolInput(rawInput);
