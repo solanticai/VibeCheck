@@ -26,6 +26,15 @@ export async function loadPlugins(pluginNames: string[]): Promise<PluginLoadResu
     presetsAdded: 0,
   };
 
+  // Trust-model escape hatch: CI or untrusted-input flows can set
+  // VGUARD_NO_PLUGINS=1 to skip loading any plugin. Plugin code runs
+  // with the full privileges of the vguard process, so this gate lets
+  // operators run linting in hostile repos without auto-executing
+  // whatever `plugins: [...]` happens to declare. See TRUST_MODEL.md.
+  if (process.env.VGUARD_NO_PLUGINS === '1') {
+    return result;
+  }
+
   for (const name of pluginNames) {
     if (!isValidNpmPackageName(name)) {
       result.errors.push({ plugin: name, error: `Invalid plugin name: "${name}"` });

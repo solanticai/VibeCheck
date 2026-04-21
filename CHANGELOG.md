@@ -88,6 +88,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`TRUST_MODEL.md`** at the repo root, linked from `README.md`.
+  Documents what running `vguard` against a repository actually executes
+  (`vguard.config.ts` = code; plugins = full-trust; local rules =
+  capped at warn), the cloud-sync redaction contract, and the
+  mitigations available for CI or untrusted-input flows. Addresses
+  #51.
+- **`VGUARD_NO_PLUGINS=1` escape hatch.** Setting the env var causes
+  `loadPlugins()` in `src/plugins/loader.ts` to short-circuit and
+  return an empty result without executing any plugin module code.
+  Built-in rules still run. Intended for CI runs against untrusted
+  repos where declared plugins should not auto-execute. Addresses
+  #51.
 - **`loadValidatedConfig()` helper** in `src/config/load-validated.ts`
   plus a `ConfigValidationError` class. Consolidates the
   discover → read → Zod-validate flow so hand-edited config typos fail
