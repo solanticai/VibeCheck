@@ -113,6 +113,8 @@ describe('quality templates', () => {
   it('noDeprecatedApi generates deprecation check', () => {
     const code = quality.noDeprecatedApi(makeCtx({ ruleId: 'quality/no-deprecated-api' }));
     expect(code).toContain('no-deprecated-api');
+    expect(code.toLowerCase()).toContain('deprecated');
+    expect(code.toLowerCase()).toContain('warning');
   });
 
   it('namingConventions generates naming check', () => {
