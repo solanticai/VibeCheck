@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('node:fs', () => ({
   existsSync: vi.fn(() => false),
@@ -159,6 +159,3 @@ describe('doctorCommand', () => {
     expect(exitSpy).toHaveBeenCalledWith(78);
   });
 });
-
-// afterEach declared at wrong level, fix:
-import { afterEach } from 'vitest';
