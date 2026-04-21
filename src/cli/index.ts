@@ -769,10 +769,6 @@ async function main(): Promise<void> {
     process.exit(EXIT.SIGINT);
   });
 
-  // No-args + no config → show help AND a setup hint. Commander's default
-  // no-args behaviour is to show help; we append a one-line nudge pointing
-  // a new user at `vguard init` when no config is detected in CWD.
-  // Only runs when stdout is a TTY so piped usage (`vguard | cat`) stays clean.
   if (process.argv.length <= 2 && process.stdout.isTTY) {
     try {
       const { discoverConfigFile } = await import('../config/discovery.js');
@@ -784,7 +780,7 @@ async function main(): Promise<void> {
         process.exit(EXIT.OK);
       }
     } catch {
-      // Fall through to normal parsing on any error — never block help.
+      // Fall through on any error — never block help.
     }
   }
 
