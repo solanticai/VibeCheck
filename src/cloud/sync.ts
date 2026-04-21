@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { basename, join, dirname } from 'node:path';
 import { readRuleHits, type RuleHitRecord } from '../engine/tracker.js';
 import { CloudClient } from './client.js';
 import { createIgnoreMatcher } from '../utils/ignore.js';
@@ -52,12 +52,112 @@ export function getUnsyncedRecords(
 }
 
 /**
- * Strip `filePath` from any record whose path matches `.vguardignore` or
- * the `cloud.excludePaths` config (merged via IgnoreMatcher extras).
+ * Common secret patterns scrubbed from every uploaded record. Matches are
+ * replaced with `[redacted]`. This is defence-in-depth — rules should not
+ * include secrets in their `message` / `metadata`, but a single leaked
+ * secret defeats the point of running a guardrail, so we scrub regardless.
  *
- * This is a PRIVACY filter — it only nulls out the `filePath` field
- * before upload. Rules still run on these files; we simply don't send
- * the path to the cloud.
+ * Each pattern targets a high-signal shape so the false-positive rate is
+ * negligible on typical rule messages:
+ *   - `sk-` / `sk-ant-` — OpenAI / Anthropic API keys
+ *   - `xoxb-` / `xoxa-` / `xoxp-` etc — Slack tokens
+ *   - `gh[opusr]_` — GitHub personal / OAuth / user / server / refresh tokens
+ *   - `AKIA…` — AWS access key IDs
+ *   - `eyJ…\.eyJ…\.…` — JWT header.payload.sig
+ *   - `AIza…` — Google API keys
+ */
+const SECRET_PATTERNS: readonly RegExp[] = [
+  /sk(?:-ant)?-[A-Za-z0-9_-]{16,}/g,
+  /xox[baprs]-[A-Za-z0-9-]{10,}/g,
+  /gh[opusr]_[A-Za-z0-9]{16,}/g,
+  /AKIA[0-9A-Z]{16}/g,
+  /eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g,
+  /AIza[0-9A-Za-z_-]{35}/g,
+];
+
+/**
+ * Replace known secret shapes in a string with `[redacted]`.
+ */
+function scrubSecretsInString(value: string): string {
+  let out = value;
+  for (const pattern of SECRET_PATTERNS) {
+    out = out.replace(pattern, '[redacted]');
+  }
+  return out;
+}
+
+/**
+ * Recursively scrub secret patterns from every string leaf in `value`.
+ * Preserves structure for objects and arrays, returns non-string primitives
+ * unchanged. Future-proofs the pipeline: if the record schema grows a
+ * `message` or `metadata` field later, the scrubber already covers it.
+ */
+function scrubSecretsDeep<T>(value: T): T {
+  if (typeof value === 'string') {
+    return scrubSecretsInString(value) as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => scrubSecretsDeep(item)) as T;
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      result[k] = scrubSecretsDeep(v);
+    }
+    return result as T;
+  }
+  return value;
+}
+
+/**
+ * Replace every occurrence of `needle` (and its basename) in `haystack`
+ * with `[redacted]`. Empty needles are skipped to avoid pathological
+ * global substitution.
+ */
+function scrubPathInString(haystack: string, needle: string): string {
+  if (!needle) return haystack;
+  let out = haystack.split(needle).join('[redacted]');
+  const base = basename(needle);
+  if (base && base !== needle) {
+    out = out.split(base).join('[redacted]');
+  }
+  return out;
+}
+
+/**
+ * Recursively replace `needle` + its basename in every string leaf of `value`.
+ */
+function scrubPathDeep<T>(value: T, needle: string): T {
+  if (typeof value === 'string') {
+    return scrubPathInString(value, needle) as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => scrubPathDeep(item, needle)) as T;
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      result[k] = scrubPathDeep(v, needle);
+    }
+    return result as T;
+  }
+  return value;
+}
+
+/**
+ * Redact records whose `filePath` matches `.vguardignore` or the
+ * `cloud.excludePaths` config (merged via IgnoreMatcher extras).
+ *
+ * A match causes:
+ *   1. `filePath` is set to `undefined`;
+ *   2. Every other string field on the record (recursively, including
+ *      future-added `message` / `metadata` / etc.) is scrubbed to replace
+ *      any occurrence of the excluded path or its basename with
+ *      `[redacted]`.
+ *
+ * Records that do not match an exclusion still run through a secret
+ * scrubber (`scrubSecretsDeep`) so high-signal token shapes never ship
+ * to the cloud regardless of configuration.
  *
  * `projectRoot` is required so paths can be normalised relative to it
  * and so `.vguardignore` is honoured the same way it is everywhere else.
@@ -67,21 +167,19 @@ export function applyExclusions(
   projectRoot: string,
   excludePaths: readonly string[] = [],
 ): RuleHitRecord[] {
-  // Empty defaults + empty extras is the common case: no matcher needed.
-  if (excludePaths.length === 0) {
-    // Still run through .vguardignore if one exists.
-    const defaultMatcher = createIgnoreMatcher(projectRoot);
-    if (!defaultMatcher.hasFile) return records;
-  }
+  const defaultMatcher = createIgnoreMatcher(projectRoot);
+  const hasMatcher = excludePaths.length > 0 || defaultMatcher.hasFile;
 
-  const matcher = createIgnoreMatcher(projectRoot, excludePaths);
+  const matcher = hasMatcher ? createIgnoreMatcher(projectRoot, excludePaths) : null;
 
   return records.map((record) => {
-    if (!record.filePath) return record;
-    if (matcher.isIgnored(record.filePath)) {
-      return { ...record, filePath: undefined };
+    let out: RuleHitRecord = record;
+
+    if (matcher && record.filePath && matcher.isIgnored(record.filePath)) {
+      out = scrubPathDeep({ ...record, filePath: undefined }, record.filePath);
     }
-    return record;
+
+    return scrubSecretsDeep(out);
   });
 }
 

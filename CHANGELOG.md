@@ -56,6 +56,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   POSIX remains a no-op. Fails open — `icacls` failures do not block
   `cloud login`. A follow-up (keychain-backed storage via
   `@napi-rs/keyring`) is tracked for the next major. Fixes #47.
+- **Cloud exclusions now scrub message/metadata, not just `filePath`.**
+  `applyExclusions()` in `src/cloud/sync.ts` used to null out `filePath`
+  only, letting the excluded path and basename leak back out through
+  any other string field on a rule-hit record (present today via
+  `sessionId`; forward-compatible with future `message` / `metadata`
+  fields). A `.vguardignore` entry of `secrets/**` or a
+  `cloud.excludePaths` entry is now honoured across the whole record
+  via a deep string scrub that also strips the basename.
+- **Defence-in-depth secret scrubbing on every upload.** Known
+  high-signal secret shapes (OpenAI `sk-…`, Anthropic `sk-ant-…`,
+  Slack `xox[baprs]-…`, GitHub `gh[opusr]_…`, AWS `AKIA…`, Google
+  `AIza…`, JWT triples) are now replaced with `[redacted]` on every
+  uploaded rule hit regardless of exclusion config. Rules should not
+  include secrets in their messages, but one leaked secret defeats the
+  point of running a guardrail, so we scrub regardless. Fixes #50.
 
 ### Added
 

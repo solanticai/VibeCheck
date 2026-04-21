@@ -78,5 +78,94 @@ describe('cloud/sync', () => {
       const result = applyExclusions(records, projectRoot, ['**/*']);
       expect(result).toHaveLength(1);
     });
+
+    it('scrubs excluded path from future message field when filePath matches', () => {
+      const records = [
+        makeRecord({
+          filePath: '/project/secrets/prod.env',
+          // Intentional cast: simulates a future RuleHitRecord with `message`.
+          message: 'Found hardcoded secret in /project/secrets/prod.env line 3',
+        } as RuleHitRecord & { message: string }),
+      ];
+      const result = applyExclusions(records, projectRoot, ['secrets/**']) as Array<
+        RuleHitRecord & { message?: string }
+      >;
+      expect(result[0].filePath).toBeUndefined();
+      expect(result[0].message).toBe('Found hardcoded secret in [redacted] line 3');
+    });
+
+    it('scrubs basename from message as well as full path', () => {
+      const records = [
+        makeRecord({
+          filePath: '/project/secrets/prod.env',
+          message: 'prod.env has a problem',
+        } as RuleHitRecord & { message: string }),
+      ];
+      const result = applyExclusions(records, projectRoot, ['secrets/**']) as Array<
+        RuleHitRecord & { message?: string }
+      >;
+      expect(result[0].message).toBe('[redacted] has a problem');
+    });
+
+    it('scrubs excluded path from nested metadata structures', () => {
+      const records = [
+        makeRecord({
+          filePath: '/project/secrets/foo.ts',
+          metadata: {
+            refs: ['/project/secrets/foo.ts', '/project/src/ok.ts'],
+            detail: { path: '/project/secrets/foo.ts' },
+          },
+        } as RuleHitRecord & { metadata: unknown }),
+      ];
+      const result = applyExclusions(records, projectRoot, ['secrets/**']) as Array<
+        RuleHitRecord & {
+          metadata?: { refs?: string[]; detail?: { path?: string } };
+        }
+      >;
+      expect(result[0].metadata?.refs?.[0]).toBe('[redacted]');
+      // Unrelated paths stay intact.
+      expect(result[0].metadata?.refs?.[1]).toBe('/project/src/ok.ts');
+      expect(result[0].metadata?.detail?.path).toBe('[redacted]');
+    });
+
+    it('redacts OpenAI-style secrets even without an exclusion', () => {
+      const records = [
+        makeRecord({
+          message: 'leaked sk-abc1234567890DEFghijklmnopqrstuvwxyz',
+        } as RuleHitRecord & { message: string }),
+      ];
+      const result = applyExclusions(records, projectRoot, []) as Array<
+        RuleHitRecord & { message?: string }
+      >;
+      expect(result[0].message).toBe('leaked [redacted]');
+    });
+
+    it('redacts GitHub PATs, AWS keys, and JWTs', () => {
+      const records = [
+        makeRecord({
+          message:
+            'tokens: ghp_abc1234567890ABCDEFghijklmn, AKIAIOSFODNN7EXAMPLE, ' +
+            'jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.abcdefg',
+        } as RuleHitRecord & { message: string }),
+      ];
+      const result = applyExclusions(records, projectRoot, []) as Array<
+        RuleHitRecord & { message?: string }
+      >;
+      expect(result[0].message).toBe('tokens: [redacted], [redacted], jwt=[redacted]');
+    });
+
+    it('leaves benign records untouched', () => {
+      const records = [
+        makeRecord({
+          filePath: '/project/src/index.ts',
+          message: 'ordinary warning text',
+        } as RuleHitRecord & { message: string }),
+      ];
+      const result = applyExclusions(records, projectRoot, []) as Array<
+        RuleHitRecord & { message?: string }
+      >;
+      expect(result[0].filePath).toBe('/project/src/index.ts');
+      expect(result[0].message).toBe('ordinary warning text');
+    });
   });
 });
