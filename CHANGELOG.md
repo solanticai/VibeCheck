@@ -7,6 +7,248 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `rollingWindowSpend(root, 0)` and the underlying `readUsage` filter
+  now use strict `>` instead of `>=` for the `sinceIso` cutoff, so a
+  zero-width window returns zero records deterministically (fixes a
+  CI flake on fast runners where a just-written record shared the
+  same millisecond timestamp as the cutoff).
+
+### Testing
+
+- Merged three GitHub Copilot Autofix PRs (#37, #38, #39) targeting
+  test files: doctor-test import-ordering cleanup, npm-package-name
+  boundary + scoped-uppercase assertions, and tighter eject template
+  assertions. PRs #41 (comment-only cloud-login no-op) and #42 (against
+  a file that no longer exists) were not merged.
+
+## [3.0.0] - 2026-04-22
+
+v3.0.0 consolidates three research-driven delivery cycles into a single
+major release: the original 10-recommendation top-ups, the 13-wave
+gap-closure (Waves 1–13), and the CLI UX + npm package audit follow-ups.
+Net result: ~90 new rules, 15 new presets, 6 new reference plugins, and
+4 new core features (fail-closed/hybrid enforcement mode,
+policy-as-prompt synthesis, per-session token/cost budgets, chainable
+rule ordering, HTTP webhook adapter, drift detection, real-time
+dashboard).
+
+### ⚠ BREAKING CHANGES
+
+- **Default enforcement mode flipped to `hybrid`.** Previous default was
+  `fail-open` (every internal rule error swallowed as a warning).
+  `hybrid` fails closed on `block`-severity rules and fails open on
+  `warn`/`info` — aligning VGuard with Microsoft AGT, Cycode, Straiker,
+  Codex, and Rulebricks. Consumers relying on the historical behaviour
+  can restore it by setting `enforcement: 'fail-open'` in
+  `vguard.config.ts`. See _Added / Core features_ below.
+- **`Rule` interface gained two optional fields** — `runAfter?: string[]`
+  and `required?: boolean` — to support the new chainable rule ordering
+  feature. Additive (existing rules compile unchanged), but plugin
+  authors who extend the interface must widen their type defs.
+
+### Added — Core features
+
+- **Fail-closed / hybrid enforcement mode.** New `enforcement` field in
+  `vguard.config.ts` accepts `'fail-open' | 'fail-closed' | 'hybrid'`
+  (default: `'hybrid'`). Threaded through `types.ts`, `config/schema.ts`,
+  `config/loader.ts`, and `engine/runner.ts`. Runner errors now map to
+  block or warn per the configured mode.
+- **Policy-as-prompt synthesis.** New `src/engine/prompt-synth.ts`
+  exposes `synthesisePolicyPrompt(config, { agent })`. Bundles active
+  rules by severity, wraps them in an explicit
+  `VGUARD-POLICY-START/END` boundary to resist indirect prompt
+  injection, and is consumed by the Claude Code adapter in place of the
+  previous static `vguard-enforcement.md` template.
+- **Per-session token/cost budgets.** New `src/engine/cost-tracker.ts`
+  (append-only `.vguard/data/cost-usage.jsonl`, session + rolling-window
+  summaries, per-model USD pricing) + `workflow/cost-budget` rule that
+  blocks at `tokensPerSession`, `usdPerSession`, or `usdPerDay`
+  thresholds.
+- **Chainable rule ordering.** Rules can declare `runAfter: string[]`
+  (topological sort in `engine/resolver.ts`) and `required: boolean`
+  (runner skips a required rule when any declared predecessor blocked).
+- **HTTP webhook adapter** (Wave 6). `src/adapters/http-webhook/` with
+  `startWebhookServer()` (local `node:http`, POST `/hook/:event`,
+  `{allowed, reason, warnings[]}` response) and `buildOpenApiSpec()`
+  (OpenAPI 3.0.3 JSON for client codegen). New CLI commands
+  `vguard webhook serve` and `vguard webhook spec`. Unlocks non-Node
+  agents (Python, Rust, Go) via OpenAPI-generated clients.
+- **Drift detection** (Wave 10). `vguard drift [--freeze] [--threshold N]
+[--format text|json]` captures a conventions baseline into
+  `.vguard/baseline.json`, diffs subsequent runs, and exits non-zero for
+  CI when drift exceeds the threshold.
+- **Real-time dashboard** (Wave 12). `vguard dashboard` starts a local
+  HTTP server that serves a self-contained HTML page (`dist/dashboard/
+index.html` — externalised asset, not an inline string) plus
+  Server-Sent Events at `/stream` tailing `rule-hits.jsonl`. `fs.watch`
+  with a 2-second poll fallback.
+- **HTML visual report.** `vguard report --format html` emits a
+  self-contained, zero-dependency `.vguard/reports/quality-report.html`
+  (debt-score circle, outcome donut, rule-frequency bar chart, top
+  blocked rules). `--format all` writes md + json + html.
+  `prefers-color-scheme: dark` supported.
+- **`auto-configure` AI skill** (`ai-for-vibe-guard/skills/
+auto-configure/`). Dispatches 2–6 parallel profile sub-agents against
+  a target repo (count scales with repo size), consolidates reports,
+  and synthesises a custom `vguard.config.ts` plus repo-specific custom
+  rules. Orchestrates the existing CLI — no core TypeScript changes.
+
+### Added — Rules
+
+**~90 new rules across security, quality, and workflow.** Full list
+in the prior `[Unreleased]` log and in the gap-closure plan at
+`.claude/plans/gap-closure-2026-04-21.md`. Key groups:
+
+- **10 OWASP gap-close rules** (Wave 1): `security/egress-allowlist`,
+  `destructive-scope-guard`, `credential-context-guard`,
+  `agent-config-leakage`, `fetched-content-injection`,
+  `untrusted-context-fence`, `agent-output-to-exec`,
+  `secret-in-agent-output`, `workflow/autonomy-circuit-breaker`,
+  `workflow/high-impact-confirm`.
+- **7 MCP rules + `mcp-server` preset** (Wave 2):
+  `mcp/stdio-command-validation`, `mcp/no-dynamic-tool-registration`,
+  `mcp/tool-description-sanitize`, `mcp/capability-disclosure`,
+  `security/mcp-url-scheme`, `security/agentsmd-integrity`,
+  `security/untrusted-tool-registration`. Plus pre-existing MCP rules
+  from the top-10 round: `mcp-server-allowlist`, `mcp-credential-scope`,
+  `mcp-tool-description-diff`.
+- **6 supply-chain rules** (Wave 3): `security/lockfile-required`,
+  `rag-source-allowlist`, `embedding-source-integrity`,
+  `tool-least-privilege`, `subagent-boundary`,
+  `quality/package-existence-check`.
+- **13 AI-code-pattern security rules** from Veracode Spring 2026 data:
+  `log-injection`, `path-traversal`, `xxe-prevention`, `weak-crypto`,
+  `insecure-deserialization`, `broad-cors`, `missing-authz`,
+  `jwt-validation`, `quality/race-condition-hint`, plus extensions to
+  `secret-detection` (Google / OpenAI / Anthropic / JWT patterns) and
+  `unsafe-eval` (Python `exec` / `compile`).
+- **Infra rules** (Wave 4): 6 K8s, 3 Bun, 4 MongoDB.
+- **Backend/agentic rules** (Wave 7): 4 NestJS, 3 Nuxt, 3 tRPC, 3 Zod.
+- **Next-ring ecosystems** (Wave 9): 4 Expo, 4 GraphQL, 3 Deno, 4 gRPC,
+  4 Rails.
+- **Low-signal presets' rules** (Wave 11): 3 Redis, 4 Phoenix/Elixir.
+- **Branch-gated commit guards**:
+  `workflow/require-changelog-on-protected-branches`,
+  `workflow/require-version-bump-on-protected-branches`,
+  `workflow/cost-budget`.
+
+### Added — Presets
+
+22 → 37 built-in presets. **15 new:** `dockerfile`, `langchain`,
+`drizzle`, `terraform`, `mcp-server`, `kubernetes-manifests`, `bun`,
+`mongodb`, `nestjs`, `nuxt`, `trpc`, `zod-validation`, `expo`,
+`graphql`, `deno`, `grpc`, `rails`, `redis`, `phoenix-elixir`.
+
+### Added — Reference plugins
+
+2 → 8 plugins in the repo. **6 new:**
+`@anthril/vguard-slack-notify`, `@anthril/vguard-cost-guardrails`,
+`@anthril/vguard-secret-scanner-ext` (trufflehog/gitleaks wrapper),
+`@anthril/vguard-pii-scrubber` (regex + Luhn, `pii-gdpr` preset),
+`@anthril/vguard-license-check` (license-checker bridge,
+`license-permissive` + `license-copyleft-safe` presets),
+`@anthril/vguard-prompt-injection-guard` (`prompt-injection-defense`
+preset), `@anthril/vguard-compliance-sbom` (syft + minimal SBOM
+generator, `eu-cra-2026` preset), `@anthril/vguard-sast-bridge`
+(semgrep / bandit / brakeman / sobelow, `sast-standard` preset).
+
+### Added — CLI polish
+
+- Help output for `dashboard`, `drift`, and `webhook` (+ `serve`,
+  `spec`) now has examples blocks — matching the pattern used by
+  `init`, `lint`, `report`. Every command gives at least one
+  copy-pasteable invocation per flag/mode.
+- `--version` output now includes the Node runtime version (e.g.
+  `vguard 3.0.0 (<sha>, <date>, node v24.12.0)`) to make bug reports
+  more actionable.
+- No-args invocation inside a TTY with no VGuard config now appends a
+  one-line setup hint: _"VGuard isn't configured in this directory yet
+  — run `vguard init` to get started."_ TTY-gated so piped usage stays
+  clean.
+- README gains a **Terminal behaviour** section documenting
+  `NO_COLOR`, `--no-color`, `--ascii`, `-q` / `--quiet`, `--verbose`,
+  `--debug`, `CI=true` auto-detection, and non-TTY stdout behaviour.
+- `scripts/derive-npm-tag.mjs` — single source of truth for dist-tag
+  derivation (stable → `latest`, `-alpha.*` → `alpha`, etc.). Called by
+  `.github/workflows/publish.yml` (replaces the inline bash mapping)
+  and covered by 16 unit tests in
+  `tests/scripts/derive-npm-tag.test.ts`.
+
+### Changed
+
+- **Default rule resolver is now topological.** Rules with `runAfter`
+  declarations are sorted before execution; rules without preserve
+  their registration order.
+- **Dashboard HTML is a real asset.** Previously a template literal
+  inside `src/dashboard/index.ts`; now lives at
+  `src/dashboard/index.html` and is copied to `dist/dashboard/index.html`
+  by the postbuild script. Enables IDE syntax highlighting.
+- **SECURITY.md supported-versions table** updated to reflect 2.x/3.x
+  reality (was stale at "1.x supported"). Added the "older majors get
+  critical fixes for 90 days" policy line.
+- **Published tarball is 49% smaller.** `package.json`'s `files` array
+  excludes `dist/**/*.d.ts.map` (309 files, not useful to consumers)
+  and the two CLI sourcemaps (`cli.js.map`, `cli.cjs.map`, 2.2 MB
+  combined). Library sourcemaps retained for consumers debugging
+  imports. Tarball 1.3 MB → 780 KB, unpacked 6.1 MB → 3.7 MB, file
+  count 635 → 324.
+- **Claude Code adapter rewired** to emit via `synthesisePolicyPrompt`
+  instead of the old static template.
+
+### Fixed
+
+- `security/xxe-prevention` Java check was a no-op due to a regex
+  negative-lookahead bug on a variable-length prefix. Rewritten as a
+  two-pass check: the unsafe constructor must appear AND no recognised
+  hardening feature must appear anywhere in the file. Hardening
+  recognised: `disallow-doctype-decl`, `external-general-entities`,
+  `external-parameter-entities`, `load-external-dtd`,
+  `setXIncludeAware(false)`, `setExpandEntityReferences(false)`.
+- `security/jwt-validation` decode-without-verify check now operates
+  at function scope (walks backward from each `jwt.decode` to the
+  enclosing `{`, forward-scans with brace balancing to the matching
+  `}`, checks that scope for `jwt.verify`). Previously passed whenever
+  any `jwt.verify` appeared anywhere in the file.
+- `security/deno-import-map-pinning` scoped-package handling — previous
+  regex `"(jsr|npm):([^@"][^"]*)"` rejected scoped specifiers like
+  `jsr:@std/fs` that start with `@`. Rewritten to strip the scope
+  prefix before checking for a `@version` suffix.
+- `security/expo-no-experimental-rsc-in-prod` now accepts quoted JSON
+  keys (`"reactServerComponents": true`) in addition to JS object
+  syntax. Path matcher also accepts `.mjs`/`.cjs` variants.
+- `security/credential-context-guard` kubectl-context regex now handles
+  `kubectl --context=production delete` (stuff between `kubectl` and
+  `delete`).
+- `report` CLI debt-score colour mapping was inverted — green for high
+  (bad) debt, red for low (good). Flipped to match the aggregator's
+  "0-100, lower is better" documentation.
+- `security/insecure-deserialization` regex had a useless `\-` escape
+  that tripped ESLint and prevented the `serialize-javascript` pattern
+  from matching.
+
+### Removed
+
+- `src/adapters/claude-code/templates/rules-template.ts` — orphaned
+  after the Claude Code adapter was rewired to `synthesisePolicyPrompt`.
+
+### Testing
+
+- Test count: ~960 → **1420** (+460 new test cases).
+- New consolidated test files for every wave's rules:
+  `tests/rules/wave-{1,2,3,4,7,9,11}.test.ts`.
+- Rule-registration smoke test (`tests/rules/
+registration-coverage.test.ts`): verifies all 75 gap-closure rule
+  IDs are present in the registry, have the expected `Rule` shape,
+  and load without collision.
+- New engine coverage: `tests/engine/{resolver-ordering,cost-tracker,
+prompt-synth,runner}.test.ts`.
+- New subsystems: `tests/adapters/http-webhook.test.ts`,
+  `tests/dashboard/dashboard.test.ts`, `tests/learn/baseline.test.ts`,
+  `tests/scripts/derive-npm-tag.test.ts`, and the Wave 8 / Wave 13
+  plugin test files.
+
 ## [2.0.2] - 2026-04-21
 
 ### Added

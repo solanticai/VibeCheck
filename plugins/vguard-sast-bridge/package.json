@@ -1,0 +1,24 @@
+{
+  "name": "@anthril/vguard-sast-bridge",
+  "version": "0.1.0",
+  "description": "VGuard plugin that bridges semgrep/bandit/brakeman/sobelow into rule-hit format.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "vguard",
+    "sast",
+    "semgrep",
+    "bandit",
+    "brakeman",
+    "sobelow"
+  ],
+  "peerDependencies": {
+    "@anthril/vguard": ">=2.0.0"
+  },
+  "license": "MIT"
+}

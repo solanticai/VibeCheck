@@ -6,7 +6,7 @@
 #
 # Setup:
 #   1. Add the SPONSORS_TOKEN secret to the repo (or use an org-level secret)
-#   2. Ensure README.md and SPONSORS.md contain the marker comments
+#   2. Ensure README.md and SPONSORS.md contain the "sponsors" marker comments
 # =============================================================================
 
 name: Sync Sponsors
@@ -29,90 +29,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # -----------------------------------------------------------------------
-      # SPONSORS.md — Full breakdown by tier
-      # -----------------------------------------------------------------------
-
-      - name: "SPONSORS.md — Founding Sponsors ($2,500+)"
+      - name: "SPONSORS.md — Sponsors"
         uses: JamesIves/github-sponsors-readme-action@v1
         with:
           token: ${{ secrets.SPONSORS_TOKEN }}
           file: "SPONSORS.md"
           organization: true
-          minimum: 250000
-          marker: "founding-sponsors"
-          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="100px" alt="{{{ login }}}" /></a>&nbsp;&nbsp;'
-
-      - name: "SPONSORS.md — Partners ($500–$2,499)"
-        uses: JamesIves/github-sponsors-readme-action@v1
-        with:
-          token: ${{ secrets.SPONSORS_TOKEN }}
-          file: "SPONSORS.md"
-          organization: true
-          minimum: 50000
-          maximum: 249999
-          marker: "partners"
+          minimum: 10000
+          marker: "sponsors"
           template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="80px" alt="{{{ login }}}" /></a>&nbsp;&nbsp;'
 
-      - name: "SPONSORS.md — Backers ($100–$499)"
-        uses: JamesIves/github-sponsors-readme-action@v1
-        with:
-          token: ${{ secrets.SPONSORS_TOKEN }}
-          file: "SPONSORS.md"
-          organization: true
-          minimum: 10000
-          maximum: 49999
-          marker: "backers"
-          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="60px" alt="{{{ login }}}" /></a>&nbsp;&nbsp;'
-
-      - name: "SPONSORS.md — Builders ($25–$99)"
-        uses: JamesIves/github-sponsors-readme-action@v1
-        with:
-          token: ${{ secrets.SPONSORS_TOKEN }}
-          file: "SPONSORS.md"
-          organization: true
-          minimum: 2500
-          maximum: 9999
-          marker: "builders"
-          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="45px" alt="{{{ login }}}" /></a>&nbsp;&nbsp;'
-
-      - name: "SPONSORS.md — Supporters ($1–$24)"
-        uses: JamesIves/github-sponsors-readme-action@v1
-        with:
-          token: ${{ secrets.SPONSORS_TOKEN }}
-          file: "SPONSORS.md"
-          organization: true
-          minimum: 100
-          maximum: 2499
-          marker: "supporters"
-          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="35px" alt="{{{ login }}}" /></a>&nbsp;'
-
-      # -----------------------------------------------------------------------
-      # README.md — Compact sponsor section
-      # -----------------------------------------------------------------------
-
-      - name: "README.md — Featured Sponsors ($100+)"
+      - name: "README.md — Sponsors"
         uses: JamesIves/github-sponsors-readme-action@v1
         with:
           token: ${{ secrets.SPONSORS_TOKEN }}
           file: "README.md"
           organization: true
           minimum: 10000
-          marker: "readme-sponsors-featured"
-          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="60px" alt="{{{ login }}}" /></a>&nbsp;&nbsp;'
-
-      - name: "README.md — All Sponsors"
-        uses: JamesIves/github-sponsors-readme-action@v1
-        with:
-          token: ${{ secrets.SPONSORS_TOKEN }}
-          file: "README.md"
-          organization: true
-          marker: "readme-sponsors-all"
-          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="35px" alt="{{{ login }}}" /></a>&nbsp;'
-
-      # -----------------------------------------------------------------------
-      # Commit changes
-      # -----------------------------------------------------------------------
+          marker: "sponsors"
+          template: '<a href="https://github.com/{{{ login }}}"><img src="https://github.com/{{{ login }}}.png" width="80px" alt="{{{ login }}}" /></a>&nbsp;&nbsp;'
 
       - name: Deploy changes
         uses: JamesIves/github-pages-deploy-action@v4

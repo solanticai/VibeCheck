@@ -1,0 +1,22 @@
+{
+  "name": "@anthril/vguard-pii-scrubber",
+  "version": "0.1.0",
+  "description": "VGuard plugin that prevents PII from leaking into agent memory files.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "vguard",
+    "pii",
+    "gdpr",
+    "redaction"
+  ],
+  "peerDependencies": {
+    "@anthril/vguard": ">=2.0.0"
+  },
+  "license": "MIT"
+}

@@ -6,25 +6,7 @@ Thank you to everyone who sponsors [Anthril](https://github.com/anthril)'s open-
 
 ---
 
-## 🛡️ Founding Sponsors
-
-<!-- founding-sponsors --><!-- founding-sponsors -->
-
-## 🏢 Partners
-
-<!-- partners --><!-- partners -->
-
-## 🏗️ Backers
-
-<!-- backers --><!-- backers -->
-
-## ⚡ Builders
-
-<!-- builders --><!-- builders -->
-
-## 🌱 Supporters
-
-<!-- supporters --><!-- supporters -->
+<!-- sponsors --><!-- sponsors -->
 
 ---
 

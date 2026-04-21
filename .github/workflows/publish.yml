@@ -38,29 +38,13 @@ jobs:
             echo "::notice::Push to master is not a PR merge. Skipping publish."
           fi
 
-      - name: Extract version from package.json
+      - name: Derive version + npm dist-tag
         id: version
         if: steps.merge.outputs.is_merge == 'true'
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-
-          if [[ "$VERSION" == *"alpha"* ]] || [[ "$VERSION" == *"beta"* ]] || [[ "$VERSION" == *"rc"* ]]; then
-            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          if [[ "$VERSION" == *"alpha"* ]]; then
-            echo "npm_tag=alpha" >> "$GITHUB_OUTPUT"
-          elif [[ "$VERSION" == *"beta"* ]]; then
-            echo "npm_tag=beta" >> "$GITHUB_OUTPUT"
-          elif [[ "$VERSION" == *"rc"* ]]; then
-            echo "npm_tag=rc" >> "$GITHUB_OUTPUT"
-          else
-            echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
-          fi
+        # Delegates to scripts/derive-npm-tag.mjs so the mapping is
+        # covered by tests/scripts/derive-npm-tag.test.ts and stays in
+        # sync between CI and local tooling.
+        run: node scripts/derive-npm-tag.mjs >> "$GITHUB_OUTPUT"
 
       - name: Check if version already published on npm
         id: npm

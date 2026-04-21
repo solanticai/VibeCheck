@@ -31,6 +31,11 @@ describe('isValidNpmPackageName', () => {
     expect(isValidNpmPackageName('')).toBe(false);
   });
 
+  it('accepts names at 214-char boundary', () => {
+    const boundaryName = 'a'.repeat(214);
+    expect(isValidNpmPackageName(boundaryName)).toBe(true);
+  });
+
   it('rejects names over 214 chars', () => {
     const longName = 'a'.repeat(215);
     expect(isValidNpmPackageName(longName)).toBe(false);

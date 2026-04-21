@@ -8,6 +8,11 @@ import { changelogReminder } from './changelog-reminder.js';
 import { formatOnSave } from './format-on-save.js';
 import { branchNaming } from './branch-naming.js';
 import { lockfileConsistency } from './lockfile-consistency.js';
+import { requireChangelogOnProtectedBranches } from './require-changelog-on-protected-branches.js';
+import { requireVersionBumpOnProtectedBranches } from './require-version-bump-on-protected-branches.js';
+import { costBudget } from './cost-budget.js';
+import { autonomyCircuitBreaker } from './autonomy-circuit-breaker.js';
+import { highImpactConfirm } from './high-impact-confirm.js';
 
 export const workflowRules: Rule[] = [
   commitConventions,
@@ -19,6 +24,11 @@ export const workflowRules: Rule[] = [
   formatOnSave,
   branchNaming,
   lockfileConsistency,
+  requireChangelogOnProtectedBranches,
+  requireVersionBumpOnProtectedBranches,
+  costBudget,
+  autonomyCircuitBreaker,
+  highImpactConfirm,
 ];
 
 export {
@@ -31,4 +41,9 @@ export {
   formatOnSave,
   branchNaming,
   lockfileConsistency,
+  requireChangelogOnProtectedBranches,
+  requireVersionBumpOnProtectedBranches,
+  costBudget,
+  autonomyCircuitBreaker,
+  highImpactConfirm,
 };

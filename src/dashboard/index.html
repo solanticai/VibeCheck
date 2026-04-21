@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>VGuard Dashboard</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --surface: #121a2b;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --border: #1f2a44;
+        --accent: #60a5fa;
+        --bad: #f87171;
+        --warn: #fbbf24;
+        --good: #34d399;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #fff;
+          --surface: #f8fafc;
+          --text: #0f172a;
+          --muted: #64748b;
+          --border: #e2e8f0;
+          --accent: #2563eb;
+          --bad: #dc2626;
+          --warn: #ca8a04;
+          --good: #16a34a;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .status {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .status.live::before {
+        content: '● ';
+        color: var(--good);
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+      }
+      .card .label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .card .value {
+        font-size: 26px;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+      .value.block {
+        color: var(--bad);
+      }
+      .value.warn {
+        color: var(--warn);
+      }
+      .value.pass {
+        color: var(--good);
+      }
+      .feed-wrap {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+      }
+      h2 {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0 0 10px;
+      }
+      .feed {
+        max-height: 480px;
+        overflow-y: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+      }
+      .feed-row {
+        display: grid;
+        grid-template-columns: 90px 60px 1fr 220px;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .feed-row:last-child {
+        border-bottom: none;
+      }
+      .s-block {
+        color: var(--bad);
+        font-weight: 600;
+      }
+      .s-warn {
+        color: var(--warn);
+      }
+      .s-pass {
+        color: var(--muted);
+      }
+      .time {
+        color: var(--muted);
+      }
+      .file {
+        color: var(--muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>VGuard Dashboard</h1>
+        <div class="status live" id="status">Connecting…</div>
+      </header>
+      <div class="cards">
+        <div class="card">
+          <div class="label">Total hits</div>
+          <div class="value" id="total">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Blocks</div>
+          <div class="value block" id="blocks">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Warnings</div>
+          <div class="value warn" id="warns">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Passes</div>
+          <div class="value pass" id="passes">0</div>
+        </div>
+      </div>
+      <div class="feed-wrap">
+        <h2>Live feed</h2>
+        <div class="feed" id="feed"></div>
+      </div>
+    </div>
+    <script>
+      const el = (id) => document.getElementById(id);
+      const statusEl = el('status');
+      const feedEl = el('feed');
+      const statsEl = {
+        total: el('total'),
+        blocks: el('blocks'),
+        warns: el('warns'),
+        passes: el('passes'),
+      };
+
+      function renderStats(s) {
+        statsEl.total.textContent = s.totalHits ?? 0;
+        statsEl.blocks.textContent = s.blocks ?? 0;
+        statsEl.warns.textContent = s.warns ?? 0;
+        statsEl.passes.textContent = s.passes ?? 0;
+      }
+
+      function renderRow(r) {
+        const row = document.createElement('div');
+        row.className = 'feed-row';
+        const t = new Date(r.timestamp).toLocaleTimeString();
+        const cls = r.status === 'block' ? 's-block' : r.status === 'warn' ? 's-warn' : 's-pass';
+        row.innerHTML =
+          '<span class="time">' +
+          t +
+          '</span>' +
+          '<span class="' +
+          cls +
+          '">' +
+          r.status +
+          '</span>' +
+          '<span>' +
+          r.ruleId +
+          '</span>' +
+          '<span class="file" title="' +
+          (r.filePath || '') +
+          '">' +
+          (r.filePath || '') +
+          '</span>';
+        feedEl.prepend(row);
+        while (feedEl.children.length > 200) feedEl.removeChild(feedEl.lastChild);
+      }
+
+      const es = new EventSource('/stream');
+      es.onopen = () => {
+        statusEl.textContent = 'Live';
+      };
+      es.onerror = () => {
+        statusEl.textContent = 'Disconnected';
+        statusEl.classList.remove('live');
+      };
+      es.addEventListener('stats', (e) => {
+        try {
+          renderStats(JSON.parse(e.data));
+        } catch {}
+      });
+      es.addEventListener('hit', (e) => {
+        try {
+          renderRow(JSON.parse(e.data));
+        } catch {}
+      });
+    </script>
+  </body>
+</html>

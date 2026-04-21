@@ -1,0 +1,24 @@
+{
+  "name": "@anthril/vguard-cost-guardrails",
+  "version": "0.1.0",
+  "description": "VGuard plugin that layers per-tool token/cost budgets on top of the core cost-budget rule.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "vguard",
+    "vibe-guard",
+    "finops",
+    "token-budget",
+    "cost",
+    "guardrails"
+  ],
+  "peerDependencies": {
+    "@anthril/vguard": ">=2.0.0"
+  },
+  "license": "MIT"
+}

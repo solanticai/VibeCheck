@@ -58,11 +58,14 @@ describe('security templates', () => {
   it('envExposure generates .env write check', () => {
     const code = security.envExposure(makeCtx({ ruleId: 'security/env-exposure' }));
     expect(code).toContain('env-exposure');
+    expect(code).toContain('.env');
+    expect(code).toContain('Write');
   });
 
   it('rlsRequired generates SQL policy check', () => {
     const code = security.rlsRequired(makeCtx({ ruleId: 'security/rls-required' }));
     expect(code).toContain('rls-required');
+    expect(code).toMatch(/rls|row level security/i);
   });
 
   it('dependencyAudit generates dependency check', () => {
@@ -108,11 +111,13 @@ describe('quality templates', () => {
   it('noUseClientInPages checks for use client directive', () => {
     const code = quality.noUseClientInPages(makeCtx({ ruleId: 'quality/no-use-client-in-pages' }));
     expect(code).toContain('no-use-client-in-pages');
+    expect(code).toContain('use client');
   });
 
   it('noDeprecatedApi generates deprecation check', () => {
     const code = quality.noDeprecatedApi(makeCtx({ ruleId: 'quality/no-deprecated-api' }));
     expect(code).toContain('no-deprecated-api');
+    expect(code.toLowerCase()).toContain('deprecated');
   });
 
   it('namingConventions generates naming check', () => {

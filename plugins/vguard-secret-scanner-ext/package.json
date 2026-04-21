@@ -1,0 +1,22 @@
+{
+  "name": "@anthril/vguard-secret-scanner-ext",
+  "version": "0.1.0",
+  "description": "VGuard plugin that wraps gitleaks/trufflehog for deep secret scanning.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "vguard",
+    "secrets",
+    "gitleaks",
+    "trufflehog"
+  ],
+  "peerDependencies": {
+    "@anthril/vguard": ">=2.0.0"
+  },
+  "license": "MIT"
+}

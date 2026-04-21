@@ -1,0 +1,21 @@
+{
+  "name": "@anthril/vguard-license-check",
+  "version": "0.1.0",
+  "description": "VGuard plugin that checks npm dep licenses against configurable allow/deny lists.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "vguard",
+    "license",
+    "compliance"
+  ],
+  "peerDependencies": {
+    "@anthril/vguard": ">=2.0.0"
+  },
+  "license": "MIT"
+}

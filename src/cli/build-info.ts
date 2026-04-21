@@ -26,5 +26,7 @@ export function formatVersion(): string {
   const extras: string[] = [];
   if (gitSha !== 'unknown') extras.push(gitSha);
   if (buildDate !== 'unknown') extras.push(buildDate);
+  const nodeVersion = typeof process !== 'undefined' ? process.version : '';
+  if (nodeVersion) extras.push(`node ${nodeVersion}`);
   return extras.length ? `${version} (${extras.join(', ')})` : version;
 }

@@ -8,8 +8,8 @@ import '../../src/presets/index.js';
 describe('preset resolution', () => {
   const presetMap = getAllPresets();
 
-  it('should have 18 built-in presets', () => {
-    expect(presetMap.size).toBe(18);
+  it('should have 37 built-in presets', () => {
+    expect(presetMap.size).toBe(37);
     expect(presetMap.has('nextjs-15')).toBe(true);
     expect(presetMap.has('typescript-strict')).toBe(true);
     expect(presetMap.has('react-19')).toBe(true);
@@ -28,6 +28,25 @@ describe('preset resolution', () => {
     expect(presetMap.has('remix')).toBe(true);
     expect(presetMap.has('prisma')).toBe(true);
     expect(presetMap.has('express')).toBe(true);
+    expect(presetMap.has('dockerfile')).toBe(true);
+    expect(presetMap.has('langchain')).toBe(true);
+    expect(presetMap.has('drizzle')).toBe(true);
+    expect(presetMap.has('terraform')).toBe(true);
+    expect(presetMap.has('mcp-server')).toBe(true);
+    expect(presetMap.has('kubernetes-manifests')).toBe(true);
+    expect(presetMap.has('bun')).toBe(true);
+    expect(presetMap.has('mongodb')).toBe(true);
+    expect(presetMap.has('nestjs')).toBe(true);
+    expect(presetMap.has('nuxt')).toBe(true);
+    expect(presetMap.has('trpc')).toBe(true);
+    expect(presetMap.has('zod-validation')).toBe(true);
+    expect(presetMap.has('expo')).toBe(true);
+    expect(presetMap.has('graphql')).toBe(true);
+    expect(presetMap.has('deno')).toBe(true);
+    expect(presetMap.has('grpc')).toBe(true);
+    expect(presetMap.has('rails')).toBe(true);
+    expect(presetMap.has('redis')).toBe(true);
+    expect(presetMap.has('phoenix-elixir')).toBe(true);
   });
 
   it('nextjs-15 preset enables correct rules', () => {

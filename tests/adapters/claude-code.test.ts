@@ -60,7 +60,7 @@ describe('Claude Code adapter', () => {
     const rulesFile = files.find((f) => f.path === '.claude/rules/vguard-enforcement.md');
     expect(rulesFile).toBeDefined();
     expect(rulesFile!.mergeStrategy).toBe('overwrite');
-    expect(rulesFile!.content).toContain('VGuard Enforcement Rules');
+    expect(rulesFile!.content).toContain('VGuard Policy');
   });
 
   it('should include all expected command names', async () => {
@@ -173,10 +173,10 @@ describe('Rules generator', () => {
     expect(file.content).toContain('Workflow');
   });
 
-  it('should include rule severity levels', () => {
+  it('should include rule severity sections', () => {
     const file = generateEnforcementRules(makeConfig());
-    expect(file.content).toContain('[block]');
-    expect(file.content).toContain('[warn]');
+    expect(file.content).toContain('Must not do (blocking)');
+    expect(file.content).toContain('Avoid when possible (warning)');
   });
 
   it('should include quick reference commands', () => {

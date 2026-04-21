@@ -99,6 +99,23 @@ case $? in
 esac
 ```
 
+## Terminal behaviour
+
+VGuard plays nicely with pipes, CI, and accessibility tooling out of the box:
+
+| Variable / flag                | Effect                                                                                                         |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `NO_COLOR=1` (env)             | Disable all ANSI colour output. Follows the [no-color.org](https://no-color.org) standard.                     |
+| `--no-color`                   | Same as `NO_COLOR=1` for a single invocation.                                                                  |
+| `--ascii`                      | Replace Unicode glyphs (`●`, `✓`, `✗`) with ASCII equivalents (`*`, `[ok]`, `[fail]`). Useful on `LANG=C`.     |
+| `-q` / `--quiet`               | Suppress banners, progress spinners, and summaries. Machine output on stdout is unaffected.                    |
+| `--verbose`                    | Emit extra diagnostic detail on stderr.                                                                        |
+| `--debug` (or `DEBUG=vguard*`) | Show full stack traces on error instead of the friendly one-line message.                                      |
+| `CI=true` (env, auto-detected) | Disables interactive prompts; commands fall back to defaults or `--yes`-style flags.                           |
+| stdout not a TTY               | Auto-disables colour, spinners, and the `vguard` no-args setup hint — safe for `vguard cmd \| jq .` pipelines. |
+
+`vguard` already auto-detects non-TTY stdout, so you rarely need to set any of these manually.
+
 ## VGuard Cloud
 
 [VGuard Cloud](https://vguard.dev) gives your team a dashboard for AI coding activity — which rules fire most, who's triggering blocks, and how conventions drift over time. Set up drift alerts, connect webhooks, and export analytics. Free tier available for small teams.
@@ -111,13 +128,7 @@ This project is maintained by [Anthril](https://github.com/anthril) and funded b
 
 [Become a sponsor →](https://github.com/sponsors/anthril)
 
-### Featured Sponsors
-
-<!-- readme-sponsors-featured --><!-- readme-sponsors-featured -->
-
-### All Sponsors
-
-<!-- readme-sponsors-all --><!-- readme-sponsors-all -->
+<!-- sponsors --><!-- sponsors -->
 
 ## Community
 
