@@ -88,6 +88,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Local-rule path list persisted into the pre-compiled config cache.**
+  `vguard generate` now records the `.loaded` file list from
+  `loadLocalRules()` into the new `localRulePaths` field of
+  `.vguard/cache/resolved-config.json`. At hook time,
+  `src/engine/hook-entry.ts` calls the new
+  `loadLocalRulesFromPaths(projectRoot, paths)` helper instead of
+  `loadLocalRules(projectRoot)`, skipping the `existsSync` +
+  `readdirSync` scan on every tool invocation — a small per-hook
+  saving, but hooks fire many times per session. Legacy caches
+  without the field fall back to the scan-based loader, so no
+  regeneration is required to upgrade. Stale cache entries (files
+  deleted since the last `generate`) are recorded as errors and
+  surfaced by `doctor`, not thrown. Tied to the follow-up noted on
+  PR #66.
 - **Project-local rule autoloader for `.vguard/rules/custom/`.** Rule
   files placed under `<projectRoot>/.vguard/rules/custom/**/*.{ts,js,mjs}`
   are now picked up at config resolution time and registered alongside

@@ -12,6 +12,7 @@ vi.mock('../../src/utils/stdin.js', () => ({
 
 vi.mock('../../src/config/compile.js', () => ({
   loadCompiledConfig: vi.fn(),
+  loadCompiledConfigWithMetadata: vi.fn(),
   serializeConfig: vi.fn(),
   compileConfig: vi.fn(),
 }));
@@ -73,7 +74,7 @@ vi.mock('../../src/utils/ignore.js', () => ({
 vi.mock('../../src/rules/index.js', () => ({}));
 
 import { parseStdinJson } from '../../src/utils/stdin.js';
-import { loadCompiledConfig } from '../../src/config/compile.js';
+import { loadCompiledConfigWithMetadata } from '../../src/config/compile.js';
 import { resolveRules } from '../../src/engine/resolver.js';
 import { runRules } from '../../src/engine/runner.js';
 import { recordPerfEntry } from '../../src/engine/perf.js';
@@ -111,7 +112,7 @@ describe('Hook Execution Integration', () => {
 
   it('exits 0 when no config found (fail-open)', async () => {
     vi.mocked(parseStdinJson).mockReturnValue({ tool_name: 'Edit', tool_input: {} });
-    vi.mocked(loadCompiledConfig).mockResolvedValue(null);
+    vi.mocked(loadCompiledConfigWithMetadata).mockResolvedValue(null);
 
     const { executeHook } = await import('../../src/engine/hook-entry.js');
 
@@ -124,10 +125,13 @@ describe('Hook Execution Integration', () => {
       tool_name: 'Edit',
       tool_input: { file_path: '/project/src/components/ui/button.tsx' },
     });
-    vi.mocked(loadCompiledConfig).mockResolvedValue({
-      presets: [],
-      agents: ['claude-code'],
-      rules: new Map(),
+    vi.mocked(loadCompiledConfigWithMetadata).mockResolvedValue({
+      config: {
+        presets: [],
+        agents: ['claude-code'],
+        rules: new Map(),
+      },
+      metadata: {},
     });
     vi.mocked(createIgnoreMatcher).mockReturnValueOnce({
       isIgnored: vi.fn(() => true),
@@ -148,10 +152,13 @@ describe('Hook Execution Integration', () => {
 
   it('exits 0 when no matching rules', async () => {
     vi.mocked(parseStdinJson).mockReturnValue({ tool_name: 'Edit', tool_input: {} });
-    vi.mocked(loadCompiledConfig).mockResolvedValue({
-      presets: [],
-      agents: ['claude-code'],
-      rules: new Map(),
+    vi.mocked(loadCompiledConfigWithMetadata).mockResolvedValue({
+      config: {
+        presets: [],
+        agents: ['claude-code'],
+        rules: new Map(),
+      },
+      metadata: {},
     });
     vi.mocked(resolveRules).mockReturnValue([]);
 
@@ -163,10 +170,13 @@ describe('Hook Execution Integration', () => {
 
   it('exits 2 when PreToolUse rule blocks', async () => {
     vi.mocked(parseStdinJson).mockReturnValue({ tool_name: 'Edit', tool_input: {} });
-    vi.mocked(loadCompiledConfig).mockResolvedValue({
-      presets: [],
-      agents: ['claude-code'],
-      rules: new Map(),
+    vi.mocked(loadCompiledConfigWithMetadata).mockResolvedValue({
+      config: {
+        presets: [],
+        agents: ['claude-code'],
+        rules: new Map(),
+      },
+      metadata: {},
     });
     vi.mocked(resolveRules).mockReturnValue([
       {
@@ -201,10 +211,13 @@ describe('Hook Execution Integration', () => {
 
   it('records perf entry after rule execution', async () => {
     vi.mocked(parseStdinJson).mockReturnValue({ tool_name: 'Edit', tool_input: {} });
-    vi.mocked(loadCompiledConfig).mockResolvedValue({
-      presets: [],
-      agents: ['claude-code'],
-      rules: new Map(),
+    vi.mocked(loadCompiledConfigWithMetadata).mockResolvedValue({
+      config: {
+        presets: [],
+        agents: ['claude-code'],
+        rules: new Map(),
+      },
+      metadata: {},
     });
     vi.mocked(resolveRules).mockReturnValue([
       {

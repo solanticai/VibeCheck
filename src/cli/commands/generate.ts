@@ -41,13 +41,18 @@ export async function generateCommand(): Promise<void> {
   }
 
   const spinner = startSpinner('Resolving config');
-  await loadLocalRules(projectRoot);
+  const localRuleResult = await loadLocalRules(projectRoot);
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
   const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
 
   spinner.update('Compiling config cache');
-  await compileConfig(resolvedConfig, projectRoot);
+  await compileConfig(resolvedConfig, projectRoot, {
+    // Persist the discovered local-rule paths so the hook runtime can
+    // replay the same jiti imports without re-scanning the directory
+    // on every tool call.
+    localRulePaths: localRuleResult.loaded,
+  });
   spinner.succeed('Updated .vguard/cache/resolved-config.json');
 
   // Generate for each agent
