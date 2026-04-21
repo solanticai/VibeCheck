@@ -88,6 +88,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`monorepo.overrides` is now applied.** The field has been declared
+  and schema-validated since v3.0 but was never consumed — a user
+  could write `monorepo.overrides['apps/mobile'] = { presets: ['react-native'] }`
+  and the preset would be silently ignored. New
+  `src/config/workspace-overrides.ts` resolves the most-specific
+  matching override key (fewest wildcards, longest literal prefix,
+  declaration order) and `resolveConfigForFile(userConfig, filePath, presetMap)`
+  layers the override's `presets` / `rules` over the root config
+  before returning a `ResolvedConfig`. `vguard lint` now threads the
+  raw config + presetMap into the scanner, which caches per-workspace
+  resolutions so files in the same workspace share a rule set. Works
+  with single-star (`apps/*`), double-star (`apps/**`), and literal
+  (`apps/mobile`) keys. Runtime hooks still use the flat compiled
+  config; extending `.vguard/cache/resolved-config.json` to persist
+  the override table will land in a follow-up. Fixes #56.
 - **Local-rule path list persisted into the pre-compiled config cache.**
   `vguard generate` now records the `.loaded` file list from
   `loadLocalRules()` into the new `localRulePaths` field of

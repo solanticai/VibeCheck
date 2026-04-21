@@ -1,10 +1,12 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import type { Rule, HookContext, ResolvedConfig } from '../types.js';
+import { join, relative } from 'node:path';
+import type { Rule, HookContext, ResolvedConfig, VGuardConfig, Preset } from '../types.js';
 import { getAllRules } from './registry.js';
 import { normalizePath, getExtension, matchesPattern } from '../utils/path.js';
 import { buildGitContext } from '../utils/git.js';
 import { createIgnoreMatcher, type IgnoreMatcher } from '../utils/ignore.js';
+import { resolveConfigForFile } from '../config/loader.js';
+import { findWorkspaceOverride } from '../config/workspace-overrides.js';
 
 /** A single issue found during scanning */
 export interface ScanIssue {
@@ -32,6 +34,13 @@ export interface ScanOptions {
    * matcher is created from `.vguardignore` + built-in defaults at `rootDir`.
    */
   ignoreMatcher?: IgnoreMatcher;
+  /**
+   * When provided alongside `presetMap`, the scanner re-resolves the
+   * config per file using `config.monorepo.overrides`. Omit both to
+   * keep the default single-config behaviour.
+   */
+  userConfig?: VGuardConfig;
+  presetMap?: Map<string, Preset>;
 }
 
 const SCANNABLE_EXTENSIONS = new Set([
@@ -59,23 +68,50 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
   const allRules = getAllRules();
   const gitContext = buildGitContext(rootDir);
 
-  // Collect applicable rules (only Write-matching rules work in scan mode)
-  const scanRules: Array<{
+  type ScanRuleSet = Array<{
     rule: Rule;
-    config: typeof config.rules extends Map<string, infer V> ? V : never;
-  }> = [];
+    config: ResolvedConfig['rules'] extends Map<string, infer V> ? V : never;
+  }>;
 
-  for (const [ruleId, ruleConfig] of config.rules) {
-    if (!ruleConfig.enabled) continue;
-    const rule = allRules.get(ruleId);
-    if (!rule) continue;
+  function buildScanRules(rc: ResolvedConfig): ScanRuleSet {
+    const out: ScanRuleSet = [];
+    for (const [ruleId, ruleConfig] of rc.rules) {
+      if (!ruleConfig.enabled) continue;
+      const rule = allRules.get(ruleId);
+      if (!rule) continue;
+      if (rule.match?.tools && !rule.match.tools.includes('Write')) continue;
+      if (rule.events.length === 1 && rule.events[0] === 'Stop') continue;
+      out.push({ rule, config: ruleConfig });
+    }
+    return out;
+  }
 
-    // Only include rules that match Write tool (scan simulates Write)
-    if (rule.match?.tools && !rule.match.tools.includes('Write')) continue;
-    // Skip Stop-only rules
-    if (rule.events.length === 1 && rule.events[0] === 'Stop') continue;
+  const defaultScanRules = buildScanRules(config);
 
-    scanRules.push({ rule, config: ruleConfig });
+  // Per-workspace cache so files that match the same override share a
+  // resolved config and scan-rule set.
+  const workspaceCache = new Map<string, { cfg: ResolvedConfig; scanRules: ScanRuleSet }>();
+  const hasOverrides =
+    options.userConfig?.monorepo?.overrides &&
+    Object.keys(options.userConfig.monorepo.overrides).length > 0 &&
+    options.presetMap;
+
+  function resolveForFile(filePath: string): { cfg: ResolvedConfig; scanRules: ScanRuleSet } {
+    if (!hasOverrides) return { cfg: config, scanRules: defaultScanRules };
+    const relPath = relative(rootDir, filePath).replace(/\\/g, '/');
+    const match = findWorkspaceOverride(options.userConfig!.monorepo, relPath);
+    if (!match) return { cfg: config, scanRules: defaultScanRules };
+
+    // Cache key: the stringified override keys that matched. Use the
+    // override reference identity via JSON of keys it touches.
+    const cacheKey = JSON.stringify({ p: match.presets ?? null, r: match.rules ?? null });
+    let cached = workspaceCache.get(cacheKey);
+    if (!cached) {
+      const cfg = resolveConfigForFile(options.userConfig!, relPath, options.presetMap);
+      cached = { cfg, scanRules: buildScanRules(cfg) };
+      workspaceCache.set(cacheKey, cached);
+    }
+    return cached;
   }
 
   // Walk the directory
@@ -93,6 +129,8 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
       continue;
     }
 
+    const { cfg: fileConfig, scanRules: fileScanRules } = resolveForFile(filePath);
+
     // Build a synthetic HookContext for this file
     const context: HookContext = {
       event: 'PreToolUse',
@@ -101,12 +139,12 @@ export async function scanProject(options: ScanOptions): Promise<ScanResult> {
         file_path: filePath,
         content,
       },
-      projectConfig: config,
+      projectConfig: fileConfig,
       gitContext,
     };
 
     // Run applicable rules
-    for (const { rule, config: ruleConfig } of scanRules) {
+    for (const { rule, config: ruleConfig } of fileScanRules) {
       // Check file match patterns
       if (rule.match?.include && !matchesPattern(filePath, rule.match.include)) continue;
       if (rule.match?.exclude && matchesPattern(filePath, rule.match.exclude)) continue;

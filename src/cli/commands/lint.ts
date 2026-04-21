@@ -30,12 +30,15 @@ export async function lintCommand(options: { format?: string }): Promise<void> {
   await loadLocalRules(projectRoot);
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
-  const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
+  const typedConfig = rawConfig as VGuardConfig;
+  const resolvedConfig = resolveConfig(typedConfig, presetMap);
 
   const spinner = machineOutput ? null : startSpinner('Scanning project');
   const result = await scanProject({
     rootDir: projectRoot,
     config: resolvedConfig,
+    userConfig: typedConfig,
+    presetMap,
   });
   spinner?.succeed(`Scanned ${result.filesScanned} files`);
 

@@ -9,6 +9,7 @@ import { vguardConfigSchema } from './schema.js';
 import { DEFAULT_CONFIG } from './defaults.js';
 import { discoverConfigFile, readRawConfig } from './discovery.js';
 import { getProfileSeverity, type ProfileName } from './profiles.js';
+import { applyWorkspaceOverride } from './workspace-overrides.js';
 
 /**
  * Load and resolve the VGuard config from a project root.
@@ -156,6 +157,23 @@ export function resolveConfig(
     cloud: config.cloud,
     enforcement: config.enforcement ?? 'hybrid',
   };
+}
+
+/**
+ * Resolve a user config for a specific touched file, applying any matching
+ * `monorepo.overrides[<glob>]` entry before delegating to `resolveConfig`.
+ *
+ * Used by `lint` (per-file scan) and by any caller that knows which file
+ * triggered enforcement. When `filePath` is undefined or no override
+ * matches, behaves identically to `resolveConfig`.
+ */
+export function resolveConfigForFile(
+  userConfig: VGuardConfig,
+  filePath: string | undefined,
+  presetMap?: Map<string, Preset>,
+): ResolvedConfig {
+  const effective = applyWorkspaceOverride(userConfig, filePath);
+  return resolveConfig(effective, presetMap);
 }
 
 /**
