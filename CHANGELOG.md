@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`sweep-gitignore` skill** under `ai-for-vibe-guard/skills/`.
+  Dispatches parallel category sub-agents (build artefacts, deps,
+  IDE/OS cruft, secrets/env, logs/caches) to audit a repo for files
+  that should be ignored, and produces a consolidated, dedup'd,
+  evidence-backed `.gitignore` patch at
+  `.vguard/GITIGNORE_SWEEP_REPORT.md`. Advisory only — never modifies
+  `.gitignore` directly. Linked from
+  `ai-for-vibe-guard/README.md`.
+
+### Docs
+
+- **`auto-configure` synthesizer + custom-rule template clarify
+  `RuleResult.status`.** The type is `'pass' | 'block' | 'warn'` —
+  there is no `'fail'` status. Added a dedicated section to
+  `ai-for-vibe-guard/skills/auto-configure/prompts/synthesizer.md`
+  and an inline NOTE to
+  `ai-for-vibe-guard/skills/auto-configure/templates/custom-rule.ts.tmpl`
+  so the generator chooses the right status and doesn't produce code
+  that fails type-check.
+
 ### Fixed
 
 - `rollingWindowSpend(root, 0)` and the underlying `readUsage` filter

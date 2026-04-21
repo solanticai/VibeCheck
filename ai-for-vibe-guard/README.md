@@ -23,6 +23,7 @@ Or reference the local path if you have the repo cloned.
 | [cloud-connect](skills/cloud-connect/SKILL.md)         | Connect to VGuard Cloud for analytics                                                        |
 | [troubleshoot](skills/troubleshoot/SKILL.md)           | Debug common VGuard issues                                                                   |
 | [custom-rules](skills/custom-rules/SKILL.md)           | Write project-specific custom guardrail rules                                                |
+| [sweep-gitignore](skills/sweep-gitignore/SKILL.md)     | Audit a repo and compile the patterns that should be added to `.gitignore` (parallel agents) |
 
 ## What is VGuard?
 

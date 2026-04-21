@@ -29,6 +29,12 @@ export const rule: Rule = {
       // Skip test files unless the rule is explicitly about testing
       if (/\.(test|spec)\.[a-z]+$/i.test(filePath)) return { status: 'pass', ruleId };
 
+      // NOTE: RuleResult.status is `'pass' | 'block' | 'warn'` — there is no
+      // `'fail'` status. On a violation, return `{ status: 'warn', ruleId,
+      // message: '...' }` (or `'block'` if severity is 'block'). Mirror the
+      // rule's declared `severity` above: 'block' -> 'block', 'warn' -> 'warn',
+      // 'info' -> 'warn' (info is a display modifier; the status itself is
+      // 'warn' so the runner routes the hit through the warn channel).
       {{CHECK_BODY}}
 
       return { status: 'pass', ruleId };

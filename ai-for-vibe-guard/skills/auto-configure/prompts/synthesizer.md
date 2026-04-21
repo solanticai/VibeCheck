@@ -52,6 +52,19 @@ For each item in `merged.customRuleIdeas`, write to `.vguard/rules/custom/<id>.t
 - `{{MATCH_TOOLS}}` — TS array literal, e.g. `['Write', 'Edit']`
 - `{{CHECK_BODY}}` — the check outline translated into real TS. For regex cases, produce a compiled `const pattern = /.../;` and `pattern.test(content)`. For AST cases, leave a `TODO` comment with the AST walk described — do not fabricate AST code.
 
+### `RuleResult.status` values
+
+The SDK types `RuleResult.status` as `'pass' | 'block' | 'warn'` — there is
+**no `'fail'` status**. On a violation, return one of:
+
+- `{ status: 'block', ruleId, message: '...' }` — for rules with `severity: 'block'`.
+- `{ status: 'warn',  ruleId, message: '...' }` — for rules with `severity: 'warn'` or `'info'` (info is a display modifier; the runtime status is still `'warn'`).
+
+Using any other string (`'fail'`, `'error'`, `'violation'`) is a TypeScript
+error and breaks the adapter pipeline. The template's fallback returns are
+already `'pass'` — only the positive-hit return inside `{{CHECK_BODY}}` needs
+to pick `'block'` or `'warn'` to match the rule's declared severity.
+
 Every rule must:
 
 - Wrap its logic in `try/catch` and return `{ status: 'pass', ruleId }` on any error (fail-open — matches VGuard's core philosophy for custom rules).
