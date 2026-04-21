@@ -136,6 +136,7 @@ This project is maintained by [Anthril](https://github.com/anthril) and funded b
 - [Contributing](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
+- [Trust Model](TRUST_MODEL.md) — what `vguard` commands actually execute, and how to lock it down in CI
 - [Changelog](CHANGELOG.md)
 
 ## License
