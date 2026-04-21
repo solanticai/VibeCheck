@@ -167,6 +167,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`monorepo.overrides` matcher compilation is now cached per
+  `MonorepoConfig` reference.** Previously every `findWorkspaceOverride`
+  call rebuilt a fresh `RegExp` per override key, so a lint run over
+  a 1000-file monorepo with 10 overrides paid 10,000 RegExp
+  constructions. Now a `WeakMap<MonorepoConfig, CompiledOverride[]>`
+  stores pre-built matchers + pre-computed specificity scores, so the
+  first lookup compiles once and every subsequent lookup against the
+  same config reference is a table walk. `buildWorkspaceGlobRegex` is
+  now a named export so the compile step is directly testable. Follow-up
+  to the perf note on PR #66.
 - **`vibeCheckConfigSchema` → `vguardConfigSchema`.** The Zod schema
   export was renamed to match the post-rebrand product name. The old
   identifier remains as a `@deprecated` re-export for one minor release
