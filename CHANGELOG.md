@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `rollingWindowSpend(root, 0)` and the underlying `readUsage` filter
+  now use strict `>` instead of `>=` for the `sinceIso` cutoff, so a
+  zero-width window returns zero records deterministically (fixes a
+  CI flake on fast runners where a just-written record shared the
+  same millisecond timestamp as the cutoff).
+
 ### Testing
 
 - Merged three GitHub Copilot Autofix PRs (#37, #38, #39) targeting

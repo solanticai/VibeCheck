@@ -136,7 +136,7 @@ export function readUsage(
   if (filter?.sinceIso) {
     const cutoff = Date.parse(filter.sinceIso);
     if (!Number.isNaN(cutoff)) {
-      out = out.filter((r) => Date.parse(r.timestamp) >= cutoff);
+      out = out.filter((r) => Date.parse(r.timestamp) > cutoff);
     }
   }
   return out;
