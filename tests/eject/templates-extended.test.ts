@@ -58,6 +58,8 @@ describe('security templates', () => {
   it('envExposure generates .env write check', () => {
     const code = security.envExposure(makeCtx({ ruleId: 'security/env-exposure' }));
     expect(code).toContain('env-exposure');
+    expect(code).toContain('.env');
+    expect(code).toContain('Write');
   });
 
   it('rlsRequired generates SQL policy check', () => {
