@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock fs to control which files exist
 const mockFiles = new Map<string, string>();
@@ -23,9 +23,16 @@ vi.mock('node:fs/promises', async () => {
   };
 });
 
-const { discoverConfigFile } = await import('../../src/config/discovery.js');
+const { discoverConfigFile, clearDiscoveryCache } = await import('../../src/config/discovery.js');
 
 describe('config/discovery', () => {
+  beforeEach(() => {
+    // Discovery is memoised per-projectRoot — clear the cache between
+    // tests that mutate `mockFiles` so each case sees a fresh lookup.
+    clearDiscoveryCache();
+    mockFiles.clear();
+  });
+
   it('should find vguard.config.ts', () => {
     mockFiles.set('/project/vguard.config.ts', 'export default {}');
     const result = discoverConfigFile('/project');

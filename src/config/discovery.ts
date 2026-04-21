@@ -18,10 +18,38 @@ export interface DiscoveredConfig {
 }
 
 /**
+ * Cache of discovery results per projectRoot. Most CLI commands call
+ * `discoverConfigFile(process.cwd())` once; a few — doctor, generate,
+ * lint — call it from multiple helpers during one invocation. The
+ * cache avoids re-hitting the filesystem for each call. Call
+ * `clearDiscoveryCache()` in tests that create or delete config
+ * files between assertions.
+ */
+const discoveryCache = new Map<string, DiscoveredConfig | null>();
+
+/**
+ * Clear the discovery cache. Intended for tests or for commands like
+ * `vguard init` that change the on-disk config layout during the same
+ * process.
+ */
+export function clearDiscoveryCache(): void {
+  discoveryCache.clear();
+}
+
+/**
  * Find the VGuard config file in a project root.
  * Searches in priority order: .ts > .js > .mjs > .json > package.json#vguard
  */
 export function discoverConfigFile(projectRoot: string): DiscoveredConfig | null {
+  const cached = discoveryCache.get(projectRoot);
+  if (cached !== undefined) return cached;
+
+  const result = discoverConfigFileUncached(projectRoot);
+  discoveryCache.set(projectRoot, result);
+  return result;
+}
+
+function discoverConfigFileUncached(projectRoot: string): DiscoveredConfig | null {
   for (const filename of CONFIG_FILES) {
     const fullPath = join(projectRoot, filename);
     if (existsSync(fullPath)) {

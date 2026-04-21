@@ -141,19 +141,74 @@ export async function executeHook(event: HookEvent): Promise<void> {
       const output = formatPreToolUseOutput(result);
       if (output.stderr) process.stderr.write(output.stderr);
       if (output.stdout) process.stdout.write(output.stdout);
-      process.exit(output.exitCode);
+      exitAfterDrain(output.exitCode);
     } else if (event === 'PostToolUse') {
       const output = formatPostToolUseOutput(result);
       if (output.stdout) process.stdout.write(output.stdout);
-      process.exit(output.exitCode);
+      exitAfterDrain(output.exitCode);
     } else {
       const output = formatStopOutput(result);
       if (output.stderr) process.stderr.write(output.stderr);
-      process.exit(output.exitCode);
+      exitAfterDrain(output.exitCode);
     }
   } catch {
     // Fail open — never block on internal errors
     process.exit(0);
+  }
+}
+
+/**
+ * Exit after the stdout + stderr pipes have finished draining.
+ *
+ * Plain `process.exit(code)` fires synchronously and will truncate any
+ * write that hasn't yet flushed to the underlying fd — not usually
+ * visible on fast pipes, but on a slow / blocked terminal (Claude Code
+ * inherits the parent's stdio) the tail of a long message can be cut
+ * mid-line. Setting `process.exitCode` and explicitly ending both
+ * streams lets Node's runtime flush on its own terms.
+ */
+function exitAfterDrain(code: number): void {
+  // Setting `process.exitCode` communicates the intent even if a later
+  // write or callback calls `process.exit(0)` by mistake.
+  process.exitCode = code;
+  // `process.stdout.write('', cb)` queues behind any pending writes,
+  // so the callback fires once the existing buffer is handed off to
+  // the kernel. For TTY stdio this is instantaneous; for piped stdio
+  // it reduces (though cannot fully eliminate) the truncation window
+  // that Node's docs warn about when `process.exit()` runs while the
+  // pipe still has bytes queued.
+  try {
+    process.stdout.write('', () => {
+      /* drain complete */
+    });
+  } catch {
+    /* stdout closed */
+  }
+  try {
+    process.stderr.write('', () => {
+      /* drain complete */
+    });
+  } catch {
+    /* stderr closed */
+  }
+  process.exit(code);
+}
+
+/**
+ * Emit a `[vguard:hook]` diagnostic line to stderr iff `VGUARD_DEBUG=1`.
+ *
+ * Hook code is load-bearing and fail-open by contract, so it mustn't
+ * throw or add meaningful latency. When users complain that "nothing is
+ * reaching the dashboard," this paper trail is the only reliable
+ * breadcrumb; without it the empty catches below look like black boxes.
+ */
+function debugHook(label: string, err: unknown): void {
+  if (process.env.VGUARD_DEBUG !== '1') return;
+  const message = err instanceof Error ? err.message : String(err);
+  try {
+    process.stderr.write(`[vguard:hook] ${label}: ${message}\n`);
+  } catch {
+    /* stderr closed — nothing sensible to do */
   }
 }
 
@@ -174,8 +229,11 @@ function triggerRealTimeStream(projectRoot: string, cloudConfig: NonNullable<Clo
       }
       return maybeFlushToCloud(projectRoot, apiKey, cloudConfig);
     })
-    .catch(() => {
-      // Fail open — streaming errors should never impact the developer
+    .catch((err) => {
+      // Fail open — streaming errors should never impact the developer.
+      // Preserve a breadcrumb under VGUARD_DEBUG so users can diagnose
+      // "why is nothing reaching the dashboard".
+      debugHook('cloud stream skipped', err);
     });
 }
 
@@ -198,8 +256,9 @@ function triggerConfigPush(projectRoot: string): void {
         return maybePushConfigSnapshot(projectRoot, key);
       });
     })
-    .catch(() => {
-      // Fail open — config push errors should never impact the developer
+    .catch((err) => {
+      // Fail open — config push errors should never impact the developer.
+      debugHook('config push skipped', err);
     });
 }
 

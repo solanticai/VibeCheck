@@ -88,6 +88,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`hasRule` and `getRuleIds` exported** from the top-level package.
+  Plugin authors doing defensive checks before `registerRule` no
+  longer have to import from the engine path. Addresses #57.6.
+- **JSDoc on `createEditVariant`** at the `src/index.ts` export site,
+  summarising the edit-rule-factory semantics for plugin authors.
+  Addresses #57.4.
 - **`TRUST_MODEL.md`** at the repo root, linked from `README.md`.
   Documents what running `vguard` against a repository actually executes
   (`vguard.config.ts` = code; plugins = full-trust; local rules =
@@ -177,6 +183,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING: `EXIT.LINT_BLOCKING` moved from `1` to `3`** so CI
+  scripts can distinguish `vguard lint` finding issues from a generic
+  Node exception (which exits `1`). `USAGE` remains `2`. Scripts that
+  only care about "any failure" (`$? -ne 0`) are unaffected; scripts
+  that specifically match on `== 1` for lint-block detection need to
+  update to `== 3`. README exit-code table updated in the same
+  commit. Addresses #57.7.
+- **`discoverConfigFile()` is now memoised per `projectRoot`** via a
+  module-level Map, so the deep monorepo lookup a single command used
+  to repeat up to a dozen times now runs once. `clearDiscoveryCache()`
+  is exported for tests and for any command that changes the on-disk
+  config layout mid-process. Addresses #57.8.
+- **`as unknown as string[]` removed from Commander `.choices()`
+  wiring** in `src/cli/index.ts`. `LINT_FORMATS`, `REPORT_FORMATS`,
+  and `SHELL_CHOICES` are now plain `string[]` with adjacent
+  `LintFormat` / `ReportFormat` / `ShellChoice` union types exported
+  for the rest of the codebase. Addresses #57.3.
+- **`clearRegistry` → `__clearRegistryForTests`** in
+  `src/engine/registry.ts`. The old name is kept as a `@deprecated`
+  re-export for one minor so existing test suites compile; new
+  callers should use the prefixed name. The public barrel in
+  `src/index.ts` no longer re-exports it. Addresses #57.5.
 - **`monorepo.overrides` matcher compilation is now cached per
   `MonorepoConfig` reference.** Previously every `findWorkspaceOverride`
   call rebuilt a fresh `RegExp` per override key, so a lint run over
@@ -231,7 +259,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rule through `resolved.rules` (the same source `config show` uses)
   and falls back to the catalogue default only when the config is
   unreadable. Fixes #45.
-
+- **`vguard rules` unknown-rule hint now uses `error()` helper.** The
+  two follow-up hint lines in `rulesEnableCommand` /
+  `rulesDisableCommand` were calling `console.error` directly,
+  bypassing the structured logger every other command in the file
+  uses. Addresses #57.1.
+- **Hook exit path attempts to drain stdio before exit.**
+  `src/engine/hook-entry.ts` now sets `process.exitCode` and queues
+  an empty write through stdout/stderr to flush any pending bytes
+  before calling `process.exit(code)`. Reduces the truncation window
+  on piped stdio that heavy writers (long `message` fields on
+  block-severity rules) could hit under load. Addresses #57.9.
+- **Cloud sync + config-push empty catches log under `VGUARD_DEBUG=1`.**
+  Both fire-and-forget blocks in `hook-entry.ts` remain fail-open, but
+  under `VGUARD_DEBUG=1` they now emit `[vguard:hook] cloud stream
+  skipped: <reason>` / `config push skipped: <reason>` to stderr so
+  users troubleshooting "why is nothing reaching the dashboard" have
+  a paper trail. Addresses #57.10.
 - `rollingWindowSpend(root, 0)` and the underlying `readUsage` filter
   now use strict `>` instead of `>=` for the `sinceIso` cutoff, so a
   zero-width window returns zero records deterministically (fixes a

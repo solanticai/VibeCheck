@@ -77,8 +77,8 @@ VGuard follows the BSD `sysexits.h` conventions so CI scripts can branch on spec
 | Code  | Name            | When                                                                                          |
 | ----- | --------------- | --------------------------------------------------------------------------------------------- |
 | `0`   | `OK`            | Success.                                                                                      |
-| `1`   | `LINT_BLOCKING` | `vguard lint` found one or more `block`-severity issues.                                      |
 | `2`   | `USAGE`         | Unknown flag, missing required argument, invalid `--format` choice, `--check` + `--apply`.    |
+| `3`   | `LINT_BLOCKING` | `vguard lint` found one or more `block`-severity issues.                                      |
 | `65`  | `DATA_ERR`      | Config file loaded but failed validation (malformed JSON / zod parse error).                  |
 | `66`  | `NO_INPUT`      | Expected config not found (e.g. any command needing `vguard.config.ts` before `vguard init`). |
 | `69`  | `UNAVAILABLE`   | Cloud API or network dependency unreachable.                                                  |

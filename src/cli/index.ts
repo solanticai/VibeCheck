@@ -5,9 +5,18 @@ import { handleFatal } from './ui/errors.js';
 import { setAsciiMode, setDebugMode, setVerbosity } from './ui/env.js';
 import { EXIT } from './exit-codes.js';
 
-const LINT_FORMATS = ['text', 'json', 'github-actions', 'ndjson'] as const;
-const REPORT_FORMATS = ['md', 'json', 'html', 'all'] as const;
-const SHELL_CHOICES = ['bash', 'zsh', 'fish', 'powershell'] as const;
+// Commander's `.choices()` signature expects a mutable `string[]`, so these
+// lists are declared as plain arrays rather than `as const` tuples — that
+// way we don't need the `as unknown as string[]` double cast at the call
+// sites. The exported union types below keep the rest of the codebase
+// type-safe against the canonical values.
+const LINT_FORMATS: string[] = ['text', 'json', 'github-actions', 'ndjson'];
+const REPORT_FORMATS: string[] = ['md', 'json', 'html', 'all'];
+const SHELL_CHOICES: string[] = ['bash', 'zsh', 'fish', 'powershell'];
+
+export type LintFormat = 'text' | 'json' | 'github-actions' | 'ndjson';
+export type ReportFormat = 'md' | 'json' | 'html' | 'all';
+export type ShellChoice = 'bash' | 'zsh' | 'fish' | 'powershell';
 
 function collect(value: string, previous: string[] = []): string[] {
   return [...previous, value];
@@ -164,9 +173,7 @@ program
   .command('lint')
   .description('Run rules in static analysis mode (CI-friendly)')
   .addOption(
-    new Option('-f, --format <format>', 'Output format')
-      .choices(LINT_FORMATS as unknown as string[])
-      .default('text'),
+    new Option('-f, --format <format>', 'Output format').choices(LINT_FORMATS).default('text'),
   )
   .addHelpText(
     'after',
@@ -218,9 +225,7 @@ program
   .description('Generate quality dashboard from rule hit data')
   .option('-o, --output <path>', 'Save report to a specific file path')
   .addOption(
-    new Option('-f, --format <format>', 'Output format')
-      .choices(REPORT_FORMATS as unknown as string[])
-      .default('md'),
+    new Option('-f, --format <format>', 'Output format').choices(REPORT_FORMATS).default('md'),
   )
   .addHelpText(
     'after',

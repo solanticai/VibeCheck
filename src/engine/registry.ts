@@ -38,7 +38,19 @@ export function getRuleIds(): string[] {
   return Array.from(ruleRegistry.keys());
 }
 
-/** Clear all registered rules (for testing) */
-export function clearRegistry(): void {
+/**
+ * Clear all registered rules. Exported for test-suite use only — the
+ * `__` prefix signals that plugin authors should not rely on this
+ * being part of the public API and that it may change without a
+ * major bump.
+ */
+export function __clearRegistryForTests(): void {
   ruleRegistry.clear();
 }
+
+/**
+ * @deprecated Renamed to `__clearRegistryForTests` to signal it is
+ * internal. Kept as a re-export so existing test suites keep working;
+ * schedule for removal in the next major.
+ */
+export const clearRegistry = __clearRegistryForTests;

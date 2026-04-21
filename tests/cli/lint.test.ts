@@ -133,6 +133,8 @@ describe('lintCommand', () => {
     });
 
     await expect(lintCommand({})).rejects.toThrow('process.exit');
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    // LINT_BLOCKING was moved from 1 to 3 so CI can distinguish a lint
+    // failure from a generic Node exception (which exits 1).
+    expect(exitSpy).toHaveBeenCalledWith(3);
   });
 });

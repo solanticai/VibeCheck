@@ -117,7 +117,7 @@ export async function rulesEnableCommand(ruleId: string): Promise<void> {
 
   if (!allRules.has(ruleId)) {
     error(`Unknown rule "${ruleId}".`);
-    console.error('  Run `vguard rules list --all` to see available rules.');
+    error('  Run `vguard rules list --all` to see available rules.');
     process.exit(EXIT.USAGE);
   }
 
@@ -148,7 +148,7 @@ export async function rulesDisableCommand(ruleId: string): Promise<void> {
 
   if (!allRules.has(ruleId)) {
     error(`Unknown rule "${ruleId}".`);
-    console.error('  Run `vguard rules list --all` to see available rules.');
+    error('  Run `vguard rules list --all` to see available rules.');
     process.exit(EXIT.USAGE);
   }
 
