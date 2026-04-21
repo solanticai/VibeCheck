@@ -14,6 +14,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { dirname, join } from 'node:path';
 
 import type { SessionEventRecord } from '../engine/session-tracker.js';
+import { sanitiseBaseUrl } from './url-guard.js';
 
 const EVENTS_FILE = '.vguard/data/session-events.jsonl';
 const CURSOR_FILE = '.vguard/data/session-events.cursor.json';
@@ -105,7 +106,7 @@ export async function flushSessionEvents(
     try {
       const body = pending.map((e) => JSON.stringify(e)).join('\n');
       const url =
-        (process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev').replace(/\/$/, '') +
+        sanitiseBaseUrl(process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev') +
         '/api/v1/sessions/events';
 
       const res = await fetch(url, {

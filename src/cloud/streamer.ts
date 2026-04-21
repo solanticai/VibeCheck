@@ -3,6 +3,7 @@ import { join, dirname } from 'node:path';
 import type { CloudConfig } from '../types.js';
 import { readRuleHits } from '../engine/tracker.js';
 import { readSyncCursor, writeSyncCursor, getUnsyncedRecords, applyExclusions } from './sync.js';
+import { sanitiseBaseUrl } from './url-guard.js';
 
 const FLUSH_STATE_FILE = '.vguard/data/flush-state.json';
 
@@ -159,8 +160,7 @@ export async function maybeFlushToCloud(
     try {
       const body = batch.map((r) => JSON.stringify(r)).join('\n');
       const url =
-        (process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev').replace(/\/$/, '') +
-        '/api/v1/ingest';
+        sanitiseBaseUrl(process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev') + '/api/v1/ingest';
 
       const res = await fetch(url, {
         method: 'POST',

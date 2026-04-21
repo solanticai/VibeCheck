@@ -2,6 +2,7 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { readCredentials, writeCredentials, getCredentialsPath } from '../../cloud/credentials.js';
+import { assertSafeCloudUrl } from '../../cloud/url-guard.js';
 import { printBanner } from '../ui/banner.js';
 import { color } from '../ui/colors.js';
 import { glyph } from '../ui/glyphs.js';
@@ -43,6 +44,14 @@ export async function cloudLoginCommand(
   const cloudUrl = options.url ?? existingCreds?.apiUrl ?? DEFAULT_CLOUD_URL;
   const supabaseUrl = options.supabaseUrl ?? existingCreds?.supabaseUrl ?? DEFAULT_SUPABASE_URL;
   const clientId = DEFAULT_OAUTH_CLIENT_ID;
+
+  try {
+    assertSafeCloudUrl(cloudUrl);
+    assertSafeCloudUrl(supabaseUrl);
+  } catch (err) {
+    error(err instanceof Error ? err.message : 'Invalid cloud URL');
+    process.exit(EXIT.USAGE);
+  }
 
   if (options.noInteractive) {
     info('  To authenticate, visit:');
@@ -98,6 +107,14 @@ function handleTokenLogin(options: {
   supabaseUrl?: string;
   supabaseAnonKey?: string;
 }): void {
+  try {
+    if (options.url) assertSafeCloudUrl(options.url);
+    if (options.supabaseUrl) assertSafeCloudUrl(options.supabaseUrl);
+  } catch (err) {
+    error(err instanceof Error ? err.message : 'Invalid cloud URL');
+    process.exit(EXIT.USAGE);
+  }
+
   let expiresAt: string | undefined;
   let email: string | undefined;
   try {

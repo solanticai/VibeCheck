@@ -1,4 +1,5 @@
 import { readCredentials, getValidCredentials } from './credentials.js';
+import { sanitiseBaseUrl } from './url-guard.js';
 import type { ProjectConfigPushPayload } from '../types.js';
 
 const DEFAULT_API_URL = process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev';
@@ -33,7 +34,7 @@ export class CloudClient {
   constructor(options: CloudClientOptions = {}) {
     const creds = readCredentials();
     const url = options.apiUrl ?? creds?.apiUrl ?? DEFAULT_API_URL;
-    this.apiUrl = url.replace(/\/$/, '');
+    this.apiUrl = sanitiseBaseUrl(url);
     this.apiKey = options.apiKey;
   }
 
@@ -51,7 +52,7 @@ export class CloudClient {
     payload: ProjectConfigPushPayload,
     timeoutMs = 5_000,
   ): Promise<{ updated: boolean; projectId: string }> {
-    const url = DEFAULT_FUNCTIONS_URL.replace(/\/$/, '') + '/functions/v1/ingest-config';
+    const url = sanitiseBaseUrl(DEFAULT_FUNCTIONS_URL) + '/functions/v1/ingest-config';
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {

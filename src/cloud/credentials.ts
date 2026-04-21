@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { sanitiseBaseUrl } from './url-guard.js';
 
 const CREDENTIALS_DIR = join(homedir(), '.vguard');
 const CREDENTIALS_FILE = join(CREDENTIALS_DIR, 'credentials.json');
@@ -94,9 +95,18 @@ export async function refreshAccessToken(): Promise<CloudCredentials | null> {
   // OAuth client ID — needed for public client refresh per OAuth 2.1 spec
   const clientId = process.env.VGUARD_OAUTH_CLIENT_ID ?? 'd49f2c6e-473a-4b94-acdf-9f282cc9a278';
 
+  let refreshBase: string;
+  try {
+    refreshBase = sanitiseBaseUrl(creds.supabaseUrl);
+  } catch {
+    // Malformed / non-allowlisted supabaseUrl — refuse to refresh rather than
+    // leak the refresh token to an attacker-controlled host.
+    return null;
+  }
+
   try {
     // Use the OAuth token endpoint for refresh (per Supabase OAuth 2.1 docs)
-    const res = await fetch(`${creds.supabaseUrl}/auth/v1/oauth/token`, {
+    const res = await fetch(`${refreshBase}/auth/v1/oauth/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({

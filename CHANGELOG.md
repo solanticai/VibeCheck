@@ -18,6 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cloud sync. Following symlinks can be re-enabled per project in the
   future behind an explicit opt-in, but the default is now "never".
   Fixes #46.
+- **Cloud URLs now pass through an allowlist guard.** `src/cloud/url-guard.ts`
+  exports `assertSafeCloudUrl()` / `sanitiseBaseUrl()`, which require
+  `https://`, reject `user:pass@` userinfo, and accept only
+  `vguard.dev`, `api.vguard.dev`, and `*.supabase.co` hosts by default.
+  Applied at every outbound dial site: `CloudClient` base URL, config push
+  to the Edge Function host, the rule-hit streamer, the session-event
+  streamer, the OAuth refresh path in `credentials.ts`, and both branches
+  of `vguard cloud login`. A modified `~/.vguard/credentials.json` or
+  hostile `VGUARD_CLOUD_URL` env var can no longer redirect refresh
+  tokens, access tokens, or rule-hit payloads (which may contain source
+  excerpts) to an attacker-controlled server. Local development against
+  `localhost` / private IP ranges is still available behind an explicit
+  `VGUARD_DEV=1`. Fixes #48.
 
 ### Added
 
