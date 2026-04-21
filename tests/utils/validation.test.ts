@@ -42,6 +42,7 @@ describe('isValidNpmPackageName', () => {
 
   it('rejects names starting with uppercase', () => {
     expect(isValidNpmPackageName('MyPackage')).toBe(false);
+    expect(isValidNpmPackageName('@scope/MyPackage')).toBe(false);
   });
 });
 
