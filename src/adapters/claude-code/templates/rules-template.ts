@@ -25,7 +25,11 @@ export function buildEnforcementRulesMarkdown(config: ResolvedConfig): string {
     if (!rule) continue;
 
     totalCount++;
-    const category = ruleId.split('/')[0];
+    const ruleIdParts = ruleId.split('/');
+    const category =
+      ruleIdParts.length === 2 && ruleIdParts[0].trim() && ruleIdParts[1].trim()
+        ? ruleIdParts[0]
+        : 'uncategorized';
     const existing = categories.get(category) ?? [];
     existing.push({
       id: ruleId,
