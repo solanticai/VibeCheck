@@ -88,6 +88,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`loadValidatedConfig()` helper** in `src/config/load-validated.ts`
+  plus a `ConfigValidationError` class. Consolidates the
+  discover → read → Zod-validate flow so hand-edited config typos fail
+  fast at one place with a `path.to.field: expected X` message instead
+  of surfacing as cryptic TypeErrors deep in rule execution. `upgrade`
+  now reads plugins through this helper. Addresses #55.
+- **`cloudConfigSchema.streaming` sub-object** is now validated. The
+  Zod schema gained a strict `streamingConfigSchema` covering
+  `batchSize`, `flushIntervalMs`, `timeoutMs` (all positive integers),
+  and `cloudConfigSchema` itself is now `.strict()` so typo'd keys
+  like `flushInervalMs: 500` are rejected at config load rather than
+  silently falling through to defaults. Fixes #54.
 - **`monorepo.overrides` is now applied.** The field has been declared
   and schema-validated since v3.0 but was never consumed — a user
   could write `monorepo.overrides['apps/mobile'] = { presets: ['react-native'] }`
@@ -150,20 +162,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ai-for-vibe-guard/skills/auto-configure/templates/custom-rule.ts.tmpl`
   so the generator chooses the right status and doesn't produce code
   that fails type-check.
-### Added
-
-- **`loadValidatedConfig()` helper** in `src/config/load-validated.ts`
-  plus a `ConfigValidationError` class. Consolidates the
-  discover → read → Zod-validate flow so hand-edited config typos fail
-  fast at one place with a `path.to.field: expected X` message instead
-  of surfacing as cryptic TypeErrors deep in rule execution. `upgrade`
-  now reads plugins through this helper. Addresses #55.
-- **`cloudConfigSchema.streaming` sub-object** is now validated. The
-  Zod schema gained a strict `streamingConfigSchema` covering
-  `batchSize`, `flushIntervalMs`, `timeoutMs` (all positive integers),
-  and `cloudConfigSchema` itself is now `.strict()` so typo'd keys
-  like `flushInervalMs: 500` are rejected at config load rather than
-  silently falling through to defaults. Fixes #54.
 
 ### Changed
 
@@ -181,6 +179,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   export was renamed to match the post-rebrand product name. The old
   identifier remains as a `@deprecated` re-export for one minor release
   so external callers can migrate without breakage. Addresses #57.2.
+
+### Chore
+
+- **Regenerated `package-lock.json`** after the v2.0.1 → v3.0.0 bump
+  so the lockfile's top-level `version` field matches `package.json`.
+  `npm ci` now reproduces the intended dev tree instead of the v2.0.1
+  snapshot. Fixes #52.
+- **Investigated `@emnapi/wasi-threads` and `tslib` "extraneous" report
+  from #53.** Both packages are hoisted transitives of
+  `@rolldown/binding-wasm32-wasi` (an optional WASM binding pulled in
+  by rolldown/vite internals). No code in `src/` imports them and
+  `npm ci` installs the same tree deterministically, so the
+  "extraneous" flag is a cosmetic hoisting artifact rather than a
+  supply-chain risk. A dedicated pre-commit version-match guard — the
+  optional prevention half of #52 — is tracked as a follow-up so it
+  lands with its own behavior-change review.
 
 ### Fixed
 
