@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Chore
+
+- **Formatting sweep across the merged v3.0.1 `[Unreleased]` section**
+  after 16 follow-up PRs landed via squash-merge with heavy CHANGELOG
+  conflict resolution. Ran `npx prettier --write` on `CHANGELOG.md`
+  and the two `sweep-gitignore` skill files. No content change; only
+  line-break and whitespace normalisation so `npm run format:check`
+  passes cleanly on `dev`.
+
 ### Security
 
 - **Walker no longer follows symlinks.** `walkProject()` in
@@ -273,7 +282,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cloud sync + config-push empty catches log under `VGUARD_DEBUG=1`.**
   Both fire-and-forget blocks in `hook-entry.ts` remain fail-open, but
   under `VGUARD_DEBUG=1` they now emit `[vguard:hook] cloud stream
-  skipped: <reason>` / `config push skipped: <reason>` to stderr so
+skipped: <reason>` / `config push skipped: <reason>` to stderr so
   users troubleshooting "why is nothing reaching the dashboard" have
   a paper trail. Addresses #57.10.
 - `rollingWindowSpend(root, 0)` and the underlying `readUsage` filter

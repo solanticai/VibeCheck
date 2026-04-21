@@ -36,14 +36,14 @@ Read:
 
 One sub-agent per category. Always dispatch **all six** — they're cheap because each agent runs a tight, focused walk.
 
-| Category | Focus |
-| --- | --- |
-| `build-artefacts` | `dist/`, `build/`, `out/`, `.next/`, `.nuxt/`, `target/`, `bin/`, `obj/`, `*.tsbuildinfo`, `coverage/`, `*.lcov`, compiled outputs (`*.o`, `*.so`, `*.dll`, `*.exe`, `*.class`, `*.pyc`, `__pycache__/`) |
-| `dependencies` | `node_modules/`, `bower_components/`, `vendor/`, `.pnp.*`, Python venvs (`venv/`, `.venv/`, `env/`), Rust `target/`, `.bundle/`, `Pods/`, `.gradle/` |
-| `editor-ide` | `.vscode/*` (with allowlist for `.vscode/extensions.json` + `.vscode/settings.json`), `.idea/`, `*.swp`, `*.swo`, `*~`, `.project`, `.classpath`, `.settings/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`, `$RECYCLE.BIN/`, `ehthumbs.db`, `.Spotlight-V100`, `.Trashes`, `.history/` |
-| `secrets-env` | `.env`, `.env.*` (with allowlist for `.env.example` / `.env.sample` / `.env.template`), `*.pem`, `*.key`, `*.pfx`, `*.p12`, `id_rsa`, `id_dsa`, `*.jks`, `*.keystore`, `.netrc`, `.aws/credentials`, `.npmrc` (user-level), `gha-creds-*.json`, `.terraform/` state |
-| `logs-caches` | `*.log`, `npm-debug.log*`, `yarn-error.log*`, `pnpm-debug.log*`, `lerna-debug.log*`, `.cache/`, `.parcel-cache/`, `.turbo/`, `.eslintcache`, `.stylelintcache`, `.rpt2_cache/`, `.rts2_cache_*/`, `.tsc-cache/`, `.swc/`, `.webpack/`, `.rollup.cache/`, `.vercel/`, `.netlify/`, `.wrangler/` |
-| `tool-local` | `.claude/settings.local.json`, `.cursor/`, `.aider*`, `.continue/`, `.opencode/sessions`, `.vguard/cache/`, `.vguard/learned/`, `.vguard/data/`, tool-generated scratch under `tmp/`, `.temp/`, `tempfiles/` |
+| Category          | Focus                                                                                                                                                                                                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build-artefacts` | `dist/`, `build/`, `out/`, `.next/`, `.nuxt/`, `target/`, `bin/`, `obj/`, `*.tsbuildinfo`, `coverage/`, `*.lcov`, compiled outputs (`*.o`, `*.so`, `*.dll`, `*.exe`, `*.class`, `*.pyc`, `__pycache__/`)                                                                                       |
+| `dependencies`    | `node_modules/`, `bower_components/`, `vendor/`, `.pnp.*`, Python venvs (`venv/`, `.venv/`, `env/`), Rust `target/`, `.bundle/`, `Pods/`, `.gradle/`                                                                                                                                           |
+| `editor-ide`      | `.vscode/*` (with allowlist for `.vscode/extensions.json` + `.vscode/settings.json`), `.idea/`, `*.swp`, `*.swo`, `*~`, `.project`, `.classpath`, `.settings/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`, `$RECYCLE.BIN/`, `ehthumbs.db`, `.Spotlight-V100`, `.Trashes`, `.history/`            |
+| `secrets-env`     | `.env`, `.env.*` (with allowlist for `.env.example` / `.env.sample` / `.env.template`), `*.pem`, `*.key`, `*.pfx`, `*.p12`, `id_rsa`, `id_dsa`, `*.jks`, `*.keystore`, `.netrc`, `.aws/credentials`, `.npmrc` (user-level), `gha-creds-*.json`, `.terraform/` state                            |
+| `logs-caches`     | `*.log`, `npm-debug.log*`, `yarn-error.log*`, `pnpm-debug.log*`, `lerna-debug.log*`, `.cache/`, `.parcel-cache/`, `.turbo/`, `.eslintcache`, `.stylelintcache`, `.rpt2_cache/`, `.rts2_cache_*/`, `.tsc-cache/`, `.swc/`, `.webpack/`, `.rollup.cache/`, `.vercel/`, `.netlify/`, `.wrangler/` |
+| `tool-local`      | `.claude/settings.local.json`, `.cursor/`, `.aider*`, `.continue/`, `.opencode/sessions`, `.vguard/cache/`, `.vguard/learned/`, `.vguard/data/`, tool-generated scratch under `tmp/`, `.temp/`, `tempfiles/`                                                                                   |
 
 If the repo is **not** a Node project, the agent for that category may return an empty list — that's fine.
 
@@ -99,7 +99,7 @@ Severity rubric:
 
 1. **Dedupe** — union all `proposals[].pattern`. If two agents propose overlapping patterns, pick the narrower one and attribute both rationales.
 2. **Drop** any pattern that already appears in `existingPatterns` from Step 1 (agents should skip these, but defence in depth).
-3. **Collate allowlist entries** — every `!pattern` must appear *after* its matching ignore pattern in the final ordering. Group by category block.
+3. **Collate allowlist entries** — every `!pattern` must appear _after_ its matching ignore pattern in the final ordering. Group by category block.
 4. **Tracked-but-should-be-ignored list** — `alreadyTracked` entries surface as a manual-action section in the report; never auto-run `git rm --cached`.
 5. **Secret findings** — any `critical` severity entry triggers an extra block at the top of the report with the literal text _"Secret material may already be in git history. Ignoring the file is not enough. Run `git log --all -- <path>` and consider `git filter-repo` / BFG."_
 

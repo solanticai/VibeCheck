@@ -13,6 +13,7 @@
 ## Category scope (what to look for)
 
 ### build-artefacts
+
 Regenerable compiler / bundler outputs. Examples:
 
 - Node: `dist/`, `build/`, `out/`, `.next/`, `.nuxt/`, `.turbo/`, `coverage/`, `*.tsbuildinfo`, `*.lcov`
@@ -22,6 +23,7 @@ Regenerable compiler / bundler outputs. Examples:
 - Go: `bin/`, `dist/`
 
 ### dependencies
+
 Vendored package stores. Examples:
 
 - `node_modules/`, `bower_components/`, `jspm_packages/`, `.pnp.*`, `.yarn/cache/`, `.yarn/install-state.gz`
@@ -33,6 +35,7 @@ Vendored package stores. Examples:
 - Android: `.gradle/`
 
 ### editor-ide
+
 Editor / IDE config + OS cruft. Examples:
 
 - VS Code: `.vscode/*` with allowlisted pins (`!.vscode/extensions.json`, `!.vscode/settings.json`, `!.vscode/launch.json`, `!.vscode/tasks.json`).
@@ -43,6 +46,7 @@ Editor / IDE config + OS cruft. Examples:
 - Scratch history: `.history/`
 
 ### secrets-env
+
 Credentials + private keys + per-env config. Examples:
 
 - `.env`, `.env.*` with allowlist for `.env.example`, `.env.sample`, `.env.template`, `.env.defaults`.
@@ -56,6 +60,7 @@ Credentials + private keys + per-env config. Examples:
 **Critical rule**: If a file matching a secret pattern is currently **tracked** (appears in `trackedFiles`), raise severity to `critical` and include it in `alreadyTracked` with a note that ignoring is insufficient — the secret must be rotated and history rewritten.
 
 ### logs-caches
+
 Runtime logs + tool caches that shouldn't be checked in. Examples:
 
 - Logs: `*.log`, `npm-debug.log*`, `yarn-error.log*`, `yarn-debug.log*`, `pnpm-debug.log*`, `lerna-debug.log*`
@@ -63,6 +68,7 @@ Runtime logs + tool caches that shouldn't be checked in. Examples:
 - Deploy tool caches: `.vercel/`, `.netlify/`, `.wrangler/`, `.serverless/`, `.sst/`
 
 ### tool-local
+
 Per-developer tool state that isn't shared. Examples:
 
 - Claude Code: `.claude/settings.local.json`, `.claude/projects/*/memory/` — **note**: the shared `.claude/settings.json` SHOULD stay tracked.
