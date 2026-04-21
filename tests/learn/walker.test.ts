@@ -16,34 +16,42 @@ vi.mock('node:fs', async () => {
   const dist = pathJoin('/project', 'dist');
   const readme = pathJoin('/project', 'README.md');
   const image = pathJoin('/project', 'image.png');
+  const symlinkFile = pathJoin('/project', 'src', 'spicy.ts');
+  const symlinkDir = pathJoin('/project', 'linked-dir');
 
-  const files: Record<string, { content: string; isDir: boolean; size: number }> = {
-    [root]: { content: '', isDir: true, size: 0 },
-    [src]: { content: '', isDir: true, size: 0 },
-    [indexTs]: { content: 'export const x = 1;', isDir: false, size: 20 },
-    [appTsx]: { content: '<App />', isDir: false, size: 10 },
-    [utilsJs]: { content: 'module.exports = {};', isDir: false, size: 25 },
-    [nodeModules]: { content: '', isDir: true, size: 0 },
-    [dist]: { content: '', isDir: true, size: 0 },
-    [readme]: { content: '# README', isDir: false, size: 10 },
-    [image]: { content: '', isDir: false, size: 100 },
+  const files: Record<
+    string,
+    { content: string; isDir: boolean; isSymlink: boolean; size: number }
+  > = {
+    [root]: { content: '', isDir: true, isSymlink: false, size: 0 },
+    [src]: { content: '', isDir: true, isSymlink: false, size: 0 },
+    [indexTs]: { content: 'export const x = 1;', isDir: false, isSymlink: false, size: 20 },
+    [appTsx]: { content: '<App />', isDir: false, isSymlink: false, size: 10 },
+    [utilsJs]: { content: 'module.exports = {};', isDir: false, isSymlink: false, size: 25 },
+    [nodeModules]: { content: '', isDir: true, isSymlink: false, size: 0 },
+    [dist]: { content: '', isDir: true, isSymlink: false, size: 0 },
+    [readme]: { content: '# README', isDir: false, isSymlink: false, size: 10 },
+    [image]: { content: '', isDir: false, isSymlink: false, size: 100 },
+    [symlinkFile]: { content: 'SECRET', isDir: false, isSymlink: true, size: 20 },
+    [symlinkDir]: { content: '', isDir: true, isSymlink: true, size: 0 },
   };
 
   const dirEntries: Record<string, string[]> = {
-    [root]: ['src', 'node_modules', 'dist', 'README.md', 'image.png'],
-    [src]: ['index.ts', 'app.tsx', 'utils.js'],
+    [root]: ['src', 'node_modules', 'dist', 'README.md', 'image.png', 'linked-dir'],
+    [src]: ['index.ts', 'app.tsx', 'utils.js', 'spicy.ts'],
   };
 
   return {
     readdirSync: vi.fn((dir: string) => {
       return dirEntries[dir] ?? [];
     }),
-    statSync: vi.fn((path: string) => {
+    lstatSync: vi.fn((path: string) => {
       const entry = files[path];
       if (!entry) throw new Error(`ENOENT: ${path}`);
       return {
         isDirectory: () => entry.isDir,
         isFile: () => !entry.isDir,
+        isSymbolicLink: () => entry.isSymlink,
         size: entry.size,
       };
     }),
@@ -96,5 +104,12 @@ describe('File System Walker', () => {
       expect(file.directory).toBeTruthy();
       expect(file.path).toBeTruthy();
     }
+  });
+
+  it('skips symbolic links (files and directories)', () => {
+    const files = walkProject({ rootDir: ROOT });
+    const paths = files.map((f) => f.path);
+    expect(paths.every((p) => !p.includes('spicy.ts'))).toBe(true);
+    expect(paths.every((p) => !p.includes('linked-dir'))).toBe(true);
   });
 });

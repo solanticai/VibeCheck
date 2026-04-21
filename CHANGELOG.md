@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Walker no longer follows symlinks.** `walkProject()` in
+  `src/learn/walker.ts` now uses `lstatSync` and skips any entry whose
+  `isSymbolicLink()` is true, closing an arbitrary-file-read path on
+  shared dev hosts and CI agents where a symlink inside the project
+  tree (e.g. `./spicy.txt -> ~/.ssh/id_rsa`) would previously be read
+  into `learn`/`lint` processing context and could be forwarded to
+  cloud sync. Following symlinks can be re-enabled per project in the
+  future behind an explicit opt-in, but the default is now "never".
+  Fixes #46.
+
 ### Added
 
 - **`sweep-gitignore` skill** under `ai-for-vibe-guard/skills/`.

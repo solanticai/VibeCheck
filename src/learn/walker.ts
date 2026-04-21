@@ -1,4 +1,4 @@
-import { readdirSync, statSync, readFileSync } from 'node:fs';
+import { readdirSync, lstatSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { normalizePath } from '../utils/path.js';
 import { createIgnoreMatcher, type IgnoreMatcher } from '../utils/ignore.js';
@@ -69,7 +69,8 @@ function walkDir(dir: string, matcher: IgnoreMatcher, files: WalkedFile[], maxFi
     const fullPath = join(dir, entry);
 
     try {
-      const stat = statSync(fullPath);
+      const stat = lstatSync(fullPath);
+      if (stat.isSymbolicLink()) continue;
       if (stat.isDirectory()) {
         if (matcher.isIgnored(fullPath + '/')) continue;
         walkDir(fullPath, matcher, files, maxFiles);
