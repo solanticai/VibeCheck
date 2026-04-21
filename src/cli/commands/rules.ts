@@ -9,6 +9,7 @@ import { getAllRules } from '../../engine/registry.js';
 import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
+import { loadLocalRules } from '../../plugins/local-rule-loader.js';
 import type { VGuardConfig } from '../../types.js';
 import { printBanner } from '../ui/banner.js';
 import { color } from '../ui/colors.js';
@@ -18,6 +19,7 @@ import { EXIT } from '../exit-codes.js';
 
 export async function rulesListCommand(options: { all?: boolean; json?: boolean }): Promise<void> {
   const projectRoot = process.cwd();
+  await loadLocalRules(projectRoot);
   const allRules = getAllRules();
 
   const discovered = discoverConfigFile(projectRoot);

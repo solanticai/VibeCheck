@@ -9,6 +9,7 @@ import { compileConfig } from '../../config/compile.js';
 import { getAllPresets } from '../../config/presets.js';
 import { resolveConfig } from '../../config/loader.js';
 import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
+import { loadLocalRules } from '../../plugins/local-rule-loader.js';
 import { claudeCodeAdapter } from '../../adapters/claude-code/adapter.js';
 import { cursorAdapter } from '../../adapters/cursor/adapter.js';
 import { codexAdapter } from '../../adapters/codex/adapter.js';
@@ -40,6 +41,7 @@ export async function generateCommand(): Promise<void> {
   }
 
   const spinner = startSpinner('Resolving config');
+  await loadLocalRules(projectRoot);
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
   const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);

@@ -88,6 +88,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Project-local rule autoloader for `.vguard/rules/custom/`.** Rule
+  files placed under `<projectRoot>/.vguard/rules/custom/**/*.{ts,js,mjs}`
+  are now picked up at config resolution time and registered alongside
+  built-in and plugin rules. Previously these files were orphans — the
+  `auto-configure` skill wrote them and they looked valid, but nothing
+  scanned the directory, so `vguard doctor` reported green while the
+  rules were inert. Local rules are discovered by `lint`, `generate`,
+  `rules list`, `doctor`, and by the runtime hook entry. Their
+  effective severity is capped at `warn` (block-severity enforcement
+  still requires a published plugin via `config.plugins`) to keep the
+  supply-chain trust model explicit: anything that can stop a
+  developer mid-edit has been through an npm publish. `doctor` now
+  surfaces load errors, severity downgrades, and the registered-rule
+  count under a `Local rules` check. Fixes #44.
 - **`sweep-gitignore` skill** under `ai-for-vibe-guard/skills/`.
   Dispatches parallel category sub-agents (build artefacts, deps,
   IDE/OS cruft, secrets/env, logs/caches) to audit a repo for files

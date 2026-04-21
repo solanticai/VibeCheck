@@ -24,6 +24,7 @@ import { createIgnoreMatcher } from '../utils/ignore.js';
 
 // Import and register all built-in rules
 import '../rules/index.js';
+import { loadLocalRules } from '../plugins/local-rule-loader.js';
 
 /**
  * Main hook execution function.
@@ -47,6 +48,11 @@ export async function executeHook(event: HookEvent): Promise<void> {
     if (!config) {
       process.exit(0); // No config = no enforcement
     }
+
+    // 2b. Register project-local rules from .vguard/rules/custom/ so any
+    // rule IDs the resolved config references are actually in the registry.
+    // Fail-open: loader records errors internally but never throws.
+    await loadLocalRules(process.cwd());
 
     // 3. Extract tool info + session identifier
     const { toolName } = extractToolInput(rawInput);

@@ -4,6 +4,7 @@ import '../../rules/index.js';
 import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
+import { loadLocalRules } from '../../plugins/local-rule-loader.js';
 import { scanProject } from '../../engine/scanner.js';
 import { formatText } from '../formatters/text.js';
 import { formatGitHubActions } from '../formatters/github-actions.js';
@@ -26,6 +27,7 @@ export async function lintCommand(options: { format?: string }): Promise<void> {
   const format = options.format ?? 'text';
   const machineOutput = format === 'json' || format === 'github-actions' || format === 'ndjson';
 
+  await loadLocalRules(projectRoot);
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
   const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);

@@ -8,6 +8,7 @@ import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
 import { getAllRules } from '../../engine/registry.js';
+import { loadLocalRules } from '../../plugins/local-rule-loader.js';
 import { readPerfEntries, calculatePerfStats, PERF_BUDGET_MS } from '../../engine/perf.js';
 import { createIgnoreMatcher, HARDCODED_DEFAULTS } from '../../utils/ignore.js';
 import type { VGuardConfig } from '../../types.js';
@@ -52,6 +53,35 @@ export async function doctorCommand(options: DoctorOptions = {}): Promise<void> 
     status: 'pass',
     message: `Found ${discovered.path}`,
   });
+
+  // Load project-local rules from .vguard/rules/custom/ before resolving
+  // the config so any rule IDs referenced there are in the registry.
+  const localRuleResult = await loadLocalRules(projectRoot);
+  if (localRuleResult.directoryExists) {
+    if (localRuleResult.errors.length > 0) {
+      for (const err of localRuleResult.errors) {
+        results.push({
+          name: `Local rule: ${err.file}`,
+          status: 'warn',
+          message: err.error,
+        });
+      }
+    }
+    if (localRuleResult.downgraded.length > 0) {
+      results.push({
+        name: 'Local rule severity',
+        status: 'warn',
+        message:
+          `${localRuleResult.downgraded.length} local rule(s) downgraded to "warn". ` +
+          'Block-severity enforcement requires a published plugin via `config.plugins`.',
+      });
+    }
+    results.push({
+      name: 'Local rules',
+      status: 'pass',
+      message: `${localRuleResult.rulesAdded} rule(s) loaded from .vguard/rules/custom/`,
+    });
+  }
 
   let resolvedConfig;
   let rawConfig: VGuardConfig;
