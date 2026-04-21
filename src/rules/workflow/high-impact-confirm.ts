@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Rule, RuleResult } from '../../types.js';
+import { validateUserRegex } from '../../utils/validate-regex.js';
 
 const configSchema = z.object({
   patterns: z.array(z.string()).optional(),
@@ -55,7 +56,9 @@ export const highImpactConfirm: Rule = {
     let patterns: RegExp[];
     try {
       patterns = customPatterns
-        ? customPatterns.map((p) => new RegExp(p, 'i'))
+        ? customPatterns.map((p, i) =>
+            validateUserRegex(p, 'i', { label: `${ruleId}.patterns[${i}]` }),
+          )
         : DEFAULT_HIGH_IMPACT_PATTERNS;
     } catch {
       patterns = DEFAULT_HIGH_IMPACT_PATTERNS;

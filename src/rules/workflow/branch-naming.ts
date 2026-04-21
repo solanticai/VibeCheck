@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Rule, RuleResult } from '../../types.js';
+import { validateUserRegex } from '../../utils/validate-regex.js';
 
 const configSchema = z.object({
   pattern: z.string().optional(),
@@ -41,8 +42,11 @@ export const branchNaming: Rule = {
       }
 
       const patternStr = ruleConfig?.options?.pattern as string | undefined;
-      // new RegExp() can throw on invalid user-supplied patterns — fail-open
-      const pattern = patternStr ? new RegExp(patternStr) : DEFAULT_PATTERN;
+      // Invalid or ReDoS-prone patterns fall back to DEFAULT_PATTERN via the
+      // surrounding try/catch — fail-open so a bad config never blocks work.
+      const pattern = patternStr
+        ? validateUserRegex(patternStr, '', { label: `${ruleId}.pattern` })
+        : DEFAULT_PATTERN;
 
       if (!pattern.test(branch)) {
         return {

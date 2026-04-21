@@ -71,6 +71,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   uploaded rule hit regardless of exclusion config. Rules should not
   include secrets in their messages, but one leaked secret defeats the
   point of running a guardrail, so we scrub regardless. Fixes #50.
+- **User-supplied regex patterns now run through a ReDoS validator.**
+  Rules that compile `customPatterns` / `pattern` / `secretNamePattern`
+  from `vguard.config.ts` used to pass the string straight to
+  `new RegExp(...)`, letting a catastrophic-backtracking pattern like
+  `(a+)+b` or `^(([a-z])+.)+[A-Z]([a-z])+$` hang a hook for seconds
+  to minutes — which violates the "never block developer flow"
+  contract. `src/utils/validate-regex.ts` adds
+  `validateUserRegex(source, flags, { label })` with a structural check
+  that rejects nested unbounded quantifiers applied to groups, plus a
+  20 ms smoke test against a pathological input. Threaded through
+  `workflow/high-impact-confirm`, `workflow/branch-naming`, and
+  `security/mcp-credential-scope`. Rules fall back to their built-in
+  defaults if a custom pattern is rejected, so config errors do not
+  break enforcement. Fixes #49.
 
 ### Added
 

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { Rule, RuleResult } from '../../types.js';
 import { normalizePath } from '../../utils/path.js';
+import { validateUserRegex } from '../../utils/validate-regex.js';
 
 const configSchema = z.object({
   configFiles: z.array(z.string()).optional(),
@@ -87,7 +88,7 @@ export const mcpCredentialScope: Rule = {
 
     let pattern: RegExp;
     try {
-      pattern = new RegExp(patternStr, 'i');
+      pattern = validateUserRegex(patternStr, 'i', { label: `${ruleId}.secretNamePattern` });
     } catch {
       return { status: 'pass', ruleId };
     }
