@@ -1,14 +1,13 @@
 import type { GeneratedFile, ResolvedConfig } from '../../types.js';
-import { buildEnforcementRulesMarkdown } from './templates/rules-template.js';
+import { synthesisePolicyPrompt } from '../../engine/prompt-synth.js';
 
 /**
- * Generate .claude/rules/vguard-enforcement.md with active rule documentation.
- *
- * Uses 'overwrite' strategy because this file must stay in sync with the
- * resolved config. It is regenerated on every `vguard generate`.
+ * Generate .claude/rules/vguard-enforcement.md using the agent-agnostic
+ * policy-as-prompt synthesizer. The file is regenerated on every
+ * `vguard generate` so it always reflects the resolved config.
  */
 export function generateEnforcementRules(config: ResolvedConfig): GeneratedFile {
-  const content = buildEnforcementRulesMarkdown(config);
+  const content = synthesisePolicyPrompt(config, { agent: 'claude-code' });
 
   return {
     path: '.claude/rules/vguard-enforcement.md',

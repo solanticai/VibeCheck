@@ -58,6 +58,7 @@ export const vibeCheckConfigSchema = z.object({
   learn: learnConfigSchema,
   cloud: cloudConfigSchema,
   monorepo: monorepoConfigSchema,
+  enforcement: z.enum(['fail-open', 'fail-closed', 'hybrid']).optional(),
 });
 
 export type ValidatedConfig = z.infer<typeof vibeCheckConfigSchema>;

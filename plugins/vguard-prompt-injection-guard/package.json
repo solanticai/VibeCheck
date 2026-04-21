@@ -1,0 +1,21 @@
+{
+  "name": "@anthril/vguard-prompt-injection-guard",
+  "version": "0.1.0",
+  "description": "VGuard plugin that scans inbound fetched content for prompt-injection markers.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "vguard",
+    "prompt-injection",
+    "owasp-llm01"
+  ],
+  "peerDependencies": {
+    "@anthril/vguard": ">=2.0.0"
+  },
+  "license": "MIT"
+}

@@ -2,9 +2,13 @@
 
 ## Supported Versions
 
+Security fixes are applied to the latest **minor** line of the current major release.
+Older major lines receive critical-severity patches only for 90 days after a new major ships.
+
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.x     | :white_check_mark: |
+| 2.x     | :white_check_mark: |
+| 1.x     | :x:                |
 | < 1.0   | :x:                |
 
 ## Reporting a Vulnerability

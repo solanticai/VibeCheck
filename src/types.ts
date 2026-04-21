@@ -107,6 +107,19 @@ export interface Rule {
   check: (context: HookContext) => Promise<RuleResult> | RuleResult;
   /** Whether to auto-generate an Edit variant via createEditVariant(). Default: true for Write rules */
   editCheck?: boolean;
+  /**
+   * Ordering hint: IDs of other rules that must run BEFORE this rule in
+   * the same event+tool bucket. Used by the resolver's topological sort.
+   * Unknown / missing predecessors are ignored silently.
+   */
+  runAfter?: string[];
+  /**
+   * When true and any rule listed in `runAfter` produced a block during
+   * this pass, this rule is skipped entirely (not just treated as pass).
+   * Lets plugin rules declare "only run if the upstream check passed".
+   * Default: false.
+   */
+  required?: boolean;
 }
 
 // ─── Config Types ───────────────────────────────────────────────────────────
@@ -132,6 +145,23 @@ export interface LearnConfig {
   ignorePaths?: string[];
 }
 
+/**
+ * How the runner handles *internal* errors inside a rule's `check()`.
+ *
+ * - `fail-open`: internal errors are swallowed (logged as a warn result).
+ *   Never block the user's operation. Historical VGuard default.
+ * - `fail-closed`: any internal error becomes a synthetic block.
+ *   Matches the industry consensus (Microsoft AGT, Cycode, Straiker,
+ *   Codex, Rulebricks).
+ * - `hybrid`: fail-closed on `block`-severity rules, fail-open on
+ *   `warn`/`info`. The recommended default — preserves the ergonomics
+ *   of advisory rules while keeping safety-critical rules safe.
+ *
+ * This setting has no effect on a rule's own `status: 'block' | 'warn'`
+ * returns; it only governs what happens when the rule *throws*.
+ */
+export type EnforcementMode = 'fail-open' | 'fail-closed' | 'hybrid';
+
 /** User-facing config (vguard.config.ts) */
 export interface VGuardConfig {
   /** Severity profile: strict, standard, relaxed, or audit */
@@ -150,6 +180,8 @@ export interface VGuardConfig {
   cloud?: CloudConfig;
   /** Monorepo support */
   monorepo?: MonorepoConfig;
+  /** How the runner handles internal errors in rules. Default: "hybrid". */
+  enforcement?: EnforcementMode;
 }
 
 /** Monorepo configuration */
@@ -204,6 +236,8 @@ export interface ResolvedConfig {
   rules: Map<string, ResolvedRuleConfig>;
   /** Cloud sync settings (optional, passed through from user config) */
   cloud?: CloudConfig;
+  /** Effective enforcement mode for runner error handling. */
+  enforcement?: EnforcementMode;
 }
 
 // ─── Cloud Config-Snapshot Push ─────────────────────────────────────────────

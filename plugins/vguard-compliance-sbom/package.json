@@ -1,0 +1,23 @@
+{
+  "name": "@anthril/vguard-compliance-sbom",
+  "version": "0.1.0",
+  "description": "VGuard plugin that generates and validates CycloneDX SBOMs.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "vguard",
+    "sbom",
+    "cyclonedx",
+    "eu-cra",
+    "compliance"
+  ],
+  "peerDependencies": {
+    "@anthril/vguard": ">=2.0.0"
+  },
+  "license": "MIT"
+}

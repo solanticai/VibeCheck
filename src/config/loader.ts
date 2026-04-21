@@ -64,6 +64,7 @@ function mergeConfigs(base: VGuardConfig, override: VGuardConfig): VGuardConfig 
     learn: override.learn ?? base.learn,
     cloud: override.cloud ?? base.cloud,
     monorepo: override.monorepo ?? base.monorepo,
+    enforcement: override.enforcement ?? base.enforcement,
   };
 }
 
@@ -153,6 +154,7 @@ export function resolveConfig(
     agents: config.agents ?? DEFAULT_CONFIG.agents,
     rules,
     cloud: config.cloud,
+    enforcement: config.enforcement ?? 'hybrid',
   };
 }
 

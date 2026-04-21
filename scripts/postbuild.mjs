@@ -10,12 +10,15 @@
  * the package.json build script for maintainability.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, copyFileSync, mkdirSync, existsSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { execSync } from 'node:child_process';
 
 const CLI_CJS = 'dist/cli.cjs';
 const HOOK_ENTRY_SRC = 'src/engine/hook-entry.ts';
 const RUNNER_DTS = 'dist/hooks/runner.d.ts';
+const DASHBOARD_HTML_SRC = 'src/dashboard/index.html';
+const DASHBOARD_HTML_DIST = 'dist/dashboard/index.html';
 
 // 1. Inject shebang into CLI CJS entry if missing
 const cliContent = readFileSync(CLI_CJS, 'utf8');
@@ -48,4 +51,11 @@ if (exportMatch) {
     HOOK_ENTRY_SRC,
     '— using fallback',
   );
+}
+
+// 4. Copy dashboard HTML asset so `vguard dashboard` can serve it from dist/
+if (existsSync(DASHBOARD_HTML_SRC)) {
+  mkdirSync(dirname(DASHBOARD_HTML_DIST), { recursive: true });
+  copyFileSync(DASHBOARD_HTML_SRC, DASHBOARD_HTML_DIST);
+  console.log(`[postbuild] Copied ${DASHBOARD_HTML_SRC} → ${DASHBOARD_HTML_DIST}`);
 }

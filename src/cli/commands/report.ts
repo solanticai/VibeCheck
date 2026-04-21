@@ -1,7 +1,8 @@
 import { writeFile, mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { aggregateReport } from '../../report/aggregator.js';
 import { generateMarkdownReport, saveReport } from '../../report/markdown.js';
+import { generateHtmlReport, saveHtmlReport } from '../../report/html.js';
 import { printBanner } from '../ui/banner.js';
 import { color } from '../ui/colors.js';
 import { glyph } from '../ui/glyphs.js';
@@ -21,34 +22,57 @@ export async function reportCommand(options?: { output?: string; format?: string
   }
 
   const format = options?.format ?? 'md';
+  const writtenPaths: string[] = [];
 
   if (format === 'json') {
     const json = JSON.stringify(data, null, 2);
-
     if (options?.output) {
       await mkdir(dirname(options.output), { recursive: true });
       await writeFile(options.output, json, 'utf-8');
-      info(`  ${color.green(glyph('pass'))} Report saved to ${options.output}`);
+      writtenPaths.push(options.output);
     } else {
       process.stdout.write(json + '\n');
     }
-    return;
+  } else if (format === 'html') {
+    const html = generateHtmlReport(data);
+    if (options?.output) {
+      await mkdir(dirname(options.output), { recursive: true });
+      await writeFile(options.output, html, 'utf-8');
+      writtenPaths.push(options.output);
+    } else {
+      writtenPaths.push(await saveHtmlReport(html, projectRoot));
+    }
+  } else if (format === 'all') {
+    // Ignore --output when writing all formats; use default locations.
+    const markdown = generateMarkdownReport(data);
+    writtenPaths.push(await saveReport(markdown, projectRoot));
+
+    const html = generateHtmlReport(data);
+    writtenPaths.push(await saveHtmlReport(html, projectRoot));
+
+    const jsonPath = join(projectRoot, '.vguard', 'reports', 'quality-report.json');
+    await mkdir(dirname(jsonPath), { recursive: true });
+    await writeFile(jsonPath, JSON.stringify(data, null, 2), 'utf-8');
+    writtenPaths.push(jsonPath);
+  } else {
+    // default: md
+    const markdown = generateMarkdownReport(data);
+    if (options?.output) {
+      await mkdir(dirname(options.output), { recursive: true });
+      await writeFile(options.output, markdown, 'utf-8');
+      writtenPaths.push(options.output);
+    } else {
+      writtenPaths.push(await saveReport(markdown, projectRoot));
+    }
   }
 
-  const markdown = generateMarkdownReport(data);
-
-  if (options?.output) {
-    await mkdir(dirname(options.output), { recursive: true });
-    await writeFile(options.output, markdown, 'utf-8');
-    info(`  ${color.green(glyph('pass'))} Report saved to ${options.output}`);
-  } else {
-    const outputPath = await saveReport(markdown, projectRoot);
-    info(`  ${color.green(glyph('pass'))} Report saved to ${outputPath}`);
+  for (const path of writtenPaths) {
+    info(`  ${color.green(glyph('pass'))} Report saved to ${path}`);
   }
 
   info(`  ${color.bold('Total rule executions:')} ${data.totalHits}`);
 
   const score = data.debtScore;
-  const scoreColor = score >= 80 ? color.green : score >= 50 ? color.yellow : color.red;
+  const scoreColor = score >= 80 ? color.red : score >= 50 ? color.yellow : color.green;
   info(`  ${color.bold('Technical debt score:')}  ${scoreColor(`${score}/100`)}\n`);
 }

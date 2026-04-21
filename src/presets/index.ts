@@ -17,6 +17,25 @@ import { vue } from './vue.js';
 import { remix } from './remix.js';
 import { prisma } from './prisma.js';
 import { express } from './express.js';
+import { dockerfile } from './dockerfile.js';
+import { langchain } from './langchain.js';
+import { drizzle } from './drizzle.js';
+import { terraform } from './terraform.js';
+import { mcpServer } from './mcp-server.js';
+import { kubernetesManifests } from './kubernetes-manifests.js';
+import { bun } from './bun.js';
+import { mongodb } from './mongodb.js';
+import { nestjs } from './nestjs.js';
+import { nuxt } from './nuxt.js';
+import { trpc } from './trpc.js';
+import { zodValidation } from './zod-validation.js';
+import { expo } from './expo.js';
+import { graphql } from './graphql.js';
+import { deno } from './deno.js';
+import { grpc } from './grpc.js';
+import { rails } from './rails.js';
+import { redis } from './redis.js';
+import { phoenixElixir } from './phoenix-elixir.js';
 
 /** All built-in presets */
 export const allBuiltinPresets = [
@@ -38,6 +57,25 @@ export const allBuiltinPresets = [
   remix,
   prisma,
   express,
+  dockerfile,
+  langchain,
+  drizzle,
+  terraform,
+  mcpServer,
+  kubernetesManifests,
+  bun,
+  mongodb,
+  nestjs,
+  nuxt,
+  trpc,
+  zodValidation,
+  expo,
+  graphql,
+  deno,
+  grpc,
+  rails,
+  redis,
+  phoenixElixir,
 ];
 
 /** Register all built-in presets */
@@ -69,4 +107,23 @@ export {
   remix,
   prisma,
   express,
+  dockerfile,
+  langchain,
+  drizzle,
+  terraform,
+  mcpServer,
+  kubernetesManifests,
+  bun,
+  mongodb,
+  nestjs,
+  nuxt,
+  trpc,
+  zodValidation,
+  expo,
+  graphql,
+  deno,
+  grpc,
+  rails,
+  redis,
+  phoenixElixir,
 };

@@ -6,7 +6,7 @@ import { setAsciiMode, setDebugMode, setVerbosity } from './ui/env.js';
 import { EXIT } from './exit-codes.js';
 
 const LINT_FORMATS = ['text', 'json', 'github-actions', 'ndjson'] as const;
-const REPORT_FORMATS = ['md', 'json'] as const;
+const REPORT_FORMATS = ['md', 'json', 'html', 'all'] as const;
 const SHELL_CHOICES = ['bash', 'zsh', 'fish', 'powershell'] as const;
 
 function collect(value: string, previous: string[] = []): string[] {
@@ -228,11 +228,107 @@ program
 Examples:
   $ vguard report                             Markdown at .vguard/reports/...
   $ vguard report --format json -o out.json   JSON to a file
+  $ vguard report --format html               Self-contained HTML dashboard
+  $ vguard report --format all                Write md + json + html
 `,
   )
   .action(async (options: { output?: string; format?: string }) => {
     const { reportCommand } = await import('./commands/report.js');
     await reportCommand(options);
+  });
+
+program
+  .command('dashboard')
+  .description('Start a local live dashboard that tails rule-hits.jsonl')
+  .option('-p, --port <port>', 'Port to bind', (v) => parseInt(v, 10), 7322)
+  .option('-H, --host <host>', 'Bind host', '127.0.0.1')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  $ vguard dashboard                             Open http://127.0.0.1:7322
+  $ vguard dashboard --port 8080                 Use a custom port
+  $ vguard dashboard --host 0.0.0.0              Bind on all interfaces (LAN-reachable)
+`,
+  )
+  .action(async (options: { port?: number; host?: string }) => {
+    const { dashboardCommand } = await import('./commands/dashboard.js');
+    await dashboardCommand(options);
+  });
+
+program
+  .command('drift')
+  .description('Measure convention drift vs .vguard/baseline.json (freeze with --freeze)')
+  .option('--freeze', 'Freeze current conventions as the baseline')
+  .option('--threshold <pct>', 'Exit non-zero if drift % exceeds this', (v) => parseFloat(v))
+  .option('--format <fmt>', 'Output format (text|json)', 'text')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  $ vguard drift --freeze                        Capture baseline (run once)
+  $ vguard drift                                 Measure drift vs baseline
+  $ vguard drift --threshold 15                  CI-friendly (exit non-zero if > 15%)
+  $ vguard drift --format json | jq .            Machine-readable output
+`,
+  )
+  .action(async (options: { freeze?: boolean; threshold?: number; format?: string }) => {
+    const { driftCommand } = await import('./commands/drift.js');
+    await driftCommand(options);
+  });
+
+const webhookCmd = program
+  .command('webhook')
+  .description('HTTP webhook adapter for language-agnostic agents')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  $ vguard webhook serve                          Serve on http://127.0.0.1:7321
+  $ vguard webhook serve --port 8080              Use a custom port
+  $ vguard webhook spec                           Write OpenAPI spec to .vguard/webhook/openapi.json
+  $ vguard webhook spec -o ./openapi.json         Write to a custom path
+`,
+  );
+
+webhookCmd
+  .command('serve')
+  .description('Start a local HTTP server that evaluates VGuard rules against JSON payloads')
+  .option('-p, --port <port>', 'Port to bind', (v) => parseInt(v, 10), 7321)
+  .option('-H, --host <host>', 'Bind host', '127.0.0.1')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  $ vguard webhook serve                          Default: 127.0.0.1:7321
+  $ vguard webhook serve --port 8080              Custom port
+  $ vguard webhook serve --host 0.0.0.0           Bind all interfaces
+  $ curl -X POST http://127.0.0.1:7321/hook/PreToolUse \\
+      -H 'content-type: application/json' \\
+      -d '{"tool":"Bash","toolInput":{"command":"ls"}}'
+`,
+  )
+  .action(async (options: { port?: number; host?: string }) => {
+    const { webhookServeCommand } = await import('./commands/webhook.js');
+    await webhookServeCommand(options);
+  });
+
+webhookCmd
+  .command('spec')
+  .description('Write the OpenAPI 3.0.3 spec for the webhook endpoint')
+  .option('-o, --output <path>', 'Output path', '.vguard/webhook/openapi.json')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  $ vguard webhook spec                           Default: .vguard/webhook/openapi.json
+  $ vguard webhook spec -o ./openapi.json         Custom output path
+  $ vguard webhook spec -o - > spec.json          (future: stdout support)
+`,
+  )
+  .action(async (options: { output?: string }) => {
+    const { webhookSpecCommand } = await import('./commands/webhook.js');
+    await webhookSpecCommand(options);
   });
 
 program
@@ -672,6 +768,25 @@ async function main(): Promise<void> {
     process.stderr.write('\n');
     process.exit(EXIT.SIGINT);
   });
+
+  // No-args + no config → show help AND a setup hint. Commander's default
+  // no-args behaviour is to show help; we append a one-line nudge pointing
+  // a new user at `vguard init` when no config is detected in CWD.
+  // Only runs when stdout is a TTY so piped usage (`vguard | cat`) stays clean.
+  if (process.argv.length <= 2 && process.stdout.isTTY) {
+    try {
+      const { discoverConfigFile } = await import('../config/discovery.js');
+      if (!discoverConfigFile(process.cwd())) {
+        program.outputHelp();
+        process.stderr.write(
+          "\n  VGuard isn't configured in this directory yet — run `vguard init` to get started.\n",
+        );
+        process.exit(EXIT.OK);
+      }
+    } catch {
+      // Fall through to normal parsing on any error — never block help.
+    }
+  }
 
   try {
     await program.parseAsync(process.argv);

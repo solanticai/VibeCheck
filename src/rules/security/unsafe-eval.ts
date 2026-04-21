@@ -30,12 +30,49 @@ export const unsafeEval: Rule = {
     if (!content || !filePath) return { status: 'pass', ruleId };
 
     const ext = getExtension(filePath);
-    if (!['ts', 'tsx', 'js', 'jsx', 'mjs', 'cjs'].includes(ext)) {
+    if (!['ts', 'tsx', 'js', 'jsx', 'mjs', 'cjs', 'py'].includes(ext)) {
       return { status: 'pass', ruleId };
     }
 
     // Skip .d.ts files
     if (filePath.endsWith('.d.ts')) return { status: 'pass', ruleId };
+
+    // Python-specific checks: exec() / compile() with string source
+    if (ext === 'py') {
+      const pyLines = content.split('\n');
+      for (const line of pyLines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('#')) continue;
+        if (/\bexec\s*\(/.test(trimmed)) {
+          return {
+            status: 'block',
+            ruleId,
+            message: 'Python exec() detected — executes arbitrary code, high injection risk.',
+            fix: 'Refactor to an explicit dispatch table or ast.literal_eval if you only need safe evaluation of a Python literal.',
+          };
+        }
+        if (/\beval\s*\(/.test(trimmed)) {
+          return {
+            status: 'block',
+            ruleId,
+            message: 'Python eval() detected — executes arbitrary code.',
+            fix: 'Use ast.literal_eval for safe literal evaluation, or a proper parser for your domain.',
+          };
+        }
+        if (
+          /\bcompile\s*\([^)]*,\s*['"][^'"]*['"]\s*,\s*['"](?:exec|eval|single)['"]/.test(trimmed)
+        ) {
+          return {
+            status: 'block',
+            ruleId,
+            message:
+              'Python compile(..., "exec"|"eval"|"single") detected — produces a runnable code object from string source.',
+            fix: 'Avoid dynamic code compilation on untrusted input. Prefer a predefined set of named operations.',
+          };
+        }
+      }
+      return { status: 'pass', ruleId };
+    }
 
     // Skip test files if configured
     const ruleConfig = context.projectConfig.rules.get(ruleId);

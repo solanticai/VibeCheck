@@ -75,6 +75,20 @@ export const SECRET_PATTERNS: Array<[string, RegExp, string]> = [
 
   // npm
   ['npm Token', /npm_[A-Za-z0-9]{36}/, 'npm authentication token'],
+
+  // Google / GCP
+  ['Google API Key', /AIza[0-9A-Za-z_-]{35}/, 'Google API key'],
+
+  // OpenAI / Anthropic
+  ['OpenAI API Key', /sk-(?:proj-)?[A-Za-z0-9_-]{20,}/, 'OpenAI-shaped API key'],
+  ['Anthropic API Key', /sk-ant-(?:api\d+-|sid\d+-)?[A-Za-z0-9_-]{40,}/, 'Anthropic API key'],
+
+  // JWT-shaped (three base64url segments)
+  [
+    'JWT',
+    /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/,
+    'JWT-shaped token',
+  ],
 ];
 
 /**

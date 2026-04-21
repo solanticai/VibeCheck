@@ -14,6 +14,11 @@ import { noAnyType } from './no-any-type.js';
 import { errorHandling } from './error-handling.js';
 import { a11yJsx } from './a11y-jsx.js';
 import { magicNumbers } from './magic-numbers.js';
+import { raceConditionHint } from './race-condition-hint.js';
+import { packageExistenceCheck } from './package-existence-check.js';
+import { nuxtUseStatePerRequest } from './nuxt-usestate-per-request.js';
+import { zodNoAnySchema } from './zod-no-any-schema.js';
+import { zodRequireStripOrStrict } from './zod-require-strip-or-strict.js';
 
 export const qualityRules: Rule[] = [
   importAliases,
@@ -31,6 +36,11 @@ export const qualityRules: Rule[] = [
   errorHandling,
   a11yJsx,
   magicNumbers,
+  raceConditionHint,
+  packageExistenceCheck,
+  nuxtUseStatePerRequest,
+  zodNoAnySchema,
+  zodRequireStripOrStrict,
 ];
 
 export {
@@ -49,4 +59,9 @@ export {
   errorHandling,
   a11yJsx,
   magicNumbers,
+  raceConditionHint,
+  packageExistenceCheck,
+  nuxtUseStatePerRequest,
+  zodNoAnySchema,
+  zodRequireStripOrStrict,
 };

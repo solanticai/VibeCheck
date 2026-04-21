@@ -102,7 +102,7 @@ describe('runRules', () => {
     expect(secondRan).toBe(true);
   });
 
-  it('should handle rule errors gracefully (fail open)', async () => {
+  it('should fail-open on error when enforcement is "fail-open"', async () => {
     const rules: ResolvedRule[] = [
       {
         rule: {
@@ -119,10 +119,82 @@ describe('runRules', () => {
       },
     ];
 
+    const ctx = createContext();
+    ctx.projectConfig = { ...ctx.projectConfig, enforcement: 'fail-open' };
+    const result = await runRules(rules, ctx);
+    expect(result.blocked).toBe(false);
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0].message).toContain('Something broke');
+  });
+
+  it('should fail-closed on error for block-severity rules in "hybrid" mode (default)', async () => {
+    const rules: ResolvedRule[] = [
+      {
+        rule: {
+          id: 'error-rule',
+          name: 'Error Rule',
+          description: 'Throws',
+          severity: 'block',
+          events: ['PreToolUse'],
+          check: () => {
+            throw new Error('Something broke');
+          },
+        },
+        config: { enabled: true, severity: 'block', options: {} },
+      },
+    ];
+
+    // default enforcement resolves to 'hybrid'
+    const result = await runRules(rules, createContext());
+    expect(result.blocked).toBe(true);
+    expect(result.blockingResult?.message).toContain('Something broke');
+  });
+
+  it('should fail-open on error for warn-severity rules in "hybrid" mode', async () => {
+    const rules: ResolvedRule[] = [
+      {
+        rule: {
+          id: 'advisory-rule',
+          name: 'Advisory Rule',
+          description: 'Throws',
+          severity: 'warn',
+          events: ['PreToolUse'],
+          check: () => {
+            throw new Error('Something broke');
+          },
+        },
+        config: { enabled: true, severity: 'warn', options: {} },
+      },
+    ];
+
     const result = await runRules(rules, createContext());
     expect(result.blocked).toBe(false);
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0].message).toContain('Something broke');
+  });
+
+  it('should always block on error when enforcement is "fail-closed"', async () => {
+    const rules: ResolvedRule[] = [
+      {
+        rule: {
+          id: 'advisory-rule',
+          name: 'Advisory Rule',
+          description: 'Throws',
+          severity: 'warn',
+          events: ['PreToolUse'],
+          check: () => {
+            throw new Error('Something broke');
+          },
+        },
+        config: { enabled: true, severity: 'warn', options: {} },
+      },
+    ];
+
+    const ctx = createContext();
+    ctx.projectConfig = { ...ctx.projectConfig, enforcement: 'fail-closed' };
+    const result = await runRules(rules, ctx);
+    expect(result.blocked).toBe(true);
+    expect(result.blockingResult?.message).toContain('Something broke');
   });
 
   it('should downgrade block to warn when config severity is warn', async () => {

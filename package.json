@@ -1,6 +1,6 @@
 {
   "name": "@anthril/vguard",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "AI coding guardrails framework. Runtime-enforced quality controls for Claude Code, Cursor, Codex, and more.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -27,7 +27,10 @@
     "./src/presets/index.ts"
   ],
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.d.ts.map",
+    "!dist/cli.js.map",
+    "!dist/cli.cjs.map"
   ],
   "scripts": {
     "build": "tsup && node scripts/postbuild.mjs",
