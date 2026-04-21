@@ -31,6 +31,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   excerpts) to an attacker-controlled server. Local development against
   `localhost` / private IP ranges is still available behind an explicit
   `VGUARD_DEV=1`. Fixes #48.
+- **Credentials file is now ACL-locked on Windows.** The `mode: 0o600`
+  in `writeCredentials()` was silently ignored on NTFS: Node does not
+  map POSIX modes to Windows ACLs, so `~/.vguard/credentials.json`
+  (access token, refresh token, API key — all plaintext) ended up
+  readable by any local account in `BUILTIN\Users`. The new
+  `src/cloud/acl-guard.ts` runs
+  `icacls /inheritance:r /grant:r <user>:F` on the file after every
+  `writeCredentials()` call so the on-disk ACL matches the 0o600 intent.
+  POSIX remains a no-op. Fails open — `icacls` failures do not block
+  `cloud login`. A follow-up (keychain-backed storage via
+  `@napi-rs/keyring`) is tracked for the next major. Fixes #47.
 
 ### Added
 

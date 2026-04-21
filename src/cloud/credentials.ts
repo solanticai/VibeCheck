@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from '
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { sanitiseBaseUrl } from './url-guard.js';
+import { restrictCredentialsAcl } from './acl-guard.js';
 
 const CREDENTIALS_DIR = join(homedir(), '.vguard');
 const CREDENTIALS_FILE = join(CREDENTIALS_DIR, 'credentials.json');
@@ -43,6 +44,11 @@ export function readCredentials(): CloudCredentials | null {
 
 /**
  * Store Cloud credentials to disk.
+ *
+ * The `mode: 0o600` / `0o700` below locks the file on POSIX but is
+ * effectively ignored on Windows — Node does not map numeric POSIX modes
+ * to NTFS ACLs, so the credentials end up readable by any local user.
+ * `restrictCredentialsAcl` closes that gap on Windows via `icacls`.
  */
 export function writeCredentials(credentials: CloudCredentials): void {
   if (!existsSync(CREDENTIALS_DIR)) {
@@ -52,6 +58,7 @@ export function writeCredentials(credentials: CloudCredentials): void {
     encoding: 'utf-8',
     mode: 0o600,
   });
+  restrictCredentialsAcl(CREDENTIALS_FILE);
 }
 
 /**
