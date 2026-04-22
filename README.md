@@ -35,27 +35,57 @@ Answer four questions and you have working guardrails. The init wizard detects y
 
 **Smart Detection** — Edit rules only flag problems that are newly introduced. Pre-existing issues in the file are left alone so you can adopt guardrails incrementally without fixing every legacy violation first. [Rules overview →](https://vguard.dev/docs/rules/overview)
 
+**Convention Learning** — `vguard learn` walks your codebase, extracts naming patterns, import aliases, and file-structure conventions, then promotes the stable ones into rules. Guardrails that match the project they're installed in, not a generic template. [Learn docs →](https://vguard.dev/docs/learn)
+
+**CI + Analytics** — GitHub Actions adapter runs the same ruleset in CI. Hit data is tracked in `.vguard/data/` (append-only JSONL) and surfaces via `vguard report`, `vguard drift`, the local `vguard dashboard`, or VGuard Cloud for team-wide visibility. [Analytics →](https://vguard.dev/docs/analytics)
+
+**Native Git Hooks** — `vguard install-hooks` writes `.git/hooks/pre-commit` and `commit-msg` scripts so CLI committers (outside Claude Code / Cursor) also get CHANGELOG, version-bump, lockfile, and commit-convention enforcement. Runs automatically via `postinstall`; opt out with `VGUARD_NO_INSTALL_HOOKS=1`. [Install hooks docs →](https://vguard.dev/docs/install-hooks)
+
+**Plugin System** — Publish rules and presets as npm packages. `config.plugins` loads them through a validated shape-check and exposes their rules to the resolver like any built-in. [Plugin authoring →](https://vguard.dev/docs/plugins)
+
 ## Rule Layers
 
 <img src="docs/assets/rule-layers.svg" alt="Five rule layers: Security, Quality, Workflow, Custom, Analytics" width="100%" />
 
-### Rules — 25 built-in
+### Rules — 143 built-in across 8 categories
 
-| Category     | Count | Examples                                                              | Docs                                                     |
-| ------------ | ----: | --------------------------------------------------------------------- | -------------------------------------------------------- |
-| **Security** |     7 | branch-protection, secret-detection, prompt-injection, rls-required   | [security rules](https://vguard.dev/docs/rules/security) |
-| **Quality**  |    11 | import-aliases, naming-conventions, hallucination-guard, dead-exports | [quality rules](https://vguard.dev/docs/rules/quality)   |
-| **Workflow** |     7 | commit-conventions, pr-reminder, migration-safety, changelog-reminder | [workflow rules](https://vguard.dev/docs/rules/workflow) |
+| Category            | Count | Examples                                                                                          | Docs                                                            |
+| ------------------- | ----: | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Security**        |    95 | branch-protection, secret-detection, prompt-injection, rls-required, sql-injection, jwt-validation, k8s-\*, grpc-\*, mcp-\*, mongo-\*, nestjs-\*, phoenix-\*, rails-\*, redis-\*, trpc-\*, expo-\*, nuxt-\* | [security rules](https://vguard.dev/docs/rules/security)        |
+| **Quality**         |    20 | import-aliases, naming-conventions, hallucination-guard, dead-exports, no-any-type, magic-numbers, a11y-jsx, zod-no-any-schema | [quality rules](https://vguard.dev/docs/rules/quality)          |
+| **Workflow**        |    14 | commit-conventions, pr-reminder, migration-safety, changelog-reminder, branch-naming, cost-budget, autonomy-circuit-breaker, review-gate | [workflow rules](https://vguard.dev/docs/rules/workflow)        |
+| **Maintainability** |     5 | consistent-returns, cyclomatic-complexity, max-function-params, no-deep-nesting, no-god-files     | [maintainability rules](https://vguard.dev/docs/rules/maintainability) |
+| **Testing**         |     4 | assertion-count, mock-cleanup, no-snapshot-abuse, no-test-skip                                    | [testing rules](https://vguard.dev/docs/rules/testing)          |
+| **Performance**     |     3 | bundle-size, image-optimization, no-sync-io                                                       | [performance rules](https://vguard.dev/docs/rules/performance)  |
+| **Reliability**     |     1 | no-unhandled-promises                                                                             | [reliability rules](https://vguard.dev/docs/rules/reliability)  |
+| **Documentation**   |     1 | public-api-jsdoc                                                                                  | [documentation rules](https://vguard.dev/docs/rules/documentation) |
 
-### Presets — 14 ecosystem presets
+### Presets — 37 ecosystem presets
 
-nextjs-15 · react-19 · typescript-strict · supabase · tailwind · django · fastapi · laravel · wordpress · react-native · astro · sveltekit · python-strict · go
+**Frontend / Meta-frameworks:** nextjs-15 · react-19 · remix · nuxt · vue · sveltekit · astro · react-native · expo · tailwind
+
+**Backend / Runtimes:** express · nestjs · fastapi · django · laravel · rails · phoenix-elixir · go · deno · bun
+
+**Data / APIs:** supabase · prisma · drizzle · mongodb · redis · graphql · grpc · trpc · zod-validation
+
+**AI / Infra:** mcp-server · langchain · dockerfile · kubernetes-manifests · terraform
+
+**Language strictness:** typescript-strict · python-strict · wordpress
 
 [Browse all presets →](https://vguard.dev/docs/presets)
 
-### Agent Support
+### Agent Support — 6 adapters
 
 <img src="docs/assets/agent-support.svg" alt="Agent support: Claude Code (runtime), Cursor/Codex/OpenCode (advisory), GitHub Actions (CI)" width="100%" />
+
+| Adapter          | Mode          | Generated artefacts                                                           |
+| ---------------- | ------------- | ----------------------------------------------------------------------------- |
+| `claude-code`    | Runtime hooks | `.vguard/hooks/*.js`, `.claude/settings.json`, `.claude/commands/vguard-*.md` |
+| `cursor`         | Advisory      | `.cursorrules`, `.cursor/rules/*.mdc`                                         |
+| `codex`          | Advisory      | `AGENTS.md`, `.codex/instructions.md`                                         |
+| `opencode`       | Advisory      | `.opencode/instructions.md`                                                   |
+| `github-actions` | CI            | `.github/workflows/vguard.yml`                                                |
+| `http-webhook`   | Integrations  | Webhook dispatcher for Cloud / Slack / custom endpoints                       |
 
 ## Documentation
 
@@ -63,7 +93,7 @@ nextjs-15 · react-19 · typescript-strict · supabase · tailwind · django · 
 | ----------------------------------------------------------- | --------------------------------------------- |
 | [Getting Started](https://vguard.dev/docs/getting-started)  | Install, init wizard, first run               |
 | [Configuration](https://vguard.dev/docs/configuration)      | `vguard.config.ts` reference                  |
-| [CLI](https://vguard.dev/docs/cli)                          | `init`, `add`, `remove`, `generate`, `doctor` |
+| [CLI](https://vguard.dev/docs/cli)                          | `init`, `add`, `remove`, `generate`, `doctor`, `lint`, `fix`, `learn`, `report`, `drift`, `dashboard`, `upgrade`, `eject`, `cloud`, `rules`, `presets`, `config`, `ignore`, `webhook`, `completion` |
 | [Rules](https://vguard.dev/docs/rules/overview)             | All built-in rules with examples              |
 | [Presets](https://vguard.dev/docs/presets)                  | Framework-specific rule bundles               |
 | [Agent Setup](https://vguard.dev/docs/agent-setup)          | Per-agent adapter configuration               |

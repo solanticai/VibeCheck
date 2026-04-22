@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`vguard install-hooks` command** — installs native git `pre-commit`
+  and `commit-msg` hooks that invoke VGuard's workflow rules. Runs on
+  every `git commit` regardless of IDE, closing the gap where
+  Claude Code / Cursor hooks could not protect CLI committers.
+  Uninstall with `vguard install-hooks --uninstall`, bypass for one
+  commit with `VGUARD_SKIP_HOOKS=1 git commit …`, skip postinstall
+  entirely with `VGUARD_NO_INSTALL_HOOKS=1 npm install`.
+- **`git:pre-commit` and `git:commit-msg` hook events** on the
+  `HookEvent` union — rules can now opt into native git hook
+  dispatch. The `git-hook-runner` in `src/engine/git-hook-runner.ts`
+  drives this path and records hits to `.vguard/data/rule-hits.jsonl`
+  like every other event.
+- **`workflow/lockfile-version-match`** — new rule that blocks
+  commits when `package-lock.json` version disagrees with
+  `package.json` (previously enforced only by the husky script).
+- **`new-plugin` skill** — scaffolds an npm-publishable VGuard plugin
+  package with rules, presets, validator tests, and trust-model
+  disclosure. Mirrors the pattern of `new-rule` / `new-preset` /
+  `new-adapter`.
+- **Slash commands** `/lint-rules`, `/preset-explain`,
+  `/validate-config`, `/rule-dependency-check` for faster
+  discovery and config hygiene checks inside Claude Code.
+
+### Changed
+
+- **Removed husky.** Replaced the `.husky/pre-commit` and
+  `commit-msg` scripts with native git hooks written by
+  `vguard install-hooks`. The `postinstall` script auto-installs
+  hooks when vguard is added as a dependency. `commit-conventions`
+  now runs as a `block` severity on the native `git:commit-msg`
+  event (previously `warn` on Claude Code `Stop`). CHANGELOG,
+  version-bump, and lockfile-version checks remain covered by
+  their dedicated workflow rules. Lint / type-check / format
+  gating moves to CI only — run `npm run lint && npm run
+  type-check && npm run format:check` locally before pushing.
+
 ### Chore
 
 - **Formatting sweep across the merged v3.0.1 `[Unreleased]` section**

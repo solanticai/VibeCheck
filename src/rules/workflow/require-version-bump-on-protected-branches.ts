@@ -28,8 +28,8 @@ export const requireVersionBumpOnProtectedBranches: Rule = {
   description:
     'Blocks commits to release branches unless package.json (or configured manifest) is staged.',
   severity: 'block',
-  events: ['PreToolUse'],
-  match: { tools: ['Bash'] },
+  events: ['PreToolUse', 'git:pre-commit'],
+  match: { tools: ['Bash', 'git'] },
   configSchema,
   editCheck: false,
 
@@ -37,8 +37,12 @@ export const requireVersionBumpOnProtectedBranches: Rule = {
     const ruleId = 'workflow/require-version-bump-on-protected-branches';
 
     try {
-      const command = context.toolInput?.command as string | undefined;
-      if (!isGitCommitCommand(command)) return { status: 'pass', ruleId };
+      // In the native git pre-commit hook we're already inside a commit;
+      // skip the command-intent sniff.
+      if (context.event !== 'git:pre-commit') {
+        const command = context.toolInput?.command as string | undefined;
+        if (!isGitCommitCommand(command)) return { status: 'pass', ruleId };
+      }
 
       const { repoRoot, branch } = context.gitContext;
       if (!repoRoot || !branch) return { status: 'pass', ruleId };

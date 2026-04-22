@@ -11,7 +11,12 @@ export type HookEvent =
   | 'SessionStart'
   | 'SessionEnd'
   | 'UserPromptSubmit'
-  | 'Notification';
+  | 'Notification'
+  // Native git hook events (installed by `vguard install-hooks`). These
+  // fire during raw `git commit` outside any IDE, covering CLI committers
+  // that Claude Code / Cursor hooks would never see.
+  | 'git:pre-commit'
+  | 'git:commit-msg';
 
 // ─── Match Patterns ─────────────────────────────────────────────────────────
 

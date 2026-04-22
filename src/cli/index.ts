@@ -170,6 +170,39 @@ Examples:
   });
 
 program
+  .command('install-hooks')
+  .description('Install native git pre-commit and commit-msg hooks (replaces husky)')
+  .option('--uninstall', 'Remove VGuard-managed git hooks')
+  .option('--silent', 'Suppress informational output (used by npm postinstall)')
+  .option('--force', 'Overwrite existing non-vguard git hooks')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  $ vguard install-hooks              Install pre-commit + commit-msg hooks
+  $ vguard install-hooks --uninstall  Remove VGuard-managed hooks
+  $ VGUARD_NO_INSTALL_HOOKS=1 npm i   Skip auto-install at npm install time
+  $ VGUARD_SKIP_HOOKS=1 git commit    Bypass hooks for one commit
+`,
+  )
+  .action(async (options: { uninstall?: boolean; silent?: boolean; force?: boolean }) => {
+    const { installHooksCommand } = await import('./commands/install-hooks.js');
+    await installHooksCommand(options);
+  });
+
+// Hidden subcommand invoked by the generated .git/hooks/* scripts. Not shown
+// in `vguard --help` because it's an internal dispatcher, not user-facing.
+program
+  .command('_run-git-hook <event> [msgFile]', { hidden: true })
+  .action(async (event: string, msgFile: string | undefined) => {
+    if (event !== 'git:pre-commit' && event !== 'git:commit-msg') {
+      process.exit(0);
+    }
+    const { runGitHook } = await import('../engine/git-hook-runner.js');
+    await runGitHook(event, msgFile ? { commitMessageFile: msgFile } : {});
+  });
+
+program
   .command('lint')
   .description('Run rules in static analysis mode (CI-friendly)')
   .addOption(
@@ -499,6 +532,82 @@ Examples:
     const { presetsRemoveCommand } = await import('./commands/presets.js');
     await presetsRemoveCommand(presetId);
   });
+
+const skills = program
+  .command('skills')
+  .description('Manage VGuard companion skills (list, install, add, remove)')
+  .action(showHelpAction);
+
+skills
+  .command('list')
+  .description('List every companion skill bundled with VGuard')
+  .option('-j, --json', 'Output as JSON')
+  .action((options: { json?: boolean }) => {
+    // Intentionally synchronous — skillsListCommand calls process.exit.
+    import('./commands/skills.js').then((m) => m.skillsListCommand(options));
+  });
+
+skills
+  .command('install')
+  .description('Install companion skills into the configured agent directories')
+  .option(
+    '--agent <name>',
+    'Install into a single agent only (claude-code | cursor | codex | opencode | all)',
+  )
+  .option(
+    '--skills <ids>',
+    'Non-interactive: comma-separated skill ids, "all", or "none"',
+  )
+  .option('--yes', 'Skip the interactive prompt and install every bundled skill')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  $ vguard skills install                     Interactive checkbox prompt
+  $ vguard skills install --yes               Install every bundled skill
+  $ vguard skills install --skills=setup-vguard,troubleshoot
+  $ vguard skills install --skills=none       Skip (useful in CI)
+  $ vguard skills install --agent claude-code Scope to a single agent
+`,
+  )
+  .action(
+    async (options: {
+      agent?: 'claude-code' | 'cursor' | 'codex' | 'opencode' | 'all';
+      skills?: string;
+      yes?: boolean;
+    }) => {
+      const { skillsInstallCommand } = await import('./commands/skills.js');
+      await skillsInstallCommand(options);
+    },
+  );
+
+skills
+  .command('add <ids...>')
+  .description('Non-interactive install of one or more skills by id')
+  .option('--agent <name>', 'Install into a single agent only')
+  .action(
+    async (
+      ids: string[],
+      options: { agent?: 'claude-code' | 'cursor' | 'codex' | 'opencode' | 'all' },
+    ) => {
+      const { skillsAddCommand } = await import('./commands/skills.js');
+      await skillsAddCommand(ids, options);
+    },
+  );
+
+skills
+  .command('remove <ids...>')
+  .description('Remove one or more installed skills from every configured agent')
+  .option('--agent <name>', 'Remove from a single agent only')
+  .action(
+    async (
+      ids: string[],
+      options: { agent?: 'claude-code' | 'cursor' | 'codex' | 'opencode' | 'all' },
+    ) => {
+      const { skillsRemoveCommand } = await import('./commands/skills.js');
+      await skillsRemoveCommand(ids, options);
+    },
+  );
 
 const config = program
   .command('config')

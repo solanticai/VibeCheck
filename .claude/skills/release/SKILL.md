@@ -71,10 +71,62 @@ npm run build
 
 If you fix code to pass checks, include those fixes in the commit.
 
-## Step 5: Stage, Commit, Push
+## Step 5: Audit README, TRUST_MODEL, and SECURITY
+
+Before committing the release, verify the three top-level docs still match reality. Each release can ship new rules, presets, adapters, CLI commands, plugin surface, or supported version lines — stale docs here mislead users and auditors.
+
+Run this check for each file:
+
+### 5a. `README.md`
+
+1. **Rule counts** — compare the table against source:
+   ```bash
+   for dir in src/rules/*/; do
+     n=$(ls "$dir" 2>/dev/null | grep -v index.ts | grep -v helpers | wc -l)
+     echo "$dir: $n"
+   done
+   ```
+   Update the "Rules — N built-in across M categories" heading and every row of the category table.
+
+2. **Preset count and list** — `ls src/presets/*.ts | grep -v index.ts | wc -l` and compare against the Presets section. Group changes into the existing sub-buckets (Frontend, Backend, Data/APIs, AI/Infra, Language strictness) or add a new one if warranted.
+
+3. **Adapter count** — `ls -d src/adapters/*/ | wc -l` and compare against the "Agent Support — N adapters" table.
+
+4. **CLI command list** — `grep -E "^\s*\.command\(" src/cli/index.ts` and compare against the CLI row in the Documentation table.
+
+5. **Exit codes** — cross-check against `src/cli/exit-codes.ts`; add any new ones.
+
+6. **Features** — if a release adds a headline capability (learning, drift, cloud, plugin surface, new adapter mode), add a short `**Name** — one line` bullet in the Features section.
+
+7. **Companion skills** — if this release added or removed any skill under `ai-for-vibe-guard/skills/`, verify the count and list anywhere they are referenced (README, CLAUDE.md, docs). If a new skill landed, confirm it is included in the `files` array in `package.json` so it ships with the tarball (`npm pack --dry-run | grep ai-for-vibe-guard`).
+
+### 5b. `TRUST_MODEL.md`
+
+1. Re-read the document end-to-end.
+2. Flag any of these that changed in this release:
+   - new surface that executes user-authored code (config, plugins, hook scripts, templates)
+   - new network egress (cloud endpoints, webhooks, telemetry)
+   - new filesystem writes outside `.vguard/`
+   - new environment variables that disable safety checks
+   - new `SECURITY DEFINER`-equivalent behaviour (elevated privileges, root-only operations)
+3. If any changed, add or update the relevant numbered section. Keep the "equivalent to `npm run <script>`" framing intact.
+
+### 5c. `SECURITY.md`
+
+1. **Supported Versions table** — compare against `package.json` version. The table must list the current major with a checkmark, and downgrade older majors per the 90-day policy.
+2. **Reporting channel** — confirm `security@anthril.com` (or current channel) still applies.
+3. **Triage SLAs and disclosure window** — leave untouched unless the user has asked to change them.
+
+### 5d. Stage doc updates
+
+Any changes made above are part of this release commit. Stage them alongside `package.json` and `CHANGELOG.md` in Step 6.
+
+If no changes are needed, say so explicitly to the user (one line: "README, TRUST_MODEL, SECURITY all current.") and continue.
+
+## Step 6: Stage, Commit, Push
 
 ```bash
-git add package.json CHANGELOG.md
+git add package.json CHANGELOG.md README.md TRUST_MODEL.md SECURITY.md
 # Also add any files fixed in Step 4
 git commit -m "chore(release): bump version to X.Y.Z"
 git push origin dev
@@ -85,7 +137,7 @@ git push origin dev
 - Never modify master directly
 - All operations on `dev` branch only
 
-## Step 6: Create PR
+## Step 7: Create PR
 
 ```bash
 gh pr create --base master --head dev \
@@ -108,7 +160,7 @@ EOF
 
 Report the PR URL to the user.
 
-## Step 7: Monitor CI
+## Step 8: Monitor CI
 
 ```bash
 gh pr checks <PR_NUMBER> --watch
@@ -122,7 +174,7 @@ If checks fail:
 
 **Maximum 2 retry cycles.** If checks still fail after 2 retries, stop and ask the user for guidance.
 
-## Step 8: Publish Changelog Discussion (Post-Merge)
+## Step 9: Publish Changelog Discussion (Post-Merge)
 
 **This step runs AFTER the user confirms the PR has been merged and the publish workflow has completed.**
 
@@ -200,7 +252,7 @@ If checks fail:
 
 9. Report the discussion URL to the user.
 
-## Step 9: Audit vibe-guard-cloud Documentation
+## Step 10: Audit vibe-guard-cloud Documentation
 
 After each release, check whether the cloud documentation needs updates:
 

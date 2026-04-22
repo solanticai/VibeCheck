@@ -8,6 +8,7 @@ import { changelogReminder } from './changelog-reminder.js';
 import { formatOnSave } from './format-on-save.js';
 import { branchNaming } from './branch-naming.js';
 import { lockfileConsistency } from './lockfile-consistency.js';
+import { lockfileVersionMatch } from './lockfile-version-match.js';
 import { requireChangelogOnProtectedBranches } from './require-changelog-on-protected-branches.js';
 import { requireVersionBumpOnProtectedBranches } from './require-version-bump-on-protected-branches.js';
 import { costBudget } from './cost-budget.js';
@@ -24,6 +25,7 @@ export const workflowRules: Rule[] = [
   formatOnSave,
   branchNaming,
   lockfileConsistency,
+  lockfileVersionMatch,
   requireChangelogOnProtectedBranches,
   requireVersionBumpOnProtectedBranches,
   costBudget,
@@ -41,6 +43,7 @@ export {
   formatOnSave,
   branchNaming,
   lockfileConsistency,
+  lockfileVersionMatch,
   requireChangelogOnProtectedBranches,
   requireVersionBumpOnProtectedBranches,
   costBudget,

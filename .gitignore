@@ -39,6 +39,8 @@ Desktop.ini
 !.claude/skills/
 .claude/settings.json
 .claude/settings.local.json
+# Release skill is maintainer-only (contains publish workflow details)
+.claude/skills/release/
 
 # Project plan (private)
 vguard-project-plan.md

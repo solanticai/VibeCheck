@@ -149,8 +149,8 @@ tests/
 | ---------- | ----------------------- | ----------------------------------------------------------------------------------- |
 | ESLint 10  | `eslint.config.js`      | Linting (typescript-eslint, no `any`, unused vars)                                  |
 | Prettier 3 | `.prettierrc`           | Formatting (single quotes, trailing commas, 100 char width)                         |
-| commitlint | `commitlint.config.mjs` | Conventional commits (feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert) |
-| Husky 9    | `.husky/`               | Pre-commit (lint + type-check), commit-msg (commitlint)                             |
+| commitlint | `commitlint.config.mjs` | Conventional commits spec read by `workflow/commit-conventions` rule                |
+| Native git hooks | `.git/hooks/pre-commit`, `.git/hooks/commit-msg` | Written by `vguard install-hooks` on `npm install` (postinstall). Enforce CHANGELOG, version bump, lockfile-version match, and commit-message conventions for shell committers. Replaces husky. Skip one commit with `VGUARD_SKIP_HOOKS=1`, skip install with `VGUARD_NO_INSTALL_HOOKS=1`, uninstall with `vguard install-hooks --uninstall`. |
 
 ### TypeScript
 

@@ -29,16 +29,30 @@ Ask the user for these if not provided:
 Use the template at `.claude/skills/new-adapter/templates/adapter.ts`.
 
 Review existing adapters for reference:
-- `claude-code/adapter.ts` — runtime enforcement with hook scripts
-- `cursor/adapter.ts` — advisory with .cursorrules + .mdc files
-- `codex/adapter.ts` — advisory with AGENTS.md
-- `opencode/adapter.ts` — advisory with instructions.md
+- `claude-code/adapter.ts` — runtime enforcement with hook scripts (strategy: hooks overwrite, settings merge, commands create-only)
+- `cursor/adapter.ts` — advisory with .cursorrules + .mdc files (strategy: overwrite)
+- `codex/adapter.ts` — advisory with AGENTS.md (strategy: overwrite + create-only)
+- `opencode/adapter.ts` — advisory with instructions.md (strategy: overwrite)
+- `github-actions/adapter.ts` — CI enforcement with workflow YAML (strategy: create-only)
+- `http-webhook/adapter.ts` — dispatcher for Cloud / Slack / custom endpoints (strategy: merge into existing dispatcher config; no file overwrite — the adapter emits a dispatcher registration rather than a static config)
+
+Strategy reference for new adapters:
+- **overwrite** — regenerate the whole file each run (cursor, github-actions for create-only files)
+- **merge** — read existing file, update only VGuard-managed sections (claude-code settings, http-webhook dispatcher config)
+- **create-only** — never touch an existing file; users edit freely after first run (codex AGENTS.md, github-actions workflow)
 
 ### 2. Update Type Definitions
 
 In `src/types.ts`, add the new agent to `AgentType`:
 ```typescript
-export type AgentType = 'claude-code' | 'cursor' | 'codex' | 'opencode' | '<agent-id>';
+export type AgentType =
+  | 'claude-code'
+  | 'cursor'
+  | 'codex'
+  | 'opencode'
+  | 'github-actions'
+  | 'http-webhook'
+  | '<agent-id>';
 ```
 
 ### 3. Update Config Schema

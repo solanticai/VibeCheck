@@ -175,9 +175,74 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
 
   await applyProjectIntegrations(projectRoot, { interactive: !nonInteractive });
 
+  await maybeInstallCompanionSkills(projectRoot, agents, nonInteractive);
+
   const ruleCount = resolvedConfig.rules.size;
   console.log(`\n  ${color.green('VGuard initialized')} with ${ruleCount} active rules.`);
   console.log('  Run `vguard doctor` to verify your setup.\n');
+}
+
+/**
+ * Offer to install VGuard companion skills into the selected agent
+ * directories. Skipped entirely in non-interactive / CI runs so the init
+ * flow stays scriptable; users can always run `vguard skills install`
+ * later.
+ */
+async function maybeInstallCompanionSkills(
+  projectRoot: string,
+  agents: AgentType[],
+  nonInteractive: boolean,
+): Promise<void> {
+  try {
+    const { listSourceSkills } = await import('../../adapters/skills-helpers.js');
+    const skills = listSourceSkills();
+    if (skills.length === 0) return;
+
+    if (nonInteractive) {
+      console.log(
+        `  Skipped companion skills (non-interactive). Run ${color.cyan(
+          'vguard skills install',
+        )} when you're ready.`,
+      );
+      return;
+    }
+
+    const wantsAny = await confirm({
+      message: `Install VGuard companion skills (${skills.length} available)?`,
+      default: true,
+    });
+    if (!wantsAny) return;
+
+    const { promptSkillSelection } = await import('../prompts/skills.js');
+    const selected = await promptSkillSelection({ skills });
+    if (selected.length === 0) return;
+
+    const { filterSkills } = await import('../../adapters/skills-helpers.js');
+    const chosen = filterSkills(skills, selected);
+    const { BUILD_INFO } = await import('../build-info.js');
+
+    const { installClaudeCodeSkills } = await import(
+      '../../adapters/claude-code/skills.js'
+    );
+    const { installCursorSkills } = await import('../../adapters/cursor/skills.js');
+    const { installCodexSkills } = await import('../../adapters/codex/skills.js');
+    const { installOpenCodeSkills } = await import('../../adapters/opencode/skills.js');
+
+    for (const agent of agents) {
+      if (agent === 'claude-code') {
+        installClaudeCodeSkills(chosen, projectRoot, BUILD_INFO.version);
+      } else if (agent === 'cursor') {
+        installCursorSkills(chosen, projectRoot, BUILD_INFO.version);
+      } else if (agent === 'codex') {
+        installCodexSkills(chosen, projectRoot, BUILD_INFO.version);
+      } else if (agent === 'opencode') {
+        installOpenCodeSkills(chosen, projectRoot, BUILD_INFO.version);
+      }
+      console.log(`  Installed ${chosen.length} skill(s) for ${color.cyan(agent)}`);
+    }
+  } catch {
+    // Skill install failures must never block init.
+  }
 }
 
 async function resolvePresets(

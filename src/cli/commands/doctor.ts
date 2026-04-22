@@ -241,7 +241,63 @@ export async function doctorCommand(options: DoctorOptions = {}): Promise<void> 
     });
   }
 
+  await checkCompanionSkillDrift(projectRoot, results);
+
   finalize(results, options);
+}
+
+/**
+ * Warn if any installed companion skill has a different vguardVersion
+ * in its frontmatter than the current package version. Only runs for
+ * Claude Code installs (native skills with frontmatter) — Cursor / Codex
+ * / OpenCode targets are rewritten on every `vguard skills install` so
+ * there's no equivalent drift concept.
+ */
+async function checkCompanionSkillDrift(
+  projectRoot: string,
+  results: CheckResult[],
+): Promise<void> {
+  try {
+    const skillsDir = join(projectRoot, '.claude', 'skills');
+    if (!existsSync(skillsDir)) return;
+
+    const { listSourceSkills } = await import('../../adapters/skills-helpers.js');
+    const { BUILD_INFO } = await import('../build-info.js');
+
+    const bundledIds = new Set(listSourceSkills().map((s) => s.id));
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const installed = readdirSync(skillsDir, { withFileTypes: true }).filter((e) =>
+      e.isDirectory(),
+    );
+
+    const drifted: string[] = [];
+    for (const entry of installed) {
+      if (!bundledIds.has(entry.name)) continue;
+      const path = join(skillsDir, entry.name, 'SKILL.md');
+      if (!existsSync(path)) continue;
+      try {
+        const raw = readFileSync(path, 'utf8');
+        const match = raw.match(/^vguardVersion:\s*(.+)$/m);
+        if (match && match[1].trim() !== BUILD_INFO.version) {
+          drifted.push(`${entry.name} (${match[1].trim()} → ${BUILD_INFO.version})`);
+        }
+      } catch {
+        // unreadable skill — ignore
+      }
+    }
+
+    if (drifted.length > 0) {
+      results.push({
+        name: 'Companion skills',
+        status: 'warn',
+        message: `Skill version drift: ${drifted.join(
+          ', ',
+        )}. Run \`vguard skills install\` to refresh.`,
+      });
+    }
+  } catch {
+    // Drift check failures must never fail doctor.
+  }
 }
 
 function finalize(results: CheckResult[], options: DoctorOptions): void {

@@ -26,30 +26,35 @@ export const commitConventions: Rule = {
   name: 'Commit Conventions',
   description: 'Validates conventional commit format (feat/fix/chore/etc).',
   severity: 'warn',
-  events: ['Stop'],
+  events: ['Stop', 'git:commit-msg'],
   editCheck: false,
 
   check: (context): RuleResult => {
     const ruleId = 'workflow/commit-conventions';
-    const cwd = context.gitContext.repoRoot ?? process.cwd();
 
-    // Get the last commit message
-    const lastCommit = gitCommand(['log', '-1', '--format=%s'], cwd);
-    if (!lastCommit) {
-      return { status: 'pass', ruleId };
-    }
+    // In the native git commit-msg hook the message is passed through
+    // toolInput.commitMessage — block severity because we can actually
+    // abort the commit here (Stop mode is advisory-only).
+    const isGitHook = context.event === 'git:commit-msg';
+    const commitMessage = isGitHook
+      ? ((context.toolInput?.commitMessage as string | undefined) ?? '').split('\n')[0]
+      : (() => {
+          const cwd = context.gitContext.repoRoot ?? process.cwd();
+          return gitCommand(['log', '-1', '--format=%s'], cwd);
+        })();
 
-    // Check conventional commit format
+    if (!commitMessage) return { status: 'pass', ruleId };
+
     const ruleConfig = context.projectConfig.rules.get(ruleId);
     const types = (ruleConfig?.options?.types as string[]) ?? DEFAULT_TYPES;
     const typePattern = types.join('|');
     const regex = new RegExp(`^(${typePattern})(\\(.+\\))?!?:\\s.+`);
 
-    if (!regex.test(lastCommit)) {
+    if (!regex.test(commitMessage)) {
       return {
-        status: 'warn',
+        status: isGitHook ? 'block' : 'warn',
         ruleId,
-        message: `Last commit "${lastCommit}" doesn't follow conventional commit format.`,
+        message: `Commit message "${commitMessage}" doesn't follow conventional commit format.`,
         fix: `Use format: type(scope): description (e.g., "feat(auth): add login flow").\nValid types: ${types.join(', ')}`,
       };
     }

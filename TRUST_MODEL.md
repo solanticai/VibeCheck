@@ -50,6 +50,38 @@ under `.vguard/hooks/`. Reviewing `vguard.config.ts` is equivalent to
 reviewing the hooks — rerunning `vguard generate` will reproduce them
 byte-for-byte.
 
+### 3a. Native git hooks under `.git/hooks/`
+
+`vguard install-hooks` writes two POSIX shell scripts to `.git/hooks/`:
+`pre-commit` and `commit-msg`. Each script carries the literal marker
+`# vguard-managed-hook` so subsequent re-runs recognise and replace
+only VGuard-owned hooks (existing non-vguard hooks are left in place
+unless the user passes `--force`).
+
+The hook scripts exec `node_modules/.bin/vguard _run-git-hook <event>`,
+which invokes the same `runGitHook()` path as manual CLI invocations.
+No hidden behaviour, no network calls, no file writes outside
+`.vguard/data/rule-hits.jsonl`. See
+[`src/cli/commands/install-hooks.ts`](src/cli/commands/install-hooks.ts)
+for the exact body templates and
+[`src/engine/git-hook-runner.ts`](src/engine/git-hook-runner.ts) for
+the runner.
+
+**Escape hatches:**
+
+- `VGUARD_SKIP_HOOKS=1 git commit …` — skip VGuard hooks for one
+  commit without touching any files.
+- `VGUARD_NO_INSTALL_HOOKS=1 npm install` — skip the `postinstall`
+  auto-install entirely (e.g. hostile-repo linting).
+- `vguard install-hooks --uninstall` — remove any hook this tool
+  installed; non-vguard hooks at the same paths are left alone.
+
+Installing vguard as a dependency runs `postinstall`, which in turn
+runs `install-hooks --silent`. Like every npm package, this is a
+trust decision at `npm install` time — the same trust model that
+applies to `prepare`, `postinstall`, and `install` scripts in every
+other dep in your lockfile.
+
 ### 4. Project-local rules
 
 `.vguard/rules/custom/**/*.{ts,js,mjs}` are autoloaded at config

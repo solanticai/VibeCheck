@@ -27,8 +27,8 @@ export const requireChangelogOnProtectedBranches: Rule = {
   description:
     'Blocks commits to protected branches unless CHANGELOG.md (or configured file) is staged.',
   severity: 'block',
-  events: ['PreToolUse'],
-  match: { tools: ['Bash'] },
+  events: ['PreToolUse', 'git:pre-commit'],
+  match: { tools: ['Bash', 'git'] },
   configSchema,
   editCheck: false,
 
@@ -36,8 +36,12 @@ export const requireChangelogOnProtectedBranches: Rule = {
     const ruleId = 'workflow/require-changelog-on-protected-branches';
 
     try {
-      const command = context.toolInput?.command as string | undefined;
-      if (!isGitCommitCommand(command)) return { status: 'pass', ruleId };
+      // In the native git pre-commit hook we're already inside a commit;
+      // skip the command-intent sniff.
+      if (context.event !== 'git:pre-commit') {
+        const command = context.toolInput?.command as string | undefined;
+        if (!isGitCommitCommand(command)) return { status: 'pass', ruleId };
+      }
 
       const { repoRoot, branch } = context.gitContext;
       if (!repoRoot || !branch) return { status: 'pass', ruleId };

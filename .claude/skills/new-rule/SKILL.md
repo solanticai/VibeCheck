@@ -18,7 +18,7 @@ Generate a complete VGuard rule following project conventions.
 ## Required Information
 
 Ask the user for these if not provided:
-- **Category**: `security`, `quality`, or `workflow`
+- **Category**: one of `security`, `quality`, `workflow`, `maintainability`, `testing`, `performance`, `reliability`, `documentation`
 - **Rule name**: kebab-case identifier (e.g., `no-hardcoded-urls`)
 - **Description**: What this rule prevents and why
 - **Severity**: `block` (prevents operation), `warn` (allows but warns), `info` (informational)

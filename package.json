@@ -28,6 +28,7 @@
   ],
   "files": [
     "dist",
+    "ai-for-vibe-guard/skills/**",
     "!dist/**/*.d.ts.map",
     "!dist/cli.js.map",
     "!dist/cli.cjs.map"
@@ -43,7 +44,7 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "postinstall": "node dist/cli.cjs install-hooks --silent || true"
   },
   "keywords": [
     "ai",
@@ -91,7 +92,6 @@
     "@vitest/coverage-v8": "^4.1.2",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
-    "husky": "^9.1.7",
     "prettier": "^3.8.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.2",
